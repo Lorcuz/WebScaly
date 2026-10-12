@@ -54,7 +54,7 @@ const context = await chromium.launchPersistentContext(
   },
 );
 const report = {
-  version: "0.3.0",
+  version: "0.3.1",
   anonymous: true,
   testOnlyGrants: true,
   cases: [],

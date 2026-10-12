@@ -1,5 +1,7 @@
 # Compatibility validation for 0.3.0
 
+The 0.3.1 update adds an About-page GitHub link and refreshed artwork. Player rendering and access control are unchanged; the player results below were recorded for 0.3.0.
+
 Checks completed on 12 October 2026. Results apply to the tested pages and local browser; they do not certify every page, Chrome version or physical GPU. Anonymous live checks use an isolated profile with explicit test-only grants. The shipped manifest grants no websites by default.
 
 | Live player           | Direct enhancement                     | Extension controls and comparison | Evidence and limits                                                                                                                                                                                                                                                                                      |

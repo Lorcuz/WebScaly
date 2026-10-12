@@ -607,7 +607,7 @@ function App() {
         {feedback}
         <footer>
           <span>Local processing · no telemetry</span>
-          <span className="version">0.3.0</span>
+          <span className="version">0.3.1</span>
         </footer>
       </main>
     );
@@ -637,7 +637,7 @@ function App() {
         </nav>
         <div className="sidebar-bottom">
           <span className="privacy-dot" />
-          Local processing · no telemetry<p>WebScaly 0.3.0</p>
+          Local processing · no telemetry<p>WebScaly 0.3.1</p>
         </div>
       </aside>
       <main className="settings-main" id="settings-content" tabIndex={-1}>

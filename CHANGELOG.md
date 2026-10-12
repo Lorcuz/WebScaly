@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.1 — 13 October 2026
+
+- Added the WebScaly repository to Settings → About, with a GitHub icon matching the existing contact links.
+- The repository opens in a new tab only when selected. Enhancement, site permissions and local settings are unchanged.
+- Updated the store screenshots, package version and corresponding source.
+
 ## 0.3.0 — 13 October 2026
 
 Prepared for first public release.

@@ -1,6 +1,7 @@
 import { useState } from "react";
 import {
   IconBrandDiscord,
+  IconBrandGithub,
   IconHeart,
   IconMail,
   IconShieldCheck,
@@ -13,7 +14,7 @@ export function About() {
       <section className="settings-panel about-intro">
         <img src="./icons/128.png" width="72" height="72" alt="" />
         <div>
-          <span className="about-version">WebScaly · 0.3.0</span>
+          <span className="about-version">WebScaly · 0.3.1</span>
           <h2>Bring your videos into focus.</h2>
           <p>
             WebScaly brings out detail in the videos you watch, right in your
@@ -61,6 +62,20 @@ export function About() {
         <section className="settings-panel about-contact">
           <h2>Contact</h2>
           <p className="muted">A question, an idea, or a little feedback?</p>
+          <a
+            className="contact-link"
+            href="https://github.com/Lorcuz/WebScaly"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <IconBrandGithub size={20} stroke={1.7} aria-hidden="true" />
+            <span>
+              <small>GitHub</small>Lorcuz/WebScaly
+            </span>
+            <span className="external-mark" aria-hidden="true">
+              ↗
+            </span>
+          </a>
           <a className="contact-link" href="mailto:notlorcuz@gmail.com">
             <IconMail size={20} stroke={1.7} aria-hidden="true" />
             <span>
@@ -117,8 +132,8 @@ export function About() {
         </section>
       </div>
       <p className="about-external-note">
-        Email, Discord and PayPal are optional third-party services with their
-        own privacy policies.
+        GitHub, email, Discord and PayPal are optional third-party services with
+        their own privacy policies.
       </p>
       <footer className="about-credit">
         <p>

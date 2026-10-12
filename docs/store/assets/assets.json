@@ -1,5 +1,5 @@
 {
-  "version": "0.3.0",
+  "version": "0.3.1",
   "footage": "Original procedural video, created locally for WebScaly",
   "screenshots": "Actual installed extension with test-only loopback approval; popup overview contains its unaltered UI capture",
   "files": [

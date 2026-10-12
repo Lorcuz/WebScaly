@@ -1,6 +1,6 @@
 # WebScaly Privacy Policy
 
-Last updated: 13 October 2026. Applies to WebScaly 0.3.0.
+Last updated: 13 October 2026. Applies to WebScaly 0.3.1.
 
 WebScaly enhances video on your device, on websites you approve. It does not send your videos or browsing activity to the developer, run analytics, sell data or use cloud processing. You do not need an account.
 
@@ -27,7 +27,7 @@ You can edit settings and remove website access in the interface. A configuratio
 
 ## Optional contact and donation services
 
-Email and Discord links open only when you choose them. The PayPal QR is bundled locally and appears only when you choose Support WebScaly. Scanning it opens PayPal through your chosen app. WebScaly does not receive or store your payment information.
+GitHub, email and Discord links open only when you choose them. The PayPal QR is bundled locally and appears only when you choose Support WebScaly. Scanning it opens PayPal through your chosen app. WebScaly does not receive or store your payment information.
 
 If you contact the maintainer, the email address or Discord identity, message and attachments you voluntarily send are received through that service and used to answer your request. Share only the details needed to resolve the issue. Public GitHub issue content is visible to others. The provider's privacy policy applies: [Google](https://policies.google.com/privacy), [Discord](https://discord.com/privacy), [PayPal](https://www.paypal.com/webapps/mpp/ua/privacy-full), and [GitHub](https://docs.github.com/en/site-policy/privacy-policies/github-general-privacy-statement). WebScaly does not contact these services automatically for video enhancement.
 

@@ -1,6 +1,6 @@
 # Chrome Web Store Listing — WebScaly
 
-Last updated: 2026-10-13. Version: 0.3.0. Status: prepared locally; not submitted.
+Last updated: 2026-10-13. Version: 0.3.1. Status: prepared locally; not submitted.
 
 ## Store listing — copy these choices
 
@@ -21,7 +21,7 @@ Last updated: 2026-10-13. Version: 0.3.0. Status: prepared locally; not submitte
 | Public contact email | notlorcuz@gmail.com |
 | Publisher/display name | Lorcuz, if available. Use your verified account details where the dashboard requires them. |
 
-The links above become live after uploading the repository as `Lorcuz/webscaly` on branch `main`. If you choose another owner/name, update them consistently. Official URL is separate from Homepage URL; no Search Console registration is needed to use your repository as the homepage.
+The repository, support and privacy links are public on GitHub. Settings → About also links to the repository with a GitHub icon. Official URL is separate from Homepage URL; no Search Console registration is needed to use your repository as the homepage.
 
 ## Detailed description
 
@@ -99,7 +99,7 @@ Users can choose any ordinary HTTP or HTTPS video website. These optional declar
 
 **Remote code**
 
-Select **No, I am not using remote code**. JavaScript, styles, fonts, enhancement shaders and weights are bundled with the extension. The extension does not download or execute remote code. Optional email/Discord/PayPal destinations are user-initiated external services, not executable-code dependencies.
+Select **No, I am not using remote code**. JavaScript, styles, fonts, enhancement shaders and weights are bundled with the extension. The extension does not download or execute remote code. Optional GitHub/email/Discord/PayPal destinations are user-initiated external services, not executable-code dependencies.
 
 ## Privacy practices — disclose local handling
 
@@ -123,11 +123,11 @@ Check all three certifications: data is not sold to third parties; data is not u
 
 **Privacy policy URL:** https://github.com/Lorcuz/webscaly/blob/main/PRIVACY.md
 
-Upload the public repository first, then verify this URL loads without sign-in before submitting the store item. The policy describes on-device origins, frames, session context, preferences, diagnostic data, exports, optional tab sharing and voluntary support messages.
+This policy is public on GitHub; verify the URL loads without sign-in before submitting the store item. It describes on-device origins, frames, session context, preferences, diagnostic data, exports, optional tab sharing and voluntary support messages.
 
 ## Upload and review instructions
 
-Upload only `webscaly-0.3.0.zip`, not the GitHub source archive or the entire handoff folder. The ZIP has `manifest.json` at its root. Do not remove the license notices or `compliance/`: it carries the required FSRCNNX source and rebuild material. The source ZIP inside compliance is legal corresponding source, not runtime code.
+Upload only `webscaly-0.3.1.zip`, not the GitHub source archive or the entire handoff folder. If your store draft already contains 0.3.0, upload this newer package before submitting. The ZIP has `manifest.json` at its root. Do not remove the license notices or `compliance/`: it carries the required FSRCNNX source and rebuild material. The source ZIP inside compliance is legal corresponding source, not runtime code.
 
 Suggested reviewer notes: "WebScaly has no website access on installation. Open an ordinary video page, click the extension, choose Add this website and Allow, then enable Enhancement. Embedded players need their own approval in addition to the parent page. Player Controls/Compare/HUD are off by default. The compatibility player requires an explicit Chrome tab-sharing choice. Local processing can be restricted by protected media or pixel-access rules. The bundled compliance archive contains LGPL corresponding source and rebuild instructions."
 
@@ -137,9 +137,10 @@ Use Chrome 121+ with a supported graphics context. No login is required. The sup
 
 | Version | Prepared | Changes | Status |
 | --- | --- | --- | --- |
+| 0.3.1 | 2026-10-13 | GitHub repository link and icon in About; refreshed UI screenshots and corresponding source. | Prepared; not submitted |
 | 0.3.0 | 2026-10-13 | Enhancement-only release, opt-in site access, refined interface, About/support, current artwork and corresponding source. | Prepared; not submitted |
 
-Before final submission: make the repository/support/privacy URLs publicly reachable; finish publisher registration, account/contact verification and any region-specific trader disclosures shown by the dashboard; verify Add/Allow and revocation in your installed Chrome profile. If 0.3.0 was already published, use a higher manifest version for a subsequent release.
+Before final submission: upload 0.3.1 and its current screenshots; finish publisher registration, account/contact verification and any region-specific trader disclosures shown by the dashboard; verify Add/Allow and revocation in your installed Chrome profile. The GitHub repository and 0.3.0 release are public; Chrome Web Store submission remains separate.
 
 The package and artwork are prepared locally. Store approval and publishing are controlled by Google and the publisher.
 
