@@ -1,0 +1,41 @@
+name: Bug report
+description: Report a reproducible WebScaly problem.
+title: "[Bug] "
+body:
+  - type: markdown
+    attributes:
+      value: "Remove personal details, private video addresses and credentials. For security issues, email notlorcuz@gmail.com instead."
+  - type: textarea
+    id: problem
+    attributes:
+      label: What happened?
+      description: Describe the problem and the result you expected.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Steps to reproduce
+      description: Include a public page address only if it is safe to share.
+    validations:
+      required: true
+  - type: input
+    id: versions
+    attributes:
+      label: Chrome and WebScaly versions
+    validations:
+      required: true
+  - type: dropdown
+    id: algorithm
+    attributes:
+      label: Enhancement algorithm
+      options:
+        - Spatial Detail
+        - Anime4K CNN
+        - FSRCNNX x2
+        - Not sure
+  - type: textarea
+    id: diagnostics
+    attributes:
+      label: Relevant diagnostics or screenshot
+      description: Remove personal information; do not attach a full browser profile or configuration export.

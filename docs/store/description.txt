@@ -1,0 +1,30 @@
+Enhance the videos you watch, right in your browser. WebScaly adds sharper detail and local upscaling on websites you approve, while your usual player keeps control of playback and sound.
+
+CHOOSE YOUR ENHANCEMENT
+Spatial Detail: light sharpening and noise reduction.
+Anime4K: restore detail in animation.
+FSRCNNX: reconstruct finer detail with 2× upscaling.
+
+Adjust quality and output size to suit your device. Keep different settings for different websites. Turn on comparison to see the original and enhanced image side by side.
+
+A QUIET, COMPACT INTERFACE
+Start with the popup: approve a website, enable Enhancement and choose an algorithm. In-player controls, comparison and the performance HUD stay hidden until you turn them on. Advanced settings offer more control, clear diagnostics and short help for technical options.
+
+YOU CONTROL WEBSITE ACCESS
+WebScaly has no website access by default. Click Add this website, then Allow in Chrome. If a page uses an embedded player, approve that player's website too. Remove access whenever you want.
+
+YOUR VIDEOS STAY ON YOUR DEVICE
+No accounts, tracking, analytics, cloud processing or automatic uploads. Website addresses, video frames and settings are used locally to provide enhancement. The developer does not receive your browsing activity or videos.
+
+WHEN DIRECT ACCESS IS RESTRICTED
+The optional compatibility player lets you explicitly share your source tab and select the video area for local enhancement. Audio remains in the original tab. Nothing is recorded or uploaded.
+
+COMPATIBILITY
+Requires Chrome 121 or newer. Performance and available algorithms depend on your browser, GPU and video player. A lighter spatial fallback is available when supported. Protected video and browser security restrictions can prevent enhancement. Support is not guaranteed for every website or device.
+
+SUPPORT
+Questions or feedback: notlorcuz@gmail.com
+Bug reports: https://github.com/Lorcuz/webscaly/issues
+Privacy: https://github.com/Lorcuz/webscaly/blob/main/PRIVACY.md
+
+WebScaly is free and open source. Optional support is available in Settings → About.

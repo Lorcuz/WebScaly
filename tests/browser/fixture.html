@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+  <head>
+    <title>WebScaly extension fixture</title>
+    <style>
+      body {
+        margin: 24px;
+        background: #10171f;
+        color: white;
+        font: 16px system-ui;
+      }
+      .player {
+        position: relative;
+        width: 960px;
+        max-width: 90vw;
+      }
+      video {
+        width: 100%;
+        display: block;
+      }
+      button {
+        padding: 10px;
+      }
+      iframe {
+        width: 400px;
+        height: 260px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Procedural video fixture</h1>
+    <button id="play">Create source</button>
+    <div class="player">
+      <video id="video" muted controls playsinline></video>
+    </div>
+    <button id="fullscreen">Fullscreen player</button>
+    <script type="module" src="./fixture.ts"></script>
+  </body>
+</html>

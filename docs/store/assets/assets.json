@@ -1,0 +1,70 @@
+{
+  "version": "0.3.0",
+  "footage": "Original procedural video, created locally for WebScaly",
+  "screenshots": "Actual installed extension with test-only loopback approval; popup overview contains its unaltered UI capture",
+  "files": [
+    {
+      "file": "icon-128.png",
+      "width": 128,
+      "height": 128,
+      "alpha": true,
+      "channels": 4
+    },
+    {
+      "file": "small-promo-440x280.png",
+      "width": 440,
+      "height": 280,
+      "alpha": false,
+      "channels": 3
+    },
+    {
+      "file": "marquee-promo-1400x560.png",
+      "width": 1400,
+      "height": 560,
+      "alpha": false,
+      "channels": 3
+    },
+    {
+      "file": "01-player-1280x800.png",
+      "width": 1280,
+      "height": 800,
+      "alpha": false,
+      "channels": 3
+    },
+    {
+      "file": "02-settings-1280x800.png",
+      "width": 1280,
+      "height": 800,
+      "alpha": false,
+      "channels": 3
+    },
+    {
+      "file": "03-popup-1280x800.png",
+      "width": 1280,
+      "height": 800,
+      "alpha": false,
+      "channels": 3
+    },
+    {
+      "file": "04-site-profiles-1280x800.png",
+      "width": 1280,
+      "height": 800,
+      "alpha": false,
+      "channels": 3
+    },
+    {
+      "file": "05-about-1280x800.png",
+      "width": 1280,
+      "height": 800,
+      "alpha": false,
+      "channels": 3
+    },
+    {
+      "file": "popup-ui.png",
+      "width": 360,
+      "height": 441,
+      "alpha": false,
+      "channels": 3
+    }
+  ]
+}

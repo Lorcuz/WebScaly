@@ -1,0 +1,81 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Local player compatibility fixture</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <style>
+      body {
+        margin: 24px;
+        background: #10171f;
+        color: white;
+        font: 16px system-ui;
+      }
+      .player {
+        position: relative;
+        width: 960px;
+        max-width: 90vw;
+      }
+      video {
+        display: block;
+        width: 100%;
+      }
+      button {
+        padding: 10px;
+      }
+      .native-controls {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: #e74c3c;
+        padding: 8px;
+      }
+      .jwplayer {
+        aspect-ratio: 16 / 9;
+      }
+      .jw-wrapper,
+      .jw-media,
+      .jw-controls {
+        position: absolute;
+        inset: 0;
+      }
+      .jw-media video {
+        position: absolute;
+        inset: 0;
+        height: 100%;
+      }
+      .jw-controls {
+        pointer-events: none;
+      }
+      .native-controls {
+        pointer-events: auto;
+      }
+      .jw-captions {
+        position: absolute;
+        left: 25%;
+        right: 25%;
+        bottom: 75px;
+        background: #f4c542;
+        color: #10171f;
+        padding: 8px;
+        text-align: center;
+        pointer-events: none;
+      }
+      .player:fullscreen {
+        width: 100%;
+        display: grid;
+        place-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Local player fixture</h1>
+    <p id="kind"></p>
+    <button id="play">Start video</button>
+    <div class="player">
+      <video id="video" muted controls playsinline></video>
+    </div>
+    <button id="fullscreen">Fullscreen player</button>
+    <script type="module" src="./players.ts"></script>
+  </body>
+</html>

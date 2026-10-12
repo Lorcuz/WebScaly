@@ -78,4 +78,3 @@ Optional PayPal support is available from **Settings → About → Support WebSc
 WebScaly-authored code and its scale logo use the [MIT License](LICENSE). Bundled third-party material retains its own license. In particular, the FSRCNNX weights and derived shaders are **LGPL-3.0-or-later**; the package includes corresponding source, notices and rebuild/replacement instructions. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The MIT license does not relicense those components.
 
 <p align="center">Built in Italy 🇮🇹<br><sub>by Lorenzo Gresio</sub></p>
-
