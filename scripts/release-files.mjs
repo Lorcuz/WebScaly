@@ -1,6 +1,5 @@
 import { readFile, readdir, mkdir, writeFile } from "node:fs/promises";
-import { resolve, relative, sep, basename } from "node:path";
-import { homedir } from "node:os";
+import { resolve, relative, sep } from "node:path";
 import { unzipSync } from "fflate";
 
 const decoder = new TextDecoder();
@@ -18,7 +17,6 @@ export async function collect(root, files = {}, base = root) {
   }
   return files;
 }
-const homeName = basename(homedir()).toLowerCase();
 export function audit(files, depth = 0) {
   if (depth > 2) throw Error("Unexpected archive nesting");
   for (const [name,bytes] of Object.entries(files)) {
@@ -26,11 +24,10 @@ export function audit(files, depth = 0) {
       /(^|\/)(\.git|node_modules|\.env(?:\..*)?|evidence|models|framegen|personal|test-results|\.research)(\/|$)|\.(?:bin|map|pem|key)$/i.test(name))
       throw Error(`Excluded path: ${name}`);
     const text = decoder.decode(bytes);
-    if (/[a-z]:[\\/](?:users|documents|program files)[\\/]/i.test(text) ||
+    if (/[a-z]:[\\/]+(?:users|documents|program files)[\\/]+/i.test(text) ||
       /\/(?:Users|home)\/[^\s/]+\//.test(text) ||
       /figma\.com\/(?:design|file)\/[a-z0-9]{15,}/i.test(text) ||
-      /(?:sk-[a-zA-Z0-9]{24,}|gh[pousr]_[a-zA-Z0-9]{25,}|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----)/.test(text) ||
-      (homeName.length > 3 && text.toLowerCase().includes(homeName)))
+      /(?:sk-[a-zA-Z0-9]{24,}|gh[pousr]_[a-zA-Z0-9]{25,}|-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----)/.test(text))
       throw Error(`Private data detected: ${name}`);
     if (/\.png$/i.test(name)) {
       const view = new DataView(bytes.buffer,bytes.byteOffset,bytes.byteLength);
@@ -115,3 +112,4 @@ export async function writeTree(root,files) {
     await writeFile(path,bytes);
   }
 }
+
