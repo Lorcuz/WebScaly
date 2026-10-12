@@ -21,4 +21,3 @@ describe("publication privacy audit", () => {
     expect(() => audit({ ".env": new TextEncoder().encode("EXAMPLE=value") })).toThrow("Excluded path");
   });
 });
-

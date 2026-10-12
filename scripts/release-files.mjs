@@ -112,4 +112,3 @@ export async function writeTree(root,files) {
     await writeFile(path,bytes);
   }
 }
-
