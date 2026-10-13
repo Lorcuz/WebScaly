@@ -1,24 +1,26 @@
 <p align="center"><img src="public/icons/128.png" width="80" height="80" alt="WebScaly"></p>
 
 <h1 align="center">WebScaly</h1>
-<p align="center">Bring more detail to the videos you watch. Keep processing on your device.</p>
+<p align="center">Local video enhancement for Chrome.</p>
 <p align="center"><a href="https://chromewebstore.google.com/detail/webscaly/hdcnniaagmhkocoeahemlpgjecgpchfa"><strong>Install from the Chrome Web Store</strong></a> · <a href="#getting-started">Get started</a> · <a href="PRIVACY.md">Privacy</a> · <a href="SUPPORT.md">Support</a> · <a href="THIRD_PARTY_NOTICES.md">Licenses</a></p>
-
-![WebScaly — local video enhancement](docs/store/assets/marquee-promo-1400x560.png)
 
 WebScaly is a Chrome extension that enhances accessible web video on websites you choose. It can sharpen detail, reduce light noise and upscale video while the website keeps control of playback and sound.
 
-## What you can do
+## Features
 
-- **Choose the right enhancement.** Spatial Detail offers light sharpening and denoise, Anime4K restores animation, and FSRCNNX reconstructs finer detail at 2×.
-- **Make it your own.** Adjust quality, output size and spatial strength. Save different settings for different websites.
-- **Compare when you want.** Optional player controls, a comparison slider and a performance HUD start hidden.
-- **Approve only the websites you need.** Access starts off. Embedded players need approval for both their own website and the page hosting them.
-- **Try the compatibility player.** When direct video access is restricted, explicitly share the source tab and select the video area for local enhancement. Original audio stays in that tab.
+- **Enhancement:** Spatial Detail for light sharpening and denoise, Anime4K for animation, and FSRCNNX for learned 2× upscaling.
+- **Settings:** quality, output size, spatial strength and per-site profiles.
+- **Player tools:** optional controls, comparison slider and performance HUD, all hidden initially.
+- **Website access:** disabled by default. Embedded players require approval for both their own origin and the page hosting them.
+- **Compatibility player:** explicitly share a source tab and select its video area for local enhancement when direct access is restricted. Audio stays in that tab.
+
+Processing follows decoded frames at their native cadence. WebScaly does not generate intermediate frames or increase the source frame rate.
 
 ![WebScaly playing original demonstration footage with optional comparison controls](docs/store/assets/01-player-1280x800.png)
 
-## Privacy comes first
+*Actual extension over original procedural footage: 640×360 source, Spatial Detail, Balanced quality, 2× output scale, 35% sharpening and 12% denoise. This is a controlled demonstration, not a benchmark. [Rendering, permissions and player integration](docs/LOCAL_VIDEO_ENHANCEMENT.md) explains the design and its limits.*
+
+## Privacy
 
 Video processing happens on your device. There are no analytics, tracking scripts, accounts, cloud inference or automatic uploads. Website addresses, video frames and player diagnostics are handled locally to provide enhancement. Settings and approved sites stay in your browser.
 
