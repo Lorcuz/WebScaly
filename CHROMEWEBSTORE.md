@@ -1,8 +1,10 @@
 # Chrome Web Store Listing — WebScaly
 
-Last updated: 2026-10-13. Version: 0.3.1. Status: prepared locally; not submitted.
+Last updated: 2026-10-14. Project version: 0.3.1. Status: published on the Chrome Web Store.
 
-## Store listing — copy these choices
+**Live listing:** [WebScaly on the Chrome Web Store](https://chromewebstore.google.com/detail/webscaly/hdcnniaagmhkocoeahemlpgjecgpchfa). This is the recommended installation method. Source and development releases are available on [GitHub](https://github.com/Lorcuz/WebScaly).
+
+## Store listing fields
 
 | Dashboard field | Value |
 | --- | --- |
@@ -123,26 +125,28 @@ Check all three certifications: data is not sold to third parties; data is not u
 
 **Privacy policy URL:** https://github.com/Lorcuz/webscaly/blob/main/PRIVACY.md
 
-This policy is public on GitHub; verify the URL loads without sign-in before submitting the store item. It describes on-device origins, frames, session context, preferences, diagnostic data, exports, optional tab sharing and voluntary support messages.
+This policy is public on GitHub. Keep the URL accessible without sign-in and review it when updating the store item. It describes on-device origins, frames, session context, preferences, diagnostic data, exports, optional tab sharing and voluntary support messages.
 
-## Upload and review instructions
+## Future updates and review instructions
 
-Upload only `webscaly-0.3.1.zip`, not the GitHub source archive or the entire handoff folder. If your store draft already contains 0.3.0, upload this newer package before submitting. The ZIP has `manifest.json` at its root. Do not remove the license notices or `compliance/`: it carries the required FSRCNNX source and rebuild material. The source ZIP inside compliance is legal corresponding source, not runtime code.
+For a future extension update, use a version newer than the one published on the store, complete the release checks and upload the generated `webscaly-<version>.zip` to the existing item's developer dashboard. The ZIP has `manifest.json` at its root. Keep the GitHub source archive and handoff artwork outside the upload. Preserve the license notices and `compliance/`: they carry the required FSRCNNX source and rebuild material. The source ZIP inside compliance is legal corresponding source, not runtime code.
+
+A repository documentation update does not require a new extension version or store package. Publish future code changes and their corresponding source on GitHub, and update store screenshots, listing text and privacy disclosures when the shipped behavior changes.
 
 Suggested reviewer notes: "WebScaly has no website access on installation. Open an ordinary video page, click the extension, choose Add this website and Allow, then enable Enhancement. Embedded players need their own approval in addition to the parent page. Player Controls/Compare/HUD are off by default. The compatibility player requires an explicit Chrome tab-sharing choice. Local processing can be restricted by protected media or pixel-access rules. The bundled compliance archive contains LGPL corresponding source and rebuild instructions."
 
 Use Chrome 121+ with a supported graphics context. No login is required. The supplied local test results do not certify every website, physical GPU or Chrome version. See docs/COMPATIBILITY.md for passed, partial and unverified outcomes. Native browser denial/restart recovery and physical AMD/Intel qualification remain manual validation limits.
 
-## Readiness and version history
+## Publication and version history
 
-| Version | Prepared | Changes | Status |
+| Version | Release prepared | Changes | Distribution |
 | --- | --- | --- | --- |
-| 0.3.1 | 2026-10-13 | GitHub repository link and icon in About; refreshed UI screenshots and corresponding source. | Prepared; not submitted |
-| 0.3.0 | 2026-10-13 | Enhancement-only release, opt-in site access, refined interface, About/support, current artwork and corresponding source. | Prepared; not submitted |
+| 0.3.1 | 2026-10-13 | GitHub repository link and icon in About; refreshed UI screenshots and corresponding source. | [Current GitHub release](https://github.com/Lorcuz/WebScaly/releases/tag/v0.3.1) |
+| 0.3.0 | 2026-10-13 | Enhancement-only release, opt-in site access, refined interface, About/support, current artwork and corresponding source. | [Earlier GitHub release](https://github.com/Lorcuz/WebScaly/releases/tag/v0.3.0); superseded by 0.3.1 |
 
-Before final submission: upload 0.3.1 and its current screenshots; finish publisher registration, account/contact verification and any region-specific trader disclosures shown by the dashboard; verify Add/Allow and revocation in your installed Chrome profile. The GitHub repository and 0.3.0 release are public; Chrome Web Store submission remains separate.
+The GitHub repository and Chrome Web Store listing are public. This documentation was updated on 14 October 2026 to reflect store publication and recommend the store installation first.
 
-The package and artwork are prepared locally. Store approval and publishing are controlled by Google and the publisher.
+For subsequent releases, verify Add/Allow and revocation in the installed Chrome profile, retain compatibility limits, and keep publisher/contact and any required trader disclosures current. Google and the publisher control review and publication of store updates.
 
 ## Primary references
 

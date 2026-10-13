@@ -32,18 +32,20 @@ for(const name of storeAssetNames)if(name!=="popup-ui.png")
  await copyFile(`docs/store/assets/${name}`,resolve(store,"assets",name));
 await copyFile("test-results/package-verification.json",resolve(base,"PACKAGE-VERIFICATION.json"));
 await copyFile("test-results/source-verification.json",resolve(base,"SOURCE-VERIFICATION.json"));
-await writeFile(resolve(base,"START-HERE.md"),`# WebScaly ${version} publishing files
+await writeFile(resolve(base,"START-HERE.md"),`# WebScaly ${version} release handoff
 
-1. Read GITHUB-SETUP.md and upload the **contents** of GitHub/ into the root of your new public repository. README, .gitignore, LICENSE, source, tests and notices are included; no previous Git history is present.
+WebScaly is published at https://chromewebstore.google.com/detail/webscaly/hdcnniaagmhkocoeahemlpgjecgpchfa. This folder supports future releases of the existing extension.
+
+1. Read GITHUB-SETUP.md and review the **contents** of GitHub/ against the existing public repository at https://github.com/Lorcuz/WebScaly. README, .gitignore, LICENSE, source, tests and notices are included; private development history is excluded. Preserve the repository's public history.
 2. Confirm the repository's PRIVACY.md and SUPPORT.md links load publicly.
-3. Upload **Chrome Web Store/${extensionName}** to the developer dashboard.
+3. For a future extension update, use a version newer than the published store version and upload **Chrome Web Store/${extensionName}** to the existing item's developer dashboard.
 4. Copy Description from DESCRIPTION.txt; use STORE-LISTING-AND-PRIVACY.md for all other fields, privacy declarations and permission explanations.
 5. Upload the icon, five screenshots and promo tiles from Chrome Web Store/assets/.
-6. Finish account verification and any publisher/trader fields shown in your account, then submit for review.
+6. Keep account/contact verification and any required publisher/trader fields current, then submit the update for review.
 
 The corresponding-source ZIP is provided for GitHub Releases and licensing; it is already included inside the extension ZIP. Do not upload it as the extension package. The verification and inventory files are handoff records, not extra repository files.
 
-Prepared locally on 13 October 2026. Nothing has been uploaded or submitted automatically. Compatibility and manual validation limits are documented in the repository.
+This command prepares files locally; publishing a GitHub release or submitting a store update is a separate action. Documentation-only changes need no new extension version or store upload. Compatibility and manual validation limits are documented in the repository.
 `);
 audit(await collect(github));
 console.log(base);

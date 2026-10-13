@@ -1,5 +1,10 @@
 # Changelog
 
+## Publication documentation — 14 October 2026
+
+- Added the [published Chrome Web Store listing](https://chromewebstore.google.com/detail/webscaly/hdcnniaagmhkocoeahemlpgjecgpchfa) as the recommended installation method and repository website.
+- Updated distribution and maintainer documentation to reflect public availability. The extension version remains 0.3.1.
+
 ## 0.3.1 — 13 October 2026
 
 - Added the WebScaly repository to Settings → About, with a GitHub icon matching the existing contact links.
@@ -8,7 +13,7 @@
 
 ## 0.3.0 — 13 October 2026
 
-Prepared for first public release.
+Initial public release.
 
 - Spatial Detail, Anime4K CNN and FSRCNNX x2 enhancement at the video's native frame rate.
 - Local GPU processing with capability checks, cleanup and a spatial WebGL fallback.

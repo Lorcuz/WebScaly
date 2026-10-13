@@ -2,7 +2,7 @@
 
 <h1 align="center">WebScaly</h1>
 <p align="center">Bring more detail to the videos you watch. Keep processing on your device.</p>
-<p align="center"><a href="#getting-started">Get started</a> · <a href="PRIVACY.md">Privacy</a> · <a href="SUPPORT.md">Support</a> · <a href="THIRD_PARTY_NOTICES.md">Licenses</a></p>
+<p align="center"><a href="https://chromewebstore.google.com/detail/webscaly/hdcnniaagmhkocoeahemlpgjecgpchfa"><strong>Install from the Chrome Web Store</strong></a> · <a href="#getting-started">Get started</a> · <a href="PRIVACY.md">Privacy</a> · <a href="SUPPORT.md">Support</a> · <a href="THIRD_PARTY_NOTICES.md">Licenses</a></p>
 
 ![WebScaly — local video enhancement](docs/store/assets/marquee-promo-1400x560.png)
 
@@ -22,11 +22,23 @@ WebScaly is a Chrome extension that enhances accessible web video on websites yo
 
 Video processing happens on your device. There are no analytics, tracking scripts, accounts, cloud inference or automatic uploads. Website addresses, video frames and player diagnostics are handled locally to provide enhancement. Settings and approved sites stay in your browser.
 
-You can remove website access at any time. Email, Discord and PayPal are optional services you can choose to open; their own privacy policies apply. Read the [privacy policy](PRIVACY.md) for storage, retention and support details.
+You can remove website access at any time. GitHub, email, Discord and PayPal are optional services you can choose to open; their own privacy policies apply. Read the [privacy policy](PRIVACY.md) for storage, retention and support details.
 
 ## Getting started
 
-### Build and load the extension
+### Chrome Web Store (recommended)
+
+Use **Chrome 121+**. Install the published extension from the [official WebScaly Chrome Web Store page](https://chromewebstore.google.com/detail/webscaly/hdcnniaagmhkocoeahemlpgjecgpchfa):
+
+1. Click **Add to Chrome** and confirm the installation.
+2. Open a video website, click WebScaly and choose **Add this website** → **Allow**.
+3. Turn on **Enhancement** and choose an algorithm. If the video is embedded, approve its player website from the popup too.
+
+Chrome handles updates to the store installation automatically. Website access starts off; approve only the websites you want to enhance.
+
+The permission approval completes even when Chrome closes the popup. The settings gear opens advanced settings for your current video profile. Technical options have short help on hover or keyboard focus; Escape dismisses it.
+
+### Build from source (for development)
 
 Use **Node.js 22.12+ or 24 LTS**, npm and **Chrome 121+**.
 
@@ -38,12 +50,9 @@ npm run build
 
 1. Open `chrome://extensions` and enable **Developer mode**.
 2. Choose **Load unpacked** and select the generated `dist` folder.
-3. Open a video website, click WebScaly and choose **Add this website** → **Allow**.
-4. Turn on **Enhancement** and choose an algorithm. If the video is embedded, approve its player website from the popup too.
+3. Follow the website approval and enhancement steps above.
 
-The permission approval completes even when Chrome closes the popup. The settings gear opens advanced settings for your current video profile. Technical options have short help on hover or keyboard focus; Escape dismisses it.
-
-To update an unpacked installation, reload WebScaly on the extensions page and refresh your video tabs. A published release ZIP can also be extracted and loaded as an unpacked extension.
+To update an unpacked installation, rebuild and reload WebScaly on the extensions page, then refresh your video tabs. You can also extract the extension ZIP from [GitHub Releases](https://github.com/Lorcuz/WebScaly/releases/latest) and load it as an unpacked extension.
 
 ![WebScaly enhancement settings](docs/store/assets/02-settings-1280x800.png)
 
@@ -65,7 +74,7 @@ npm run package
 
 Browser tests use original generated footage and isolated profiles. Raw profiles, screenshots and device reports belong in ignored `test-results/`. See [testing](docs/TESTING.md), [architecture](docs/ARCHITECTURE.md) and [contributing](CONTRIBUTING.md).
 
-`npm run package` produces `release/webscaly-0.3.1.zip`, a corresponding-source archive and a clean public source tree. The extension ZIP contains runtime files and required license/source material. Packaging validates the runtime allowlist and recursively scans corresponding source for private paths, credentials and retired runtime files. `npm run verify:release` checks the extracted ZIP's interface and asset loading; `npm run verify:source` installs and rebuilds from its bundled source and compares every runtime file. [CHROMEWEBSTORE.md](CHROMEWEBSTORE.md) contains store copy, permission explanations and submission instructions.
+`npm run package` produces `release/webscaly-0.3.1.zip`, a corresponding-source archive and a clean public source tree. The extension ZIP contains runtime files and required license/source material. Packaging validates the runtime allowlist and recursively scans corresponding source for private paths, credentials and retired runtime files. `npm run verify:release` checks the extracted ZIP's interface and asset loading; `npm run verify:source` installs and rebuilds from its bundled source and compares every runtime file. [CHROMEWEBSTORE.md](CHROMEWEBSTORE.md) contains the published listing link, store copy, permission explanations and future-update instructions.
 
 ## Support and feedback
 

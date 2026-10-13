@@ -1,63 +1,44 @@
-# GitHub repository setup
+# GitHub repository maintenance
 
-Upload only the contents of the prepared **GitHub** folder to the repository root. The folder has no old Git history, dependency directory, browser profile or raw development reports. Include the hidden `.github`, `.gitignore` and `.gitattributes` entries.
+The public repository is [Lorcuz/WebScaly](https://github.com/Lorcuz/WebScaly), with source on `main` and downloadable packages in [GitHub Releases](https://github.com/Lorcuz/WebScaly/releases/latest). The recommended installation method is the published [Chrome Web Store listing](https://chromewebstore.google.com/detail/webscaly/hdcnniaagmhkocoeahemlpgjecgpchfa).
 
-## Repository creation choices
+## Repository page
 
-| Field | Choose / paste |
+| Field | Value |
 | --- | --- |
-| Owner | Lorcuz |
-| Repository name | webscaly |
+| Owner / repository | Lorcuz/WebScaly |
 | Description | Privacy-friendly, local video enhancement for Chrome with Spatial Detail, Anime4K and FSRCNNX. |
+| About website | https://chromewebstore.google.com/detail/webscaly/hdcnniaagmhkocoeahemlpgjecgpchfa |
 | Visibility | Public |
-| Add README | Off — README.md is already included. |
-| Add .gitignore | None — a project-specific .gitignore is already included. |
-| Add license | None — the existing MIT LICENSE and separate third-party notices are already included. |
+| Default branch | main |
+| Issues | Enabled for the included bug and feature forms. |
+| Topics | chrome-extension, video-enhancement, upscaling, webgpu, anime4k, fsrcnnx, privacy |
 
-The project's own license is MIT. If asked about the license elsewhere, choose **MIT** for WebScaly-authored code. Do not replace the supplied LICENSE or third-party notices with a template: FSRCNNX remains LGPL-3.0-or-later, and the other bundled components retain their own terms.
+README.md puts the store installation first and retains source-build instructions for development. The project-specific `.gitignore`, `.gitattributes`, MIT LICENSE and third-party notices are already included. Keep these files rather than replacing them with repository-creation templates.
 
-## Upload the files
+WebScaly-authored code uses **MIT**. FSRCNNX remains **LGPL-3.0-or-later**, and other bundled components retain their own terms. Preserve notices and the required corresponding source/rebuild material.
 
-The browser upload flow allows up to 100 files at a time and has a per-file size limit. This source tree contains more than 100 files. **GitHub Desktop** is the easiest way to upload the whole tree, including hidden files:
+## Update the existing repository
 
-1. Create the empty repository on github.com with the choices above.
-2. In GitHub Desktop, choose **File → Clone repository**, select `Lorcuz/webscaly`, and clone it into a new local folder.
-3. Copy all contents of the prepared GitHub folder into the clone, including dotfiles. Leave the clone's own `.git` folder in place.
-4. Review changes, commit with a message such as `Initial public release: WebScaly 0.3.0`, then **Push origin**.
-5. Use branch `main` for the public links in the store documentation.
+1. Clone or update the public repository with Git or GitHub Desktop. Keep its existing public history.
+2. Make the change, review the diff and run the relevant checks. For a clean source export, include hidden project files and exclude dependencies, private development history, browser profiles and raw reports.
+3. Commit and push the reviewed changes, or open a pull request. Keep the store, support and privacy links current.
+4. Confirm the GitHub Actions workflow succeeds. It runs unit tests, build and package validation with read-only repository permissions and pinned action revisions. It does not publish releases or submit store updates. Browser/GPU tests remain local checks; hosted CI is not physical GPU qualification.
 
-You can also upload folders through the website in smaller batches. Choose **Add file → Upload files**, upload the contents at the correct repository-relative location, and commit. Do not upload a ZIP as a substitute for the source tree: GitHub will not expand it into a README and source files.
+Use the Git identity you want visible publicly. Never copy private development history into the public repository.
 
-If using the command line, run the following inside a NEW copy of the clean GitHub folder, after creating the empty remote repository:
+## Future extension releases
 
-```sh
-git init -b main
-git add .
-git commit -m "Initial public release: WebScaly 0.3.0"
-git remote add origin https://github.com/Lorcuz/webscaly.git
-git push -u origin main
-```
+For an extension-code update, increase the package and manifest version, update CHANGELOG.md and complete the tests and package/source verification described in [TESTING.md](../TESTING.md). Create a matching GitHub release tag and attach the generated extension and corresponding-source ZIPs. Keep previous release assets as historical snapshots.
 
-Use the Git identity you want visible publicly. The extension's original local repository/history is not needed for this upload.
+Then follow [CHROMEWEBSTORE.md](../../CHROMEWEBSTORE.md) to update the existing store item. A documentation-only repository update needs no new extension version or store upload.
 
-## Finish the repository page
+## Public links
 
-- Set the **About** description to the text above.
-- Suggested topics: `chrome-extension`, `video-enhancement`, `upscaling`, `webgpu`, `anime4k`, `fsrcnnx`, `privacy`.
-- Enable **Issues** so the included bug/feature forms work.
-- The included GitHub Actions workflow runs unit tests, build and package validation. It has read-only repository permissions and pinned action revisions. It does not publish releases or submit the store item. Browser/GPU tests remain a local check; hosted CI is not physical GPU qualification.
-- Optionally create a GitHub Release tagged `v0.3.0`. Attach `webscaly-0.3.0.zip` and `webscaly-source-0.3.0.zip` from the Chrome Web Store folder, and use CHANGELOG.md for release notes.
-- No Pages setup or custom domain is required. The repository README is your homepage; SUPPORT.md and PRIVACY.md provide public support/privacy pages.
+- Install: https://chromewebstore.google.com/detail/webscaly/hdcnniaagmhkocoeahemlpgjecgpchfa
+- Homepage/source: https://github.com/Lorcuz/WebScaly
+- Support: https://github.com/Lorcuz/WebScaly/blob/main/SUPPORT.md
+- Privacy: https://github.com/Lorcuz/WebScaly/blob/main/PRIVACY.md
+- Issues: https://github.com/Lorcuz/WebScaly/issues
 
-After uploading, verify these addresses in a signed-out browser:
-
-- Homepage: https://github.com/Lorcuz/webscaly
-- Support: https://github.com/Lorcuz/webscaly/blob/main/SUPPORT.md
-- Privacy: https://github.com/Lorcuz/webscaly/blob/main/PRIVACY.md
-- Issues: https://github.com/Lorcuz/webscaly/issues
-
-Then use the store instructions in the other folder. If you use another repository name or owner, replace the links in README.md, SUPPORT.md, the issue configuration and CHROMEWEBSTORE.md.
-
-## References
-
-[GitHub repository creation](https://docs.github.com/en/repositories/creating-and-managing-repositories/creating-a-new-repository) · [Uploading files and limits](https://docs.github.com/en/repositories/working-with-files/managing-files/adding-a-file-to-a-repository)
+No Pages setup or custom domain is required. Keep the support and privacy pages accessible without sign-in.

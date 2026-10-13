@@ -1,3 +1,5 @@
-# Scope
+# Scope and publication status
 
-0.3.0 retains video enhancement, scoped host approval, optional comparison and diagnostics. Rendering uses native decoded frames and browser capabilities. All player tools start hidden. Publication includes clean source without developer history, explicit package allowlists and LGPL source/rebuild material. Actual publication remains a separate step.
+WebScaly 0.3.x provides video enhancement, scoped host approval, optional comparison and diagnostics. Rendering uses native decoded frames and browser capabilities. All player tools start hidden. Public distribution includes clean source without private developer history, explicit package allowlists and LGPL source/rebuild material.
+
+The extension is published on the [Chrome Web Store](https://chromewebstore.google.com/detail/webscaly/hdcnniaagmhkocoeahemlpgjecgpchfa), the recommended installation method. Source and development releases are public on [GitHub](https://github.com/Lorcuz/WebScaly). See [CHROMEWEBSTORE.md](../CHROMEWEBSTORE.md) for listing maintenance and future updates, and [COMPATIBILITY.md](COMPATIBILITY.md) for tested behavior and limits.
