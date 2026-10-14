@@ -7,12 +7,12 @@ The public repository is [Lorcuz/WebScaly](https://github.com/Lorcuz/WebScaly), 
 | Field | Value |
 | --- | --- |
 | Owner / repository | Lorcuz/WebScaly |
-| Description | Privacy-friendly, local video enhancement for Chrome with Spatial Detail, Anime4K and FSRCNNX. |
+| Description | Local video enhancement for Chrome. Sharpen and upscale videos on websites you approve. |
 | About website | https://chromewebstore.google.com/detail/webscaly/hdcnniaagmhkocoeahemlpgjecgpchfa |
 | Visibility | Public |
 | Default branch | main |
 | Issues | Enabled for the included bug and feature forms. |
-| Topics | chrome-extension, video-enhancement, upscaling, webgpu, anime4k, fsrcnnx, privacy |
+| Topics | chrome-extension, video-enhancement, upscaling, webgpu, webgl, anime4k, fsrcnnx, privacy |
 
 README.md puts the store installation first and retains source-build instructions for development. The project-specific `.gitignore`, `.gitattributes`, MIT LICENSE and third-party notices are already included. Keep these files rather than replacing them with repository-creation templates.
 
