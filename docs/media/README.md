@@ -57,16 +57,11 @@ This is original AI-generated demonstration artwork, separate from WebScaly's pr
 
 ## Original 540p illustration in the video
 
-<details>
-<summary>View the 540p comparison used in the showcase</summary>
-
-![Original 540p illustration: enhancement OFF and Anime4K Quality ON](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/original-anime-comparison-1280x800.png)
+![Full-frame original 540p illustration: enhancement OFF and Anime4K Quality ON](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/original-anime-comparison-1920x1080.png)
 
 960×540 input → 1920×1080 output, 2× scale. Both sides use the same decoded frame. This source has more initial detail than the new 360p example.
 
 [1920×1080 full frame](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/original-anime-comparison-1920x1080.png) · [1920×1080 matched detail](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/original-anime-detail-1920x1080.png)
-
-</details>
 
 ## Video thumbnail
 

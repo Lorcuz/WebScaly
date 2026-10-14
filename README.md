@@ -6,9 +6,13 @@
 
 WebScaly is a free, open-source Chrome extension that sharpens and upscales accessible web video on websites you approve. Enhancement runs locally while your usual player handles playback and sound.
 
-![Enlarged eye detail: enhancement OFF on the left, Anime4K Quality ON on the right](docs/store/assets/01-player-1280x800.png)
+![Full-frame illustration: enhancement OFF on the left, Anime4K Quality ON on the right](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/original-anime-comparison-1920x1080.png)
 
-*Original demonstration illustration prepared as a 640×360 video. Anime4K Quality produces 1920×1080 output with Automatic scale. Both sides use the same decoded source and the same enlargement. [Full-frame comparison](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/original-anime-360-comparison-1920x1080.png) · [Capture details and credits](docs/media/ATTRIBUTIONS.md).*
+*Full-frame illustration, 960×540 source → 1920×1080 output, Anime4K Quality, 2× scale. [Open the 1920×1080 image](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/original-anime-comparison-1920x1080.png) · [Capture details and credits](docs/media/ATTRIBUTIONS.md).*
+
+![Full-frame Hero comparison: enhancement OFF on the left, Anime4K Quality ON on the right](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/hero-comparison-1920x1080.png)
+
+*Full-frame Hero comparison, 960×540 source → 1920×1080 output, Anime4K Quality, 2× scale. Hero © 2018 Blender Foundation, Daniel Martínez Lara, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); cropped, resized and enhanced. [Open the 1920×1080 image](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/hero-comparison-1920x1080.png).*
 
 ## Getting started
 
