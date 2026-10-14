@@ -6,9 +6,9 @@
 
 WebScaly is a free, open-source Chrome extension that sharpens and upscales accessible web video on websites you approve. Enhancement runs locally while your usual player handles playback and sound.
 
-![Hero: enhancement OFF on the left, Anime4K Quality ON on the right](docs/store/assets/01-player-1280x800.png)
+![Original illustration: enhancement OFF on the left, Anime4K Quality ON on the right](docs/store/assets/01-player-1280x800.png)
 
-*Same decoded frame, 960×540 source → 1920×1080 output. Hero © 2018 Blender Foundation, Daniel Martínez Lara, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); cropped, resized and enhanced. [Capture details and credits](docs/media/ATTRIBUTIONS.md).*
+*Original demonstration illustration. Same decoded frame, 960×540 source → 1920×1080 output with Anime4K Quality. [Capture details and credits](docs/media/ATTRIBUTIONS.md).*
 
 ## Getting started
 
@@ -30,9 +30,9 @@ https://github.com/user-attachments/assets/56674f4d-dd3f-478f-b941-17387b18f4fa
 
 [Download the 1080p video](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/WebScaly-showcase-1080p.mp4) · [English captions](https://github.com/Lorcuz/WebScaly/blob/main/docs/media/WebScaly-showcase.en.vtt) · [Comparison gallery and full-size images](https://github.com/Lorcuz/WebScaly/blob/main/docs/media/README.md)
 
-![Matched face-detail crops from Hero, original and enhanced](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/hero-detail-1920x1080.png)
+![Matched eye and hair detail from the original illustration, original and enhanced](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/original-anime-detail-1920x1080.png)
 
-*Identical crops enlarged equally to make edges easier to compare. The ON side comes from WebScaly's Anime4K Quality output. No extra sharpening was applied in the editor. Hero credit and license as above.*
+*Identical eye and hair crops enlarged equally to make edges easier to compare. The ON side comes from WebScaly's Anime4K Quality output. No extra sharpening was applied in the editor.*
 
 ## Enhancement options
 

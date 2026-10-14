@@ -71,7 +71,7 @@ Use files from the Chrome Web Store handoff folder's `assets/` directory:
 | Field | File | Format |
 | --- | --- | --- |
 | Store icon | icon-128.png | 128×128 PNG |
-| Screenshot 1 | 01-player-1280x800.png — Hero OFF/ON comparison | 1280×800, 24-bit PNG, no alpha |
+| Screenshot 1 | 01-player-1280x800.png — original illustration OFF/ON comparison | 1280×800, 24-bit PNG, no alpha |
 | Screenshot 2 | 02-settings-1280x800.png | 1280×800, 24-bit PNG, no alpha |
 | Screenshot 3 | 03-popup-1280x800.png | 1280×800, 24-bit PNG, no alpha |
 | Screenshot 4 | 04-site-profiles-1280x800.png | 1280×800, 24-bit PNG, no alpha |
@@ -79,7 +79,7 @@ Use files from the Chrome Web Store handoff folder's `assets/` directory:
 | Small promo tile | small-promo-440x280.png | 440×280, 24-bit PNG, no alpha |
 | Marquee promo tile | marquee-promo-1400x560.png | 1400×560, 24-bit PNG, no alpha |
 
-Image 01 compares matching decoded source and actual Anime4K Quality output from *Hero*: © 2018 Blender Foundation, Daniel Martínez Lara, CC BY 4.0, cropped, resized and enhanced. Keep its visible credit and [full attribution](docs/media/ATTRIBUTIONS.md). Other screenshots show the current installed extension on an isolated local demonstration website. All player tools remain hidden by default in a new installation. The popup overview contains an unaltered capture of the actual popup; `popup-ui.png` is supporting artwork, not a store-sized screenshot. No user history or device report is included.
+Image 01 compares matching decoded source and actual Anime4K Quality output from the original demonstration illustration. Keep its visible source note and [full attribution](docs/media/ATTRIBUTIONS.md). Other screenshots show the current installed extension on an isolated local demonstration website. All player tools remain hidden by default in a new installation. The popup overview contains an unaltered capture of the actual popup; `popup-ui.png` is supporting artwork, not a store-sized screenshot. No user history or device report is included.
 
 The [media gallery](docs/media/README.md) also provides the showcase MP4, English captions and additional comparison images. Repository artwork updates do not update the live store listing automatically; the publisher uploads chosen assets in the store dashboard.
 

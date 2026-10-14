@@ -16,11 +16,11 @@ WebScaly processes decoded frames at their native cadence. It does not generate 
 
 ## A real comparison
 
-![Hero: enhancement OFF on the left and Anime4K Quality ON on the right](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/store/assets/01-player-1280x800.png)
+![Original illustration: enhancement OFF on the left and Anime4K Quality ON on the right](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/store/assets/01-player-1280x800.png)
 
-The comparison uses the same decoded frame from *Hero*, a Blender open movie: a 960×540 input, Anime4K Quality, 2× output scale and a 1080p output-height limit. The left side is the original video; the right side is the installed extension's actual WebGPU output. Both sides receive equal presentation resizing, with no additional sharpening in the editor.
+The comparison uses the same decoded frame of the original demonstration illustration: a 960×540 input, Anime4K Quality, 2× output scale and a 1080p output-height limit. The left side is the original video; the right side is the installed extension's actual WebGPU output. Both sides receive equal presentation resizing, with no additional sharpening in the editor.
 
-*Hero* © 2018 Blender Foundation, Daniel Martínez Lara, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), was excerpted, cropped, resized and enhanced. The [comparison gallery](media/README.md) includes matched detail crops, the showcase video and [capture details and credits](media/ATTRIBUTIONS.md). These examples demonstrate picture changes, not a performance benchmark or a promise of equivalent improvement for every video. Optional player tools remain hidden by default.
+The [comparison gallery](media/README.md) includes matched eye/hair detail crops, the showcase video and [capture details and credits](media/ATTRIBUTIONS.md). Additional comparisons use the CC BY 4.0 open movie *Hero*. These examples demonstrate picture changes, not a performance benchmark or a promise of equivalent improvement for every video. Optional player tools remain hidden by default.
 
 ## Rendering follows the decoded video
 

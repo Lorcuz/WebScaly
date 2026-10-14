@@ -16,7 +16,7 @@ The public repository is [Lorcuz/WebScaly](https://github.com/Lorcuz/WebScaly), 
 
 README.md puts the store installation first and retains source-build instructions for development. The project-specific `.gitignore`, `.gitattributes`, MIT LICENSE and third-party notices are already included. Keep these files rather than replacing them with repository-creation templates.
 
-The README includes the showcase video and attributed Hero comparisons. [docs/media](../media/README.md) holds full-size images, captions, credits and checksums. Preserve the embedded video URL when editing the page. Master media is repository documentation; the source package includes its small documentation/notice files and the store-sized comparison, without the master video or gallery image files.
+The README includes the showcase video and original-illustration comparisons. [docs/media](../media/README.md) holds full-size images, additional Hero examples, captions, credits and checksums. Preserve the embedded video URL when editing the page. Master media is repository documentation; the source package includes its small documentation/notice files and the store-sized comparison, without the master video or gallery image files.
 
 WebScaly-authored code uses **MIT**. FSRCNNX remains **LGPL-3.0-or-later**, and other bundled components retain their own terms. Preserve notices and the required corresponding source/rebuild material.
 

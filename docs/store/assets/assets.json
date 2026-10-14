@@ -1,6 +1,6 @@
 {
   "version": "0.3.1",
-  "footage": "Hero - © 2018 Blender Foundation, Daniel Martínez Lara; CC BY 4.0; cropped, resized and enhanced with WebScaly Anime4K Quality. See docs/media/ATTRIBUTIONS.md.",
+  "footage": "Original illustration prepared for the WebScaly demonstration, with matching decoded OFF frames and actual Anime4K Quality ON output. See docs/media/ATTRIBUTIONS.md for source details.",
   "screenshots": "Image 01 is a labeled comparison of matched decoded frames and actual extension output. Other screenshots show the installed extension on an isolated local demonstration website; popup overview contains its unaltered UI capture.",
   "files": [
     {
