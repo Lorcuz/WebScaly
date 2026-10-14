@@ -6,9 +6,9 @@
 
 WebScaly is a free, open-source Chrome extension that sharpens and upscales accessible web video on websites you approve. Enhancement runs locally while your usual player handles playback and sound.
 
-![Original illustration: enhancement OFF on the left, Anime4K Quality ON on the right](docs/store/assets/01-player-1280x800.png)
+![Enlarged eye detail: enhancement OFF on the left, Anime4K Quality ON on the right](docs/store/assets/01-player-1280x800.png)
 
-*Original demonstration illustration. Same decoded frame, 960×540 source → 1920×1080 output with Anime4K Quality. [Capture details and credits](docs/media/ATTRIBUTIONS.md).*
+*Original demonstration illustration prepared as a 640×360 video. Anime4K Quality produces 1920×1080 output with Automatic scale. Both sides use the same decoded source and the same enlargement. [Full-frame comparison](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/original-anime-360-comparison-1920x1080.png) · [Capture details and credits](docs/media/ATTRIBUTIONS.md).*
 
 ## Getting started
 
@@ -28,11 +28,19 @@ The 58-second showcase covers website approval, Anime4K Quality, real OFF/ON com
 
 https://github.com/user-attachments/assets/56674f4d-dd3f-478f-b941-17387b18f4fa
 
-[Download the 1080p video](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/WebScaly-showcase-1080p.mp4) · [English captions](https://github.com/Lorcuz/WebScaly/blob/main/docs/media/WebScaly-showcase.en.vtt) · [Comparison gallery and full-size images](https://github.com/Lorcuz/WebScaly/blob/main/docs/media/README.md)
+[Watch on YouTube](https://youtu.be/Oy77dm2rm-s) · [Download the 1080p video](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/WebScaly-showcase-1080p.mp4) · [English captions](https://github.com/Lorcuz/WebScaly/blob/main/docs/media/WebScaly-showcase.en.vtt) · [Comparison gallery and full-size images](https://github.com/Lorcuz/WebScaly/blob/main/docs/media/README.md)
 
-![Matched eye and hair detail from the original illustration, original and enhanced](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/original-anime-detail-1920x1080.png)
+### Illustration — 360p source
 
-*Identical eye and hair crops enlarged equally to make edges easier to compare. The ON side comes from WebScaly's Anime4K Quality output. No extra sharpening was applied in the editor.*
+![Large matched eye-detail views: original 360p video above, Anime4K Quality output below](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/original-anime-360-detail-1000x1340.png)
+
+*The same 304×144 region is enlarged 3× in both panels. The source was downsampled and encoded as a 360p video before either capture; the OFF panel is its native playback, and the ON panel is actual WebScaly output. No editor sharpening is added. [Open full size](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/original-anime-360-detail-1000x1340.png).*
+
+### Hero — 540p source
+
+![Large matched Hero face-detail views: original video above, Anime4K Quality output below](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/hero-detail-1000x1340.png)
+
+*960×540 source → 1920×1080 output, Anime4K Quality, 2× scale. Identical crops and enlargement. Hero © 2018 Blender Foundation, Daniel Martínez Lara, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); cropped, resized and enhanced. [Full frame](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/hero-comparison-1920x1080.png) · [Open detail full size](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/hero-detail-1000x1340.png).*
 
 ## Enhancement options
 

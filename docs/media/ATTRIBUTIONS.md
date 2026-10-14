@@ -1,6 +1,6 @@
 # Demonstration media credits
 
-These credits apply to the showcase video, comparison images in this directory, and `docs/store/assets/01-player-1280x800.png`.
+These credits apply to the showcase video, comparison images and video thumbnail in this directory, and the comparison assets in `docs/store/assets/`.
 
 ## Hero
 
@@ -18,7 +18,7 @@ Suggested short accompanying credit:
 
 ## Original illustration
 
-Original AI-generated artwork prepared specifically for this demonstration. A larger image was cropped and downsampled to a 960×540 input. Both comparison sides use that same decoded source. The enhanced side is actual WebScaly output.
+Original AI-generated artwork prepared specifically for this demonstration. A larger image was cropped, downsampled and encoded as a video input. The original showcase and 540p images use 960×540; the newer files named `original-anime-360-*` use 640×360. Both sides of each comparison use that example's same decoded source. The enhanced side is actual WebScaly output. The thumbnail uses the showcase's 540p source.
 
 The illustration is separate from the extension's processing: WebScaly runs its bundled enhancement pipelines locally and does not call an image-generation service.
 
@@ -32,10 +32,12 @@ The shield-check symbol in the video uses [Lucide](https://lucide.dev/license), 
 
 ## Capture and presentation
 
-- Anime4K CNN, Quality, 2× output scale, 1080p output-height limit; actual WebGPU processing.
-- Illustration and film still: 960×540 input → 1920×1080 output.
+- Anime4K CNN, Quality, 1080p output-height limit; actual WebGPU processing.
+- Showcase illustration and film still: 960×540 input → 1920×1080 output, 2× output scale.
+- New illustration stills: 640×360 input → 1920×1080 output, Automatic output scale. The source was downsampled and H.264 encoded before either capture; the OFF side was not blurred separately.
 - Moving film excerpt: 960×402 input → 1920×804 output; 24 fps source. The 30 fps delivery duplicates frames without interpolation.
-- Detail images magnify identical 432×304 crops to 864×608, using equal pixel scaling on each side.
+- Original 1920×1080 detail layouts magnify identical 432×304 crops to 864×608. The new 1000×1340 layouts magnify 304×144 crops to 912×432. Both use equal pixel scaling on each side.
+- New 1280×800 store detail layouts magnify identical 280×240 crops to 588×504 on each side.
 - No extra editor sharpening or synthetic detail was added to enhanced output. Cropping and presentation resizing affect both sides equally.
 - The approval sequence uses the real worker operation on a pregranted isolated local origin. The native Chrome permission bubble is described, not shown as a recorded action.
 - These captures demonstrate output and interface behavior, not universal website compatibility or physical GPU qualification.

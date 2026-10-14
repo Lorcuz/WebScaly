@@ -12,7 +12,7 @@ Last updated: 2026-10-15. Project version: 0.3.1. Status: published on the Chrom
 | Summary from package | Local video enhancement with WebGPU and WebGL on websites you approve. |
 | Category | Entertainment |
 | Language | English |
-| Global promo video | Requires a YouTube URL. The [GitHub showcase](docs/media/README.md) is an MP4, not a YouTube upload; leave this field empty until a YouTube URL is supplied. |
+| Global promo video | https://youtu.be/Oy77dm2rm-s — published on YouTube as Unlisted, with custom thumbnail and English captions. |
 | Official URL | None. Use a verified site only if you actually own it. |
 | Homepage URL | https://github.com/Lorcuz/webscaly |
 | Support URL | https://github.com/Lorcuz/webscaly/blob/main/SUPPORT.md |
@@ -71,15 +71,17 @@ Use files from the Chrome Web Store handoff folder's `assets/` directory:
 | Field | File | Format |
 | --- | --- | --- |
 | Store icon | icon-128.png | 128×128 PNG |
-| Screenshot 1 | 01-player-1280x800.png — original illustration OFF/ON comparison | 1280×800, 24-bit PNG, no alpha |
-| Screenshot 2 | 02-settings-1280x800.png | 1280×800, 24-bit PNG, no alpha |
+| Screenshot 1 | 01-player-1280x800.png — enlarged original-illustration OFF/ON detail, 360p source | 1280×800, 24-bit PNG, no alpha |
+| Screenshot 2 | 06-hero-detail-1280x800.png — enlarged Hero OFF/ON detail, 540p source | 1280×800, 24-bit PNG, no alpha |
 | Screenshot 3 | 03-popup-1280x800.png | 1280×800, 24-bit PNG, no alpha |
-| Screenshot 4 | 04-site-profiles-1280x800.png | 1280×800, 24-bit PNG, no alpha |
-| Screenshot 5 | 05-about-1280x800.png | 1280×800, 24-bit PNG, no alpha |
+| Screenshot 4 | 02-settings-1280x800.png | 1280×800, 24-bit PNG, no alpha |
+| Screenshot 5 | 04-site-profiles-1280x800.png | 1280×800, 24-bit PNG, no alpha |
 | Small promo tile | small-promo-440x280.png | 440×280, 24-bit PNG, no alpha |
 | Marquee promo tile | marquee-promo-1400x560.png | 1400×560, 24-bit PNG, no alpha |
 
-Image 01 compares matching decoded source and actual Anime4K Quality output from the original demonstration illustration. Keep its visible source note and [full attribution](docs/media/ATTRIBUTIONS.md). Other screenshots show the current installed extension on an isolated local demonstration website. All player tools remain hidden by default in a new installation. The popup overview contains an unaltered capture of the actual popup; `popup-ui.png` is supporting artwork, not a store-sized screenshot. No user history or device report is included.
+Image 01 uses a 640×360 illustration video with Automatic scale to 1920×1080. Image 06 uses a 960×540 Hero film still with 2× scale to 1920×1080. Both compare identical enlarged regions from native playback and actual Anime4K Quality output. Keep their visible source notes and [full attribution](docs/media/ATTRIBUTIONS.md). The About screenshot is an optional alternative if you replace one of the five images above. Other screenshots show the current installed extension on an isolated local demonstration website. All player tools remain hidden by default in a new installation. The popup overview contains an unaltered capture of the actual popup; `popup-ui.png` is supporting artwork, not a store-sized screenshot. No user history or device report is included.
+
+The YouTube upload is complete. The new screenshots and promo-video URL are ready for the next listing update. Updating GitHub assets does not update the live store listing.
 
 The [media gallery](docs/media/README.md) also provides the showcase MP4, English captions and additional comparison images. Repository artwork updates do not update the live store listing automatically; the publisher uploads chosen assets in the store dashboard.
 

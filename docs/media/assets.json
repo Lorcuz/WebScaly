@@ -2,11 +2,34 @@
   "extensionVersion": "0.3.1",
   "algorithm": "Anime4K CNN",
   "quality": "Quality",
-  "scale": 2,
   "outputHeightLimit": 1080,
   "credits": "ATTRIBUTIONS.md",
   "videoEmbed": "https://github.com/user-attachments/assets/56674f4d-dd3f-478f-b941-17387b18f4fa",
+  "youtube": {
+    "url": "https://youtu.be/Oy77dm2rm-s",
+    "visibility": "Unlisted",
+    "thumbnail": "WebScaly-youtube-thumbnail-1280x720.png",
+    "captions": "WebScaly-showcase.en.vtt"
+  },
   "files": [
+    {
+      "file": "WebScaly-youtube-thumbnail-1280x720.png",
+      "bytes": 744877,
+      "sha256": "7fab9f90b67938ee299d7e5548557d122fd4eca21cbda893b9ba925516640a3f",
+      "width": 1280,
+      "height": 720,
+      "alpha": false,
+      "channels": 3,
+      "decodedInput": [
+        960,
+        540
+      ],
+      "enhancementOutput": [
+        1920,
+        1080
+      ],
+      "outputScale": "2×"
+    },
     {
       "file": "hero-comparison-1280x800.png",
       "bytes": 682294,
@@ -14,7 +37,16 @@
       "width": 1280,
       "height": 800,
       "alpha": false,
-      "channels": 3
+      "channels": 3,
+      "decodedInput": [
+        960,
+        540
+      ],
+      "enhancementOutput": [
+        1920,
+        1080
+      ],
+      "outputScale": "2×"
     },
     {
       "file": "hero-comparison-1920x1080.png",
@@ -23,7 +55,34 @@
       "width": 1920,
       "height": 1080,
       "alpha": false,
-      "channels": 3
+      "channels": 3,
+      "decodedInput": [
+        960,
+        540
+      ],
+      "enhancementOutput": [
+        1920,
+        1080
+      ],
+      "outputScale": "2×"
+    },
+    {
+      "file": "hero-detail-1000x1340.png",
+      "bytes": 205646,
+      "sha256": "e2d447adc477f3996d76bf22854f79180f179165298b07b050e8a3e9cb52aa83",
+      "width": 1000,
+      "height": 1340,
+      "alpha": false,
+      "channels": 3,
+      "decodedInput": [
+        960,
+        540
+      ],
+      "enhancementOutput": [
+        1920,
+        1080
+      ],
+      "outputScale": "2×"
     },
     {
       "file": "hero-detail-1280x800.png",
@@ -32,7 +91,16 @@
       "width": 1280,
       "height": 800,
       "alpha": false,
-      "channels": 3
+      "channels": 3,
+      "decodedInput": [
+        960,
+        540
+      ],
+      "enhancementOutput": [
+        1920,
+        1080
+      ],
+      "outputScale": "2×"
     },
     {
       "file": "hero-detail-1920x1080.png",
@@ -41,7 +109,106 @@
       "width": 1920,
       "height": 1080,
       "alpha": false,
-      "channels": 3
+      "channels": 3,
+      "decodedInput": [
+        960,
+        540
+      ],
+      "enhancementOutput": [
+        1920,
+        1080
+      ],
+      "outputScale": "2×"
+    },
+    {
+      "file": "hero-detail-large-1280x800.png",
+      "bytes": 292296,
+      "sha256": "8516c7e006e1e9c6df6b5c34cc8311e84a7f215da964c31559782d4d42690c9c",
+      "width": 1280,
+      "height": 800,
+      "alpha": false,
+      "channels": 3,
+      "decodedInput": [
+        960,
+        540
+      ],
+      "enhancementOutput": [
+        1920,
+        1080
+      ],
+      "outputScale": "2×"
+    },
+    {
+      "file": "original-anime-360-comparison-1280x800.png",
+      "bytes": 1854528,
+      "sha256": "2c113577114717f9361e44cf7ce9b2d7098c880b49b9632a97c4b207a6c70a5f",
+      "width": 1280,
+      "height": 800,
+      "alpha": false,
+      "channels": 3,
+      "decodedInput": [
+        640,
+        360
+      ],
+      "enhancementOutput": [
+        1920,
+        1080
+      ],
+      "outputScale": "Automatic"
+    },
+    {
+      "file": "original-anime-360-comparison-1920x1080.png",
+      "bytes": 3736426,
+      "sha256": "1641a67eb8153397c346ce35e5dc4b807ee6f90bad5159451641d237b84ff1f2",
+      "width": 1920,
+      "height": 1080,
+      "alpha": false,
+      "channels": 3,
+      "decodedInput": [
+        640,
+        360
+      ],
+      "enhancementOutput": [
+        1920,
+        1080
+      ],
+      "outputScale": "Automatic"
+    },
+    {
+      "file": "original-anime-360-detail-1000x1340.png",
+      "bytes": 260802,
+      "sha256": "07608e0fc43558151f92be5b71c1ad1cddb6e0346eb2611cb7bf5830ccd585b8",
+      "width": 1000,
+      "height": 1340,
+      "alpha": false,
+      "channels": 3,
+      "decodedInput": [
+        640,
+        360
+      ],
+      "enhancementOutput": [
+        1920,
+        1080
+      ],
+      "outputScale": "Automatic"
+    },
+    {
+      "file": "original-anime-360-detail-1280x800.png",
+      "bytes": 418952,
+      "sha256": "b7b21dd2f44b1825f42e9881f831c6eb8a4109c0fac963df4ef1625cc8872b7c",
+      "width": 1280,
+      "height": 800,
+      "alpha": false,
+      "channels": 3,
+      "decodedInput": [
+        640,
+        360
+      ],
+      "enhancementOutput": [
+        1920,
+        1080
+      ],
+      "outputScale": "Automatic"
     },
     {
       "file": "original-anime-comparison-1280x800.png",
@@ -50,7 +217,16 @@
       "width": 1280,
       "height": 800,
       "alpha": false,
-      "channels": 3
+      "channels": 3,
+      "decodedInput": [
+        960,
+        540
+      ],
+      "enhancementOutput": [
+        1920,
+        1080
+      ],
+      "outputScale": "2×"
     },
     {
       "file": "original-anime-comparison-1920x1080.png",
@@ -59,7 +235,16 @@
       "width": 1920,
       "height": 1080,
       "alpha": false,
-      "channels": 3
+      "channels": 3,
+      "decodedInput": [
+        960,
+        540
+      ],
+      "enhancementOutput": [
+        1920,
+        1080
+      ],
+      "outputScale": "2×"
     },
     {
       "file": "original-anime-detail-1280x800.png",
@@ -68,7 +253,16 @@
       "width": 1280,
       "height": 800,
       "alpha": false,
-      "channels": 3
+      "channels": 3,
+      "decodedInput": [
+        960,
+        540
+      ],
+      "enhancementOutput": [
+        1920,
+        1080
+      ],
+      "outputScale": "2×"
     },
     {
       "file": "original-anime-detail-1920x1080.png",
@@ -77,7 +271,16 @@
       "width": 1920,
       "height": 1080,
       "alpha": false,
-      "channels": 3
+      "channels": 3,
+      "decodedInput": [
+        960,
+        540
+      ],
+      "enhancementOutput": [
+        1920,
+        1080
+      ],
+      "outputScale": "2×"
     },
     {
       "file": "WebScaly-showcase-1080p.mp4",
