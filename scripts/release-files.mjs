@@ -59,10 +59,12 @@ export async function collectSource() {
   const roots = ["README.md","LICENSE","THIRD_PARTY_NOTICES.md","PRIVACY.md","SUPPORT.md","SECURITY.md","CONTRIBUTING.md",
     "CHANGELOG.md","CHROMEWEBSTORE.md","package.json","package-lock.json","tsconfig.json","vite.config.ts",
     "playwright.config.ts","popup.html","options.html","ui-frame.html","lab.html","benchmark.html","viewer.html",".gitignore",".gitattributes"];
-  const docs = ["ARCHITECTURE","COMPATIBILITY","DELIVERY","DESIGN","PERFORMANCE","PLAN","RESEARCH","REVIEW","TESTING","UPGRADE"].map(n=>`docs/${n}.md`);
+  const docs = ["ARCHITECTURE","COMPATIBILITY","DELIVERY","DESIGN","LOCAL_VIDEO_ENHANCEMENT","PERFORMANCE","PLAN","RESEARCH","REVIEW","TESTING","UPGRADE"].map(n=>`docs/${n}.md`);
   for (const name of [...roots,...scripts.map(n=>"scripts/"+n),...docs,
     ...["README","PRIVACY","PERMISSIONS","LISTING"].map(n=>`docs/store/${n}.md`),
-    "docs/store/description.txt","docs/publishing/GITHUB.md",...storeAssetNames.map(n=>"docs/store/assets/"+n)])
+    "docs/store/description.txt","docs/publishing/GITHUB.md",
+    ...["README.md","ATTRIBUTIONS.md","LUCIDE-LICENSE.txt","WebScaly-showcase.en.vtt","assets.json"].map(n=>"docs/media/"+n),
+    ...storeAssetNames.map(n=>"docs/store/assets/"+n)])
     source[name] = new Uint8Array(await readFile(name));
   audit(source);
   return source;

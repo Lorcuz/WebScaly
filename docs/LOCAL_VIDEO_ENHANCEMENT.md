@@ -16,11 +16,11 @@ WebScaly processes decoded frames at their native cadence. It does not generate 
 
 ## A real comparison
 
-![WebScaly's actual comparison controls over original procedural demonstration footage](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/store/assets/01-player-1280x800.png)
+![Hero: enhancement OFF on the left and Anime4K Quality ON on the right](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/store/assets/01-player-1280x800.png)
 
-The screenshot shows the installed extension processing original procedural footage: a 640×360 source, Spatial Detail, Balanced quality, 2× output scale, 35% sharpening and 12% denoise. The built-in comparison places the original and enhanced portions within one player.
+The comparison uses the same decoded frame from *Hero*, a Blender open movie: a 960×540 input, Anime4K Quality, 2× output scale and a 1080p output-height limit. The left side is the original video; the right side is the installed extension's actual WebGPU output. Both sides receive equal presentation resizing, with no additional sharpening in the editor.
 
-This is a controlled interface demonstration, not a benchmark or a promise of equivalent improvement on natural footage. Its capture procedure is available in [the source](https://github.com/Lorcuz/WebScaly/blob/main/scripts/store-capture.mjs). Player tools are hidden by default and were explicitly enabled for this demonstration.
+*Hero* © 2018 Blender Foundation, Daniel Martínez Lara, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), was excerpted, cropped, resized and enhanced. The [comparison gallery](media/README.md) includes matched detail crops, the showcase video and [capture details and credits](media/ATTRIBUTIONS.md). These examples demonstrate picture changes, not a performance benchmark or a promise of equivalent improvement for every video. Optional player tools remain hidden by default.
 
 ## Rendering follows the decoded video
 
@@ -65,5 +65,3 @@ WebScaly has no tracking, analytics, user accounts, cloud inference or automatic
 Useful feedback includes the affected player, source resolution, selected algorithm, expected behavior and reproducible steps. A cropped comparison can help with picture-quality problems. Please omit private video addresses, browser profiles and personal configuration exports from public reports.
 
 [GitHub Issues](https://github.com/Lorcuz/WebScaly/issues) is the place for reproducible problems. The [architecture notes](https://github.com/Lorcuz/WebScaly/blob/main/docs/ARCHITECTURE.md) describe the implementation in more detail.
-
-*Disclosure: AI assisted development and the preparation of this article. Technical statements are based on the linked source and recorded validation.*

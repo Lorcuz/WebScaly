@@ -1,6 +1,6 @@
 # Chrome Web Store Listing — WebScaly
 
-Last updated: 2026-10-14. Project version: 0.3.1. Status: published on the Chrome Web Store.
+Last updated: 2026-10-15. Project version: 0.3.1. Status: published on the Chrome Web Store.
 
 **Live listing:** [WebScaly on the Chrome Web Store](https://chromewebstore.google.com/detail/webscaly/hdcnniaagmhkocoeahemlpgjecgpchfa). This is the recommended installation method. Source and development releases are available on [GitHub](https://github.com/Lorcuz/WebScaly).
 
@@ -12,7 +12,7 @@ Last updated: 2026-10-14. Project version: 0.3.1. Status: published on the Chrom
 | Summary from package | Local video enhancement with WebGPU and WebGL on websites you approve. |
 | Category | Entertainment |
 | Language | English |
-| Global promo video | Leave empty; no YouTube promo video is supplied. |
+| Global promo video | Requires a YouTube URL. The [GitHub showcase](docs/media/README.md) is an MP4, not a YouTube upload; leave this field empty until a YouTube URL is supplied. |
 | Official URL | None. Use a verified site only if you actually own it. |
 | Homepage URL | https://github.com/Lorcuz/webscaly |
 | Support URL | https://github.com/Lorcuz/webscaly/blob/main/SUPPORT.md |
@@ -71,7 +71,7 @@ Use files from the Chrome Web Store handoff folder's `assets/` directory:
 | Field | File | Format |
 | --- | --- | --- |
 | Store icon | icon-128.png | 128×128 PNG |
-| Screenshot 1 | 01-player-1280x800.png | 1280×800, 24-bit PNG, no alpha |
+| Screenshot 1 | 01-player-1280x800.png — Hero OFF/ON comparison | 1280×800, 24-bit PNG, no alpha |
 | Screenshot 2 | 02-settings-1280x800.png | 1280×800, 24-bit PNG, no alpha |
 | Screenshot 3 | 03-popup-1280x800.png | 1280×800, 24-bit PNG, no alpha |
 | Screenshot 4 | 04-site-profiles-1280x800.png | 1280×800, 24-bit PNG, no alpha |
@@ -79,7 +79,9 @@ Use files from the Chrome Web Store handoff folder's `assets/` directory:
 | Small promo tile | small-promo-440x280.png | 440×280, 24-bit PNG, no alpha |
 | Marquee promo tile | marquee-promo-1400x560.png | 1400×560, 24-bit PNG, no alpha |
 
-Screenshots show the current installed extension. Player footage is original and generated locally. Optional comparison/controls are enabled for the demo; all overlays remain hidden by default in a new installation. The popup screenshot is a presentation layout containing an unaltered capture of the actual popup. No website artwork, user history or device report is included. Do not upload `popup-ui.png`, which is a supporting capture rather than a store-sized screenshot.
+Image 01 compares matching decoded source and actual Anime4K Quality output from *Hero*: © 2018 Blender Foundation, Daniel Martínez Lara, CC BY 4.0, cropped, resized and enhanced. Keep its visible credit and [full attribution](docs/media/ATTRIBUTIONS.md). Other screenshots show the current installed extension on an isolated local demonstration website. All player tools remain hidden by default in a new installation. The popup overview contains an unaltered capture of the actual popup; `popup-ui.png` is supporting artwork, not a store-sized screenshot. No user history or device report is included.
+
+The [media gallery](docs/media/README.md) also provides the showcase MP4, English captions and additional comparison images. Repository artwork updates do not update the live store listing automatically; the publisher uploads chosen assets in the store dashboard.
 
 ## Permission explanations — copy each into its field
 
@@ -144,7 +146,7 @@ Use Chrome 121+ with a supported graphics context. No login is required. The sup
 | 0.3.1 | 2026-10-13 | GitHub repository link and icon in About; refreshed UI screenshots and corresponding source. | [Current GitHub release](https://github.com/Lorcuz/WebScaly/releases/tag/v0.3.1) |
 | 0.3.0 | 2026-10-13 | Enhancement-only release, opt-in site access, refined interface, About/support, current artwork and corresponding source. | [Earlier GitHub release](https://github.com/Lorcuz/WebScaly/releases/tag/v0.3.0); superseded by 0.3.1 |
 
-The GitHub repository and Chrome Web Store listing are public. This documentation was updated on 14 October 2026 to reflect store publication and recommend the store installation first.
+The GitHub repository and Chrome Web Store listing are public. Repository artwork and documentation were updated on 15 October 2026 with the showcase video and comparison gallery. The Chrome Web Store remains the recommended installation method.
 
 For subsequent releases, verify Add/Allow and revocation in the installed Chrome profile, retain compatibility limits, and keep publisher/contact and any required trader disclosures current. Google and the publisher control review and publication of store updates.
 

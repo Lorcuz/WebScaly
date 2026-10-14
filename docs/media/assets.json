@@ -1,0 +1,104 @@
+{
+  "extensionVersion": "0.3.1",
+  "algorithm": "Anime4K CNN",
+  "quality": "Quality",
+  "scale": 2,
+  "outputHeightLimit": 1080,
+  "credits": "ATTRIBUTIONS.md",
+  "videoEmbed": "https://github.com/user-attachments/assets/56674f4d-dd3f-478f-b941-17387b18f4fa",
+  "files": [
+    {
+      "file": "hero-comparison-1280x800.png",
+      "bytes": 682294,
+      "sha256": "a91713e8aa5daf755ab7489f82dc214d9eaceacb7262012ea2d47f9253a65390",
+      "width": 1280,
+      "height": 800,
+      "alpha": false,
+      "channels": 3
+    },
+    {
+      "file": "hero-comparison-1920x1080.png",
+      "bytes": 1227354,
+      "sha256": "9b5fe43ec23e2834ddac036e74fdbbdde4a58b75fb138a3ecce14cdb6430fe62",
+      "width": 1920,
+      "height": 1080,
+      "alpha": false,
+      "channels": 3
+    },
+    {
+      "file": "hero-detail-1280x800.png",
+      "bytes": 528405,
+      "sha256": "feb663b1491015d89e8a5f8e74dba1a03acca2e6cd510ab146f938dd9debdaf5",
+      "width": 1280,
+      "height": 800,
+      "alpha": false,
+      "channels": 3
+    },
+    {
+      "file": "hero-detail-1920x1080.png",
+      "bytes": 530861,
+      "sha256": "005bff1b6055360688dffada80665587d31d354dc707307b6cca93068d3dda0d",
+      "width": 1920,
+      "height": 1080,
+      "alpha": false,
+      "channels": 3
+    },
+    {
+      "file": "original-anime-comparison-1280x800.png",
+      "bytes": 1901032,
+      "sha256": "2444cf44f68b724cf94a3985ee434fe802af8ff34ddd814a2b5151d11d1204ea",
+      "width": 1280,
+      "height": 800,
+      "alpha": false,
+      "channels": 3
+    },
+    {
+      "file": "original-anime-comparison-1920x1080.png",
+      "bytes": 3875738,
+      "sha256": "57d8cf82f9036cb878a6bd62dce1519984201693fae4771fc1fead50282a751f",
+      "width": 1920,
+      "height": 1080,
+      "alpha": false,
+      "channels": 3
+    },
+    {
+      "file": "original-anime-detail-1280x800.png",
+      "bytes": 730189,
+      "sha256": "7288d5f811dd8ec095c99c42d9966c89b841ea7aa4937d7d672298d51461501e",
+      "width": 1280,
+      "height": 800,
+      "alpha": false,
+      "channels": 3
+    },
+    {
+      "file": "original-anime-detail-1920x1080.png",
+      "bytes": 726071,
+      "sha256": "f94287fb2caa86bd3ede75a6baeb5869cf1663c98b5ee5e5280e61ea706e0cbb",
+      "width": 1920,
+      "height": 1080,
+      "alpha": false,
+      "channels": 3
+    },
+    {
+      "file": "WebScaly-showcase-1080p.mp4",
+      "bytes": 8967496,
+      "sha256": "756a1e6ae42e71e5210e959da046351823c305646e88df4dc4589e2eb7e867dc",
+      "width": 1920,
+      "height": 1080,
+      "durationSeconds": 58,
+      "frameRate": 30,
+      "codec": "H.264",
+      "audio": false
+    },
+    {
+      "file": "WebScaly-showcase.en.vtt",
+      "bytes": 1338,
+      "sha256": "3584f909dad440e976040eec52bae74c0135c7977bca80c9bcae9576e5cc5593"
+    },
+    {
+      "file": "LUCIDE-LICENSE.txt",
+      "bytes": 875,
+      "sha256": "bc88aae354dd8689acf0aef64c4390f46a10256fb7e758314b53f2c56f3241c2"
+    }
+  ]
+}
