@@ -18,7 +18,7 @@ Suggested short accompanying credit:
 
 ## Original illustration
 
-Original AI-generated artwork prepared specifically for this demonstration. A larger image was cropped, downsampled and encoded as a video input. The original showcase and 540p images use 960×540; the newer files named `original-anime-360-*` use 640×360. Both sides of each comparison use that example's same decoded source. The enhanced side is actual WebScaly output. The thumbnail uses the showcase's 540p source.
+Original AI-generated artwork prepared specifically for this demonstration. A larger image was cropped, downsampled and encoded as a video input. The original showcase and 540p images use 960×540; the newer files named `original-anime-360-*` use 640×360. Both sides of each comparison use that example's same decoded source. The enhanced side is actual WebScaly output. The original thumbnail uses the 540p illustration; the new 1920×1080 film thumbnail uses a matched Hero detail and authentic branding.
 
 The illustration is separate from the extension's processing: WebScaly runs its bundled enhancement pipelines locally and does not call an image-generation service.
 
@@ -35,9 +35,20 @@ The shield-check symbol in the video uses [Lucide](https://lucide.dev/license), 
 - Anime4K CNN, Quality, 1080p output-height limit; actual WebGPU processing.
 - Showcase illustration and film still: 960×540 input → 1920×1080 output, 2× output scale.
 - New illustration stills: 640×360 input → 1920×1080 output, Automatic output scale. The source was downsampled and H.264 encoded before either capture; the OFF side was not blurred separately.
-- Moving film excerpt: 960×402 input → 1920×804 output; 24 fps source. The 30 fps delivery duplicates frames without interpolation.
+- Wide Hero held frame: 960×402 input → 1920×804 output, captured from the 24 fps source. The new 44-second film holds matching frames during its wipe. Its 60 fps timeline animates the presentation without interpolating source footage.
+- The new film's paired detail crops use identical coordinates and movement on both sides: 760×510 for Hero and 680×460 for the 360p illustration. The original image layouts below retain their separately documented crop dimensions.
 - Original 1920×1080 detail layouts magnify identical 432×304 crops to 864×608. The new 1000×1340 layouts magnify 304×144 crops to 912×432. Both use equal pixel scaling on each side.
 - New 1280×800 store detail layouts magnify identical 280×240 crops to 588×504 on each side.
 - No extra editor sharpening or synthetic detail was added to enhanced output. Cropping and presentation resizing affect both sides equally.
 - The approval sequence uses the real worker operation on a pregranted isolated local origin. The native Chrome permission bubble is described, not shown as a recorded action.
 - These captures demonstrate output and interface behavior, not universal website compatibility or physical GPU qualification.
+
+## Soundtrack in the new videos
+
+**“Divider” by Chris Zabriskie**, from *Divider* (2011), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). [Source album](https://chriszabriskie.com/divider/) · [Artist's reuse guidance](https://chriszabriskie.com/use/).
+
+Changes: excerpted, crossfaded to the original ending, gain adjusted, normalized and mixed. No endorsement implied.
+
+Interface effects: **Kenney Interface Sounds**, [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/). [Source](https://kenney.nl/assets/interface-sounds). The click_002 and switch_002 sounds were filtered, gain adjusted and synchronized with actual UI state changes.
+
+The new films were edited and prepared with AI assistance using authentic project captures. No generated image fabricates an enhancement result. The AI-generated illustration is visibly disclosed. Retain this attribution, the source/license links and the described changes when redistributing the videos.

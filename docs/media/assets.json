@@ -4,11 +4,11 @@
   "quality": "Quality",
   "outputHeightLimit": 1080,
   "credits": "ATTRIBUTIONS.md",
-  "videoEmbed": "https://github.com/user-attachments/assets/56674f4d-dd3f-478f-b941-17387b18f4fa",
+  "videoEmbed": "https://www.youtube.com/watch?v=MHUyqf4pNGg",
   "youtube": {
-    "url": "https://youtu.be/Oy77dm2rm-s",
+    "url": "https://www.youtube.com/watch?v=MHUyqf4pNGg",
     "visibility": "Unlisted",
-    "thumbnail": "WebScaly-youtube-thumbnail-1280x720.png",
+    "thumbnail": "WebScaly-thumbnail-1920x1080.png",
     "captions": "WebScaly-showcase.en.vtt"
   },
   "files": [
@@ -284,24 +284,70 @@
     },
     {
       "file": "WebScaly-showcase-1080p.mp4",
-      "bytes": 8967496,
-      "sha256": "756a1e6ae42e71e5210e959da046351823c305646e88df4dc4589e2eb7e867dc",
+      "bytes": 6582792,
+      "sha256": "fb42d0a29206914ae55a974d958197776f1d53752b5d204445e7e2c6df850c2d",
       "width": 1920,
       "height": 1080,
-      "durationSeconds": 58,
-      "frameRate": 30,
+      "durationSeconds": 44,
+      "frameRate": 60,
       "codec": "H.264",
-      "audio": false
+      "audio": "AAC stereo, 48 kHz"
     },
     {
       "file": "WebScaly-showcase.en.vtt",
-      "bytes": 1338,
-      "sha256": "3584f909dad440e976040eec52bae74c0135c7977bca80c9bcae9576e5cc5593"
+      "bytes": 1567,
+      "sha256": "c05bab29616718e5ebeb893abe2b937b9b08339874f00eb7ac0597b90b0fc92c"
     },
     {
       "file": "LUCIDE-LICENSE.txt",
       "bytes": 875,
       "sha256": "bc88aae354dd8689acf0aef64c4390f46a10256fb7e758314b53f2c56f3241c2"
+    },
+    {
+      "file": "WebScaly-social-1080p60.mp4",
+      "bytes": 3632969,
+      "sha256": "ed2f395712c7ac31de06926a36cdb6b4c02940f3de944fbc7881f43282fdd35d",
+      "width": 1920,
+      "height": 1080,
+      "durationSeconds": 18,
+      "frameRate": 60,
+      "codec": "H.264",
+      "audio": "AAC stereo, 48 kHz"
+    },
+    {
+      "file": "WebScaly-vertical-1080x1920.mp4",
+      "bytes": 3239019,
+      "sha256": "bf5d6394c8a50ac4fd109855615da995093095bcc2fe09917a9ade6fbbdc8594",
+      "width": 1080,
+      "height": 1920,
+      "durationSeconds": 18,
+      "frameRate": 60,
+      "codec": "H.264",
+      "audio": "AAC stereo, 48 kHz"
+    },
+    {
+      "file": "WebScaly-thumbnail-1920x1080.png",
+      "bytes": 531962,
+      "sha256": "3f9ef5e6793f85f092f1ab6fd79b8a91eff6acdf67034a4731754d09590b9a0c",
+      "width": 1920,
+      "height": 1080
+    }
+  ],
+  "videoVariants": [
+    {
+      "edit": "flagship",
+      "url": "https://www.youtube.com/watch?v=MHUyqf4pNGg",
+      "file": "WebScaly-showcase-1080p.mp4"
+    },
+    {
+      "edit": "social",
+      "url": "https://www.youtube.com/watch?v=FtX5LE-ZEWM",
+      "file": "WebScaly-social-1080p60.mp4"
+    },
+    {
+      "edit": "vertical",
+      "url": "https://www.youtube.com/shorts/R_q0CDxLRJg",
+      "file": "WebScaly-vertical-1080x1920.mp4"
     }
   ]
 }
