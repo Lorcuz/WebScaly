@@ -28,11 +28,13 @@ The settings gear opens the current site's profile. **Controls**, **Compare** an
 
 ## See it in action
 
-The 58-second showcase covers website approval, Anime4K Quality, real OFF/ON comparisons, player tools and site profiles. It has on-screen explanations and no audio.
+The 44-second showcase presents matching OFF/ON frames, actual extension controls, output settings and the three processing methods. It includes licensed music and restrained interface sounds; the explanations also work without sound.
 
-https://github.com/user-attachments/assets/56674f4d-dd3f-478f-b941-17387b18f4fa
+[![Watch WebScaly's 44-second showcase](docs/media/WebScaly-thumbnail-1920x1080.png)](https://www.youtube.com/watch?v=MHUyqf4pNGg)
 
-[Watch on YouTube](https://youtu.be/Oy77dm2rm-s) · [Download the 1080p video](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/WebScaly-showcase-1080p.mp4) · [English captions](https://github.com/Lorcuz/WebScaly/blob/main/docs/media/WebScaly-showcase.en.vtt) · [Comparison gallery and full-size images](https://github.com/Lorcuz/WebScaly/blob/main/docs/media/README.md)
+[Watch on YouTube](https://www.youtube.com/watch?v=MHUyqf4pNGg) · [Download the 1080p video](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/WebScaly-showcase-1080p.mp4) · [English captions](docs/media/WebScaly-showcase.en.vtt) · [All video formats and comparison gallery](docs/media/README.md)
+
+Comparisons hold matching captured frames and use equal crops and enlargement. The 60 fps presentation animates the graphics; it is not an extension frame-rate benchmark. The illustration is original AI-generated demonstration artwork, and the output is actual WebScaly processing. [Video, music and image credits](docs/media/ATTRIBUTIONS.md).
 
 ### Illustration — 360p source
 
