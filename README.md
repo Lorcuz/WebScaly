@@ -32,7 +32,7 @@ The 44-second showcase presents matching OFF/ON frames, actual extension control
 
 [![Watch WebScaly's 44-second showcase](docs/media/WebScaly-thumbnail-1920x1080.png)](https://github.com/user-attachments/assets/98b240c8-0479-4f31-a400-3e998706db03)
 
-[Watch on YouTube](https://www.youtube.com/watch?v=MHUyqf4pNGg) · [Download the 1080p video](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/WebScaly-showcase-1080p.mp4) · [English captions](docs/media/WebScaly-showcase.en.vtt) · [All video formats and comparison gallery](docs/media/README.md)
+[Download the 1080p video](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/WebScaly-showcase-1080p.mp4) · [English captions](docs/media/WebScaly-showcase.en.vtt) · [All video formats and comparison gallery](docs/media/README.md)
 
 Comparisons hold matching captured frames and use equal crops and enlargement. The 60 fps presentation animates the graphics; it is not an extension frame-rate benchmark. The illustration is original AI-generated demonstration artwork, and the output is actual WebScaly processing. [Video, music and image credits](docs/media/ATTRIBUTIONS.md).
 
