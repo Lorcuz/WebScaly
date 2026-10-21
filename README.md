@@ -1,3 +1,11 @@
+
+
+
+
+
+
+
+
 <p align="center"><img src="public/icons/128.png" width="72" height="72" alt="WebScaly logo"></p>
 
 <h1 align="center">WebScaly</h1>
@@ -30,7 +38,7 @@ The settings gear opens the current site's profile. **Controls**, **Compare** an
 
 The 44-second showcase presents matching OFF/ON frames, actual extension controls, output settings and the three processing methods. It includes licensed music and restrained interface sounds; the explanations also work without sound.
 
-[![Watch WebScaly's 44-second showcase](docs/media/WebScaly-thumbnail-1920x1080.png)](https://github.com/user-attachments/assets/98b240c8-0479-4f31-a400-3e998706db03)
+[![Watch WebScaly's 44-second showcase](docs/media/WebScaly-thumbnail-1920x1080.png)]([https://github.com/user-attachments/assets/98b240c8-0479-4f31-a400-3e998706db03](https://github.com/user-attachments/assets/16f0a7b0-f573-4dd9-93d6-19dd66b5409c))
 
 [Download the 1080p video](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/WebScaly-showcase-1080p.mp4) · [English captions](docs/media/WebScaly-showcase.en.vtt) · [All video formats and comparison gallery](docs/media/README.md)
 
