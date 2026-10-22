@@ -4,9 +4,7 @@
 
 ## Presentation film — WebScaly 0.4.0
 
-[![Play the WebScaly 0.4.0 presentation film (720p): the same video, original and enhanced](webscaly-presentation-thumbnail.png)](https://github.com/Lorcuz/WebScaly/raw/main/docs/media/webscaly-presentation-720p.mp4)
-
-**▶ Click the picture to play the film** (720p, plays in your browser).
+https://github.com/user-attachments/assets/3110377b-ab5e-4bab-959b-4a9ba016e71f
 
 | File | Details |
 | --- | --- |

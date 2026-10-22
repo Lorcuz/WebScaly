@@ -22,9 +22,7 @@ For the design and its limits, see [rendering, permissions and player integratio
 
 ## See it in action
 
-[![Play the WebScaly 0.4.0 presentation film (720p): the same video, original and enhanced](docs/media/webscaly-presentation-thumbnail.png)](https://github.com/Lorcuz/WebScaly/raw/main/docs/media/webscaly-presentation-720p.mp4)
-
-**▶ Click the picture to play the film** (720p, plays in your browser).
+https://github.com/user-attachments/assets/3110377b-ab5e-4bab-959b-4a9ba016e71f
 
 A one-minute tour of WebScaly 0.4.0: allowing a website, choosing an engine, comparing in the player, each engine on footage that suits it, tuning the picture, and the smart and private defaults. [Download the MP4 (720p, 9 MB)](docs/media/webscaly-presentation-720p.mp4) · English captions ([SRT](docs/media/webscaly-presentation.en.srt) · [VTT](docs/media/webscaly-presentation.en.vtt)) · [All demonstrations](docs/media/README.md) · [Credits](docs/media/ATTRIBUTIONS.md)
 
