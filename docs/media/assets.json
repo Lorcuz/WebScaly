@@ -36,11 +36,56 @@
         "height": 720
       }
     ],
-    "youtube": {
-      "url": "https://www.youtube.com/watch?v=ZoKox_mrUsw",
-      "visibility": "Unlisted",
-      "captions": "webscaly-presentation.en.srt"
-    }
+    "comparisons": [
+      {
+        "file": "compare-rice-drying-1920.png",
+        "bytes": 2097837,
+        "sha256": "a1d19b8ba087ebe37b281f2056e55d746e296aea940a6d3548df93269c772d49",
+        "width": 1920,
+        "height": 864,
+        "description": "Real-life, FSRCNNX Quality, 360p source, split frame"
+      },
+      {
+        "file": "detail-rice-drying-1920.png",
+        "bytes": 857305,
+        "sha256": "85ba677f1e58d573f0cb1285bd582095a5cb7c053186a41c12c9203311226d6d",
+        "width": 1920,
+        "height": 540,
+        "description": "Real-life, FSRCNNX Quality, matched 480x270 regions enlarged 2x"
+      },
+      {
+        "file": "compare-grass-seed-heads-1920.png",
+        "bytes": 1463615,
+        "sha256": "10e7f5f6b244cc0b0bf3ae5819e11cff32bdae02799b604bb7bd21450c78e7c7",
+        "width": 1920,
+        "height": 864,
+        "description": "Real-life, FSRCNNX Quality, 360p source, split frame"
+      },
+      {
+        "file": "compare-hero-city-1920.png",
+        "bytes": 2113897,
+        "sha256": "34f7cf76690d565c2fa6ffdc69b9eb28e08b36fe9f9c07193f734cb0f095f1c5",
+        "width": 1920,
+        "height": 1080,
+        "description": "Hero, Anime4K Quality, 540p source, split frame"
+      },
+      {
+        "file": "compare-hero-crowd-1920.png",
+        "bytes": 1548307,
+        "sha256": "afb115a76a6f56aca1bfd1f6a470d09ba089b6adb93633d78861e7476de808e9",
+        "width": 1920,
+        "height": 1080,
+        "description": "Hero, Anime4K Quality, 540p source, split frame"
+      },
+      {
+        "file": "detail-hero-crowd-1920.png",
+        "bytes": 565322,
+        "sha256": "81d960964aba513bc5a2bd8456420918fa519ab14add68389ed08b982686591f",
+        "width": 1920,
+        "height": 540,
+        "description": "Hero, Anime4K Quality, matched 480x270 regions enlarged 2x"
+      }
+    ]
   },
   "extensionVersion": "0.3.1",
   "algorithm": "Anime4K CNN",

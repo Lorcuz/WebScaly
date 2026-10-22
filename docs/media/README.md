@@ -4,9 +4,7 @@
 
 ## Presentation film — WebScaly 0.4.0
 
-[![WebScaly 0.4.0 presentation film](webscaly-presentation-thumbnail.png)](https://www.youtube.com/watch?v=ZoKox_mrUsw)
-
-Also on YouTube in 1080p60 (unlisted): https://www.youtube.com/watch?v=ZoKox_mrUsw
+<video src="https://github.com/Lorcuz/WebScaly/raw/main/docs/media/webscaly-presentation-720p.mp4" poster="https://github.com/Lorcuz/WebScaly/raw/main/docs/media/webscaly-presentation-thumbnail.png" controls muted playsinline width="100%"></video>
 
 | File | Details |
 | --- | --- |
@@ -39,6 +37,19 @@ How it was made:
 - Frame rates, sizes and GPU times on screen are real readings from the capture machine, not a benchmark. Results depend on the video, browser and graphics card.
 
 Hero © 2018 Blender Foundation, Daniel Martínez Lara, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). “4K Nature Cinematography” by Aliioss Film, [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/). Earth from the International Space Station: NASA (public domain). Music: “Divider” by Chris Zabriskie, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Full credits in [ATTRIBUTIONS.md](ATTRIBUTIONS.md). [File inventory and SHA-256 checksums](assets.json).
+
+## Before and after — WebScaly 0.4.0
+
+Both engines were set to Quality. The left half of each picture is the original video with enhancement off; the right half is the same decoded frame with enhancement on. Detail images show identical regions enlarged 2×. Nothing is sharpened or retouched in editing.
+
+| Footage | Engine and source | Images |
+| --- | --- | --- |
+| Real life: rice drying | FSRCNNX · 360p → 1080p | [full frame](compare-rice-drying-1920.png) · [matched detail](detail-rice-drying-1920.png) |
+| Real life: grass seed heads | FSRCNNX · 360p → 1080p | [full frame](compare-grass-seed-heads-1920.png) |
+| Animation: Hero city | Anime4K · 540p → 1080p | [full frame](compare-hero-city-1920.png) |
+| Animation: Hero crowd | Anime4K · 540p → 1080p | [full frame](compare-hero-crowd-1920.png) · [matched detail](detail-hero-crowd-1920.png) |
+
+Real-life frames: “4K Nature Cinematography” by Aliioss Film, CC BY 3.0 (cropped from its letterbox, downscaled to 360p and enhanced). Animation frames: Hero © 2018 Blender Foundation, Daniel Martínez Lara, CC BY 4.0 (downscaled to 540p and enhanced). No endorsement implied.
 
 ## Earlier demonstrations — WebScaly 0.3.1
 

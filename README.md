@@ -18,19 +18,35 @@ WebScaly is a Chrome extension that enhances accessible web video on websites yo
 
 Processing follows decoded frames at their native cadence. WebScaly does not generate intermediate frames or increase the source frame rate.
 
-![WebScaly playing original demonstration footage with optional comparison controls](docs/store/assets/01-player-1280x800.png)
-
-*Actual extension over original procedural footage: 640×360 source, Spatial Detail, Balanced quality, 2× output scale, 35% sharpening and 12% denoise. This is a controlled demonstration, not a benchmark. [Rendering, permissions and player integration](docs/LOCAL_VIDEO_ENHANCEMENT.md) explains the design and its limits.*
+For the design and its limits, see [rendering, permissions and player integration](docs/LOCAL_VIDEO_ENHANCEMENT.md).
 
 ## See it in action
 
-[![WebScaly 0.4.0 presentation film: the same video, original and enhanced](docs/media/webscaly-presentation-thumbnail.png)](https://www.youtube.com/watch?v=ZoKox_mrUsw)
+<video src="https://github.com/Lorcuz/WebScaly/raw/main/docs/media/webscaly-presentation-720p.mp4" poster="https://github.com/Lorcuz/WebScaly/raw/main/docs/media/webscaly-presentation-thumbnail.png" controls muted playsinline width="100%"></video>
 
-A one-minute tour of WebScaly 0.4.0: allowing a website, choosing an engine, comparing in the player, each engine on footage that suits it, tuning the picture, and the smart and private defaults.
+A one-minute tour of WebScaly 0.4.0: allowing a website, choosing an engine, comparing in the player, each engine on footage that suits it, tuning the picture, and the smart and private defaults. [Download the MP4 (720p, 9 MB)](docs/media/webscaly-presentation-720p.mp4) · English captions ([SRT](docs/media/webscaly-presentation.en.srt) · [VTT](docs/media/webscaly-presentation.en.vtt)) · [All demonstrations](docs/media/README.md) · [Credits](docs/media/ATTRIBUTIONS.md)
 
-[Watch on YouTube (1080p60)](https://www.youtube.com/watch?v=ZoKox_mrUsw) · [Download the MP4 (720p, 9 MB)](docs/media/webscaly-presentation-720p.mp4) · English captions ([SRT](docs/media/webscaly-presentation.en.srt) · [VTT](docs/media/webscaly-presentation.en.vtt)) · [All demonstrations](docs/media/README.md) · [Credits](docs/media/ATTRIBUTIONS.md)
+## Before and after
 
-Every enhanced picture and interface state in the film is a capture of the extension itself. Comparisons use the same decoded frame with identical crops and enlargement; nothing is sharpened or dimmed in editing. Hero © 2018 Blender Foundation, Daniel Martínez Lara, CC BY 4.0. Earth from the International Space Station: NASA. “4K Nature Cinematography” by Aliioss Film, CC BY 3.0. Music: “Divider” by Chris Zabriskie, CC BY 4.0.
+All pictures below are WebScaly's own output, captured from a 360p or 540p stream played in Chrome and enhanced to 1080p. The left half is the original video with enhancement off; the right half is the same decoded frame with enhancement on. Nothing is sharpened or retouched afterwards.
+
+### Real-life footage — FSRCNNX
+
+![Rice drying on a tarpaulin: original video on the left, FSRCNNX output on the right](docs/media/compare-rice-drying-1920.png)
+
+![Identical regions of the same frame, enlarged 2×: original on the left, FSRCNNX on the right](docs/media/detail-rice-drying-1920.png)
+
+![Grass seed heads in low sun: original video on the left, FSRCNNX output on the right](docs/media/compare-grass-seed-heads-1920.png)
+
+### Animation — Anime4K
+
+![Hero city: original video on the left, Anime4K output on the right](docs/media/compare-hero-city-1920.png)
+
+![Hero crowd scene: original video on the left, Anime4K output on the right](docs/media/compare-hero-crowd-1920.png)
+
+![Identical regions of the same frame, enlarged 2×: original on the left, Anime4K on the right](docs/media/detail-hero-crowd-1920.png)
+
+Both engines were set to Quality. Real-life frames come from the 360p encode of "4K Nature Cinematography" by Aliioss Film ([CC BY 3.0](https://creativecommons.org/licenses/by/3.0/)); animation frames come from the 540p encode of Hero, © 2018 Blender Foundation, Daniel Martínez Lara ([CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)). Frames are cropped, resized and enhanced, and no endorsement is implied. Enhancement changes the appearance of a stream; it does not recover the original master, and results depend on the source and your graphics hardware. [More comparisons and full credits](docs/media/README.md).
 
 ## Privacy
 

@@ -22,6 +22,10 @@ Suggested short accompanying credit:
 
 **“Ultra High Definition (4K) View of Planet Earth”, NASA Johnson Space Center** (2016), filmed from the International Space Station; public domain. [Wikimedia Commons](https://commons.wikimedia.org/wiki/File:Ultra_High_Definition_(4K)_View_of_Planet_Earth.webm) · [original upload](https://www.youtube.com/watch?v=oFDeNcu3mnc). Used for the Spatial Detail showcase. Changes: an 8-second excerpt, cropped to 16:9, downscaled and encoded as a 640×360 stream, played in a browser and enhanced with WebScaly. NASA does not endorse WebScaly.
 
+## 0.4.0 before-and-after images
+
+`compare-*-1920.png` and `detail-*-1920.png` show frames from the Aliioss Film nature footage (CC BY 3.0) and from Hero (© 2018 Blender Foundation, Daniel Martínez Lara, CC BY 4.0). Changes: frames cropped (and, for the nature footage, cropped from the letterbox), downscaled to a 360p or 540p stream, played in Chromium and enhanced with WebScaly (FSRCNNX and Anime4K, Quality). Each image pairs the native frame with the enhanced output of the same decoded frame; detail images enlarge identical regions 2×. Labels and the footer were added in presentation. No endorsement implied.
+
 ## Music
 
 **“Divider” by Chris Zabriskie**, from *Divider* (2011), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). [Source album](https://chriszabriskie.com/divider/) · [Artist's reuse guidance](https://chriszabriskie.com/use/).
