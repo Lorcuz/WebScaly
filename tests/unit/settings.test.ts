@@ -1,8 +1,11 @@
 import { describe, expect, it } from "vitest";
 import {
+  BUILTIN_PRESETS,
   DEFAULTS,
   EMPTY,
   hostPattern,
+  mergeConfiguration,
+  pictureOf,
   matchesSite,
   normalizeConfiguration,
   normalizeSettings,
@@ -112,5 +115,70 @@ describe("settings and import", () => {
         ],
       }).sites,
     ).toHaveLength(1);
+  });
+});
+describe("0.4 settings model", () => {
+  it("adds picture, colour and behaviour fields with safe defaults to older profiles", () => {
+    const s = normalizeSettings({ algorithm: "anime4k", strength: 0.5 });
+    expect(s).toMatchObject({
+      algorithm: "anime4k",
+      strength: 0.5,
+      deband: 0,
+      vibrance: 0,
+      contrast: 0,
+      brightness: 0,
+      skipAbove: 0,
+      adaptive: true,
+    });
+  });
+  it("clamps colour to ±1 and only accepts known skip levels", () => {
+    const s = normalizeSettings({ vibrance: 4, contrast: -9, brightness: "1", skipAbove: 900, deband: 2 });
+    expect([s.vibrance, s.contrast, s.brightness, s.skipAbove, s.deband]).toEqual([1, -1, 0, 0, 1]);
+    expect(normalizeSettings({ skipAbove: 1080 }).skipAbove).toBe(1080);
+  });
+  it("normalizes device preferences and keeps them out of picture presets", () => {
+    const c = normalizeConfiguration({ version: 2, preferences: { paused: true, batterySaver: "yes" } });
+    expect(c.preferences).toEqual({ paused: true, batterySaver: false, welcomed: false });
+    expect(normalizeConfiguration({ version: 2 }).preferences.paused).toBe(false);
+    const picture = pictureOf({ ...DEFAULTS, hud: true, enabled: false, algorithm: "fsrcnnx" });
+    expect(picture).not.toHaveProperty("hud");
+    expect(picture).not.toHaveProperty("enabled");
+    expect(picture.algorithm).toBe("fsrcnnx");
+  });
+  it("ships complete built-in presets that survive normalization", () => {
+    expect(BUILTIN_PRESETS.map((p) => p.id)).toEqual(["anime", "live", "rescue", "battery"]);
+    for (const preset of BUILTIN_PRESETS)
+      expect(normalizeSettings({ ...DEFAULTS, ...preset.picture })).toMatchObject(preset.picture);
+  });
+  it("merges imports without dropping existing sites and lets the file win per origin", () => {
+    const current = normalizeConfiguration({
+      ...EMPTY,
+      sites: [
+        { origin: "https://a.test", subdomains: false, settings: { ...DEFAULTS, strength: 0.1 } },
+        { origin: "https://keep.test", subdomains: false, settings: DEFAULTS },
+      ],
+      presets: [{ name: "Mine", settings: DEFAULTS }],
+      preferences: { paused: true, batterySaver: true, welcomed: true },
+    });
+    const incoming = normalizeConfiguration({
+      ...EMPTY,
+      sites: [
+        { origin: "https://a.test", subdomains: false, settings: { ...DEFAULTS, strength: 0.9 } },
+        { origin: "https://new.test", subdomains: false, settings: DEFAULTS },
+      ],
+      presets: [{ name: "Theirs", settings: DEFAULTS }],
+    });
+    const merged = mergeConfiguration(current, incoming);
+    expect(merged.sites.map((s) => s.origin)).toEqual(["https://a.test", "https://keep.test", "https://new.test"]);
+    expect(merged.sites[0].settings.strength).toBe(0.9);
+    expect(merged.presets.map((p) => p.name)).toEqual(["Mine", "Theirs"]);
+    expect(merged.preferences.paused).toBe(true);
+  });
+  it("deduplicates and trims preset names", () => {
+    const c = normalizeConfiguration({
+      version: 2,
+      presets: [{ name: "  Night  ", settings: DEFAULTS }, { name: "Night", settings: DEFAULTS }, { name: " ", settings: DEFAULTS }],
+    });
+    expect(c.presets.map((p) => p.name)).toEqual(["Night"]);
   });
 });

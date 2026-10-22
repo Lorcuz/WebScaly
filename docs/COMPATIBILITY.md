@@ -1,6 +1,8 @@
-# Compatibility validation for 0.3.0
+# Compatibility validation
 
-The 0.3.1 update adds an About-page GitHub link and refreshed artwork. Player rendering and access control are unchanged; the player results below were recorded for 0.3.0.
+0.4.0 changes the rendering pipeline, the overlay and the interface; access control is unchanged. The controlled browser checks below were re-run on 0.4.0 (native video, JW-style, Video.js, Plyr, HLS, DASH, frames, shadow DOM, fallbacks, compatibility player). On 21 October 2026 the anonymous live check was repeated on 0.4.0 for YouTube, Vimeo, Twitch and Dailymotion with the same outcomes as below: Dailymotion enhanced sustained playback at native rate with WebGPU (512×288 → 1600×900, about 30 fps) and its toolbar and comparison drag passed; YouTube engaged the WebGPU renderer on decoded frames but paused anonymous playback; Vimeo and Twitch produced no decoded frames in the test browser, which most likely lacks the proprietary codecs those sites serve. AnimeWorld and AnimeUnity/Vixcloud were not repeated for 0.4.0.
+
+Plain `http://` websites are not secure contexts, so browsers do not offer WebGPU there; WebScaly uses its WebGL Spatial Detail fallback on such pages. A browser test covers this case.
 
 Checks completed on 12 October 2026. Results apply to the tested pages and local browser; they do not certify every page, Chrome version or physical GPU. Anonymous live checks use an isolated profile with explicit test-only grants. The shipped manifest grants no websites by default.
 

@@ -8,7 +8,7 @@ I maintain the project. This article explains the design decisions behind its re
 
 ## Three enhancement options
 
-Spatial Detail provides lightweight sharpening and denoise. Anime4K uses neural shaders intended for animation. FSRCNNX provides learned 2× upscaling. Quality, output size and per-site profiles let users choose an appropriate workload.
+Spatial Detail is the lightest option. Anime4K uses neural shaders intended for animation. FSRCNNX provides learned 2× upscaling. Every engine is followed by a display-size scaler and adaptive sharpening; denoise, deband and colour controls apply to all three. Quality, output size and per-site profiles let users choose an appropriate workload.
 
 These methods change the appearance of the available frames. They cannot recover a missing original master, guarantee better results for every video, or remove the browser's media protections. Excessive sharpening can accentuate compression artifacts; larger output sizes require more GPU work.
 
@@ -16,11 +16,11 @@ WebScaly processes decoded frames at their native cadence. It does not generate 
 
 ## A real comparison
 
-![Original illustration: enhancement OFF on the left and Anime4K Quality ON on the right](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/store/assets/01-player-1280x800.png)
+![WebScaly's actual comparison controls over original procedural demonstration footage](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/store/assets/01-player-1280x800.png)
 
-The comparison uses the same decoded frame of the original demonstration illustration, prepared as a 640×360 video. Anime4K Quality with Automatic output scale and a 1080p height limit produces 1920×1080 output. The left side is native playback; the right side is the installed extension's actual WebGPU output. Identical detail crops receive equal enlargement, with no additional sharpening in the editor. The gallery also contains the original 540p demonstration and a separate 540p Hero film comparison.
+The screenshot shows the installed extension processing original procedural footage: a 640×360 source, FSRCNNX, Quality, 2× output scale, 35% sharpening and 12% denoise. The built-in comparison places the original and enhanced portions within one player, and the optional HUD shows the live size, frame rates and GPU time.
 
-The [comparison gallery](media/README.md) includes matched eye/hair detail crops, the showcase video and [capture details and credits](media/ATTRIBUTIONS.md). Additional comparisons use the CC BY 4.0 open movie *Hero*. These examples demonstrate picture changes, not a performance benchmark or a promise of equivalent improvement for every video. Optional player tools remain hidden by default.
+This is a controlled interface demonstration, not a benchmark or a promise of equivalent improvement on natural footage. Its capture procedure is available in [the source](https://github.com/Lorcuz/WebScaly/blob/main/scripts/store-capture.mjs). Player tools are hidden by default and were explicitly enabled for this demonstration.
 
 ## Rendering follows the decoded video
 
@@ -32,7 +32,7 @@ Video discovery accounts for replaced elements, accessible embedded frames and o
 
 ## Website access is an ongoing decision
 
-The manifest uses storage, scripting and activeTab, with optional HTTP and HTTPS host permissions. No website is approved by default. Storage keeps settings locally; scripting activates the content code on approved websites; activeTab supplies temporary context when the user opens the extension.
+The manifest uses storage, scripting and activeTab, with optional HTTP and HTTPS host permissions. No website is approved by default. Storage keeps settings locally; scripting activates the content code on approved websites; activeTab supplies temporary context when the user opens the extension or uses one of its keyboard shortcuts.
 
 The approval operation is owned by the Manifest V3 worker. It starts the Chrome permission request before asynchronous work, records the pending intent in session storage, and completes activation after approval even if Chrome closes the popup. Denial must not create an approved site.
 

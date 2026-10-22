@@ -7,6 +7,8 @@ import {
   type Page,
 } from "@playwright/test";
 import { cp, mkdir, mkdtemp, readFile, writeFile } from "node:fs/promises";
+import { createServer } from "node:http";
+import type { AddressInfo } from "node:net";
 import { resolve } from "node:path";
 import { DEFAULTS, EMPTY, type Settings } from "../../src/shared/settings";
 import sharp from "sharp";
@@ -52,7 +54,11 @@ test.beforeAll(async () => {
     await readFile(resolve(directory, "manifest.json"), "utf8"),
   );
   // Static loopback grants exercise injected extension code. Native approval callbacks are unit-tested separately.
-  m.host_permissions = ["http://127.0.0.1/*", "http://localhost/*"];
+  m.host_permissions = [
+    "http://127.0.0.1/*",
+    "http://localhost/*",
+    "http://plain.webscaly.test/*",
+  ];
   await writeFile(resolve(directory, "manifest.json"), JSON.stringify(m));
   context = await chromium.launchPersistentContext(
     await mkdtemp(resolve("test-results/extension-profile-")),
@@ -63,6 +69,8 @@ test.beforeAll(async () => {
       args: [
         `--disable-extensions-except=${directory}`,
         `--load-extension=${directory}`,
+        // A non-loopback name, so the page is not a secure context.
+        "--host-resolver-rules=MAP plain.webscaly.test 127.0.0.1",
       ],
     },
   );
@@ -98,9 +106,7 @@ test("settings persist, revocation removes processing immediately and after refr
     "active",
   );
   await settings.getByLabel("Editing profile").selectOption(origin);
-  await settings
-    .getByLabel("Algorithm", { exact: true })
-    .selectOption("anime4k");
+  await settings.getByRole("radio", { name: /^Anime4K/ }).check();
   await expect
     .poll(() =>
       worker.evaluate(
@@ -114,13 +120,14 @@ test("settings persist, revocation removes processing immediately and after refr
     .toBe("anime4k");
   await settings.reload();
   await settings.getByLabel("Editing profile").selectOption(origin);
-  await expect(settings.getByLabel("Algorithm", { exact: true })).toHaveValue(
-    "anime4k",
-  );
-  await settings.getByRole("button", { name: "Site Profiles" }).click();
+  await expect(
+    settings.getByRole("radio", { name: /^Anime4K/ }),
+  ).toBeChecked();
+  await settings.getByRole("button", { name: "Websites" }).click();
   await settings
     .getByRole("button", { name: "Remove 127.0.0.1", exact: true })
     .click();
+  await settings.getByRole("button", { name: "Remove website", exact: true }).click();
   await expect(page.locator("webscaly-player")).toHaveCount(0);
   expect(
     await page.locator("video").evaluate((v: HTMLVideoElement) => v.paused),
@@ -135,6 +142,35 @@ test("settings persist, revocation removes processing immediately and after refr
   );
   await page.close();
   await settings.close();
+});
+test("controls frames never post to a document that is not the extension page", async () => {
+  await configure({ ...DEFAULTS, controls: true, comparison: false });
+  const page = await context.newPage();
+  const problems: string[] = [];
+  page.on("console", (m) => {
+    if (m.type() === "error" || m.type() === "warning") problems.push(m.text());
+  });
+  page.on("pageerror", (e) => problems.push(e.message));
+  await page.goto(url);
+  await page.evaluate(() => window.fixture.create(30, 640, false));
+  await expect(page.locator("webscaly-player")).toHaveAttribute("data-state", "active");
+  const iframe = page.locator('iframe[title="WebScaly video controls"]');
+  await expect(iframe).toBeVisible();
+  // Settings changes, a second frame appearing, and a container move that
+  // reloads the frame: each used to post while the frame held about:blank.
+  await configure({ ...DEFAULTS, controls: true, comparison: true });
+  await expect(page.locator('iframe[title="WebScaly comparison"]')).toBeVisible();
+  await page.evaluate(() => {
+    const frame = document.querySelector('iframe[title="WebScaly video controls"]')!;
+    const holder = document.createElement("div");
+    document.body.append(holder);
+    holder.append(frame);
+  });
+  await configure({ ...DEFAULTS, controls: true, comparison: false, hud: true });
+  await page.waitForTimeout(1200);
+  await expect(page.locator("webscaly-player output")).toBeVisible();
+  expect(problems.filter((t) => /postMessage|target origin|origin/i.test(t))).toEqual([]);
+  await page.close();
 });
 test("isolated controls and slider preserve playback and capture-phase native handlers", async () => {
   await configure({ ...DEFAULTS, controls: true, comparison: true });
@@ -161,15 +197,12 @@ test("isolated controls and slider preserve playback and capture-phase native ha
   ).toBeVisible();
   await controls.getByRole("button", { name: "HUD", exact: true }).click();
   await expect(page.locator("webscaly-player output")).toBeVisible();
+  // The controls frame is sized to its toolbar, so no transparent band covers the video.
   const frameBox = (await page
     .locator('iframe[title="WebScaly video controls"]')
     .boundingBox())!;
-  const blank = await sharp(
-    await page.screenshot({
-      clip: { x: frameBox.x + 10, y: frameBox.y + 75, width: 15, height: 15 },
-    }),
-  ).stats();
-  expect(blank.channels[0].mean).toBeLessThan(120);
+  expect(frameBox.height).toBeLessThan(60);
+  expect(frameBox.width).toBeLessThan(600);
   const slider = compare.getByRole("slider");
   await slider.focus();
   await slider.press("End");
@@ -466,9 +499,9 @@ test("popup is compact, options are keyboard accessible and old generation optio
     scroll: e.scrollHeight > e.clientHeight,
   }));
   expect(size.width).toBe(360);
-  expect(size.height).toBeLessThanOrEqual(560);
+  expect(size.height).toBeLessThanOrEqual(600);
   expect(size.scroll).toBe(false);
-  await page.getByRole("button", { name: "Advanced settings" }).focus();
+  await page.getByRole("button", { name: "Settings" }).focus();
   await expect(page.getByRole("tooltip")).toHaveCount(0);
   await page
     .locator("main.popup")
@@ -483,12 +516,12 @@ test("popup is compact, options are keyboard accessible and old generation optio
     path: "test-results/ui/settings.png",
     fullPage: true,
   });
-  await page.getByLabel("Algorithm", { exact: true }).focus();
+  await page.getByRole("radio", { name: /^Spatial Detail/ }).focus();
   await expect(page.getByRole("tooltip")).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(page.getByRole("tooltip")).toHaveCount(0);
   await options(page);
-  for (const section of ["Site Profiles", "Advanced", "Diagnostics", "About"]) {
+  for (const section of ["Websites", "Presets", "Behavior", "Diagnostics", "About"]) {
     await page.getByRole("button", { name: section }).click();
     await expect(
       page.getByRole("heading", { name: section, exact: true }),
@@ -503,20 +536,20 @@ test("popup is compact, options are keyboard accessible and old generation optio
 
 test("technical help waits for hover, stays readable and dismisses with Escape", async () => {
   const page = await options();
-  const algorithm = page.getByLabel("Algorithm", { exact: true });
+  const algorithm = page.getByRole("radiogroup", { name: "Algorithm" });
   await algorithm.hover();
   await page.waitForTimeout(350);
   await expect(page.getByRole("tooltip")).toHaveCount(0);
   const tip = page.getByRole("tooltip");
   await expect(tip).toBeVisible();
   const box = await tip.boundingBox();
-  expect(box!.width).toBeLessThanOrEqual(228);
+  expect(box!.width).toBeLessThanOrEqual(240);
   expect(box!.height).toBeLessThan(80);
   await tip.hover();
   await expect(tip).toBeVisible();
   await page.keyboard.press("Escape");
   await expect(tip).toHaveCount(0);
-  await page.getByRole("button", { name: "Site Profiles" }).hover();
+  await page.getByRole("button", { name: "Websites" }).hover();
   await page.waitForTimeout(800);
   await expect(tip).toHaveCount(0);
   await page.close();
@@ -533,7 +566,7 @@ test("About keeps donations opt-in and contacts local until followed", async () 
   await expect(
     page.getByRole("link", { name: /notlorcuz@gmail.com/ }),
   ).toHaveAttribute("href", "mailto:notlorcuz@gmail.com");
-  await expect(page.getByRole("link", { name: /Lorcuz/ })).toHaveAttribute(
+  await expect(page.getByRole("link", { name: /Discord/ })).toHaveAttribute(
     "href",
     "https://discord.com/users/754255237195235369",
   );
@@ -582,7 +615,7 @@ test("About keeps donations opt-in and contacts local until followed", async () 
   await expect(
     page.getByRole("img", { name: "PayPal donation QR code" }),
   ).toHaveCount(0);
-  await page.getByRole("button", { name: "Advanced", exact: true }).click();
+  await page.getByRole("button", { name: "Behavior", exact: true }).click();
   await page.getByRole("button", { name: "About", exact: true }).click();
   await expect(
     page.getByRole("button", { name: "Support WebScaly" }),
@@ -596,10 +629,12 @@ test("settings remain usable on small screens and with reduced motion", async ()
   await page.setViewportSize({ width: 390, height: 844 });
   await page.emulateMedia({ reducedMotion: "reduce" });
   for (const section of [
-    "Video Enhancement",
-    "Site Profiles",
-    "Advanced",
+    "Enhancement",
+    "Websites",
+    "Presets",
+    "Behavior",
     "Diagnostics",
+    "Getting started",
     "About",
   ]) {
     await page.getByRole("button", { name: section, exact: true }).click();
@@ -610,7 +645,7 @@ test("settings remain usable on small screens and with reduced motion", async ()
     ).toBe(true);
     expect(
       await page
-        .locator(".settings-content")
+        .locator(".page")
         .evaluate((e) => getComputedStyle(e).animationName),
     ).toBe("none");
   }
@@ -724,7 +759,7 @@ test("approved and embedded-access popup states fit, and full errors remain avai
   const page = await context.newPage();
   await page.goto(`chrome-extension://${id}/popup.html?tab=${tabId}`);
   await expect(
-    page.getByLabel("Embedded player", { exact: true }),
+    page.getByRole("button", { name: "Allow localhost", exact: true }),
   ).toBeVisible();
   const fits = async () => {
     const size = await page.locator("main.popup").evaluate((e) => ({
@@ -733,7 +768,7 @@ test("approved and embedded-access popup states fit, and full errors remain avai
       scroll: e.scrollHeight > e.clientHeight,
     }));
     expect(size.width).toBe(360);
-    expect(size.height).toBeLessThanOrEqual(560);
+    expect(size.height).toBeLessThanOrEqual(600);
     expect(size.scroll).toBe(false);
   };
   await fits();
@@ -764,7 +799,8 @@ test("approved and embedded-access popup states fit, and full errors remain avai
   await page
     .getByRole("button", { name: "Remove website access", exact: true })
     .click();
-  await expect(page.getByRole("alert")).toContainText("See advanced settings");
+  await page.getByRole("button", { name: "Remove access", exact: true }).click();
+  await expect(page.getByRole("alert")).toContainText("Settings → Diagnostics");
   await fits();
   await page.goto(`chrome-extension://${id}/options.html?tab=${tabId}`);
   await page.getByRole("button", { name: "Diagnostics", exact: false }).click();
@@ -806,5 +842,120 @@ test("imports grant no access and isolated UI frames cannot manage website permi
     }),
   );
   expect(rejected.ok).toBe(false);
+  await page.close();
+});
+test("sharp sources are skipped, and global pause clears and restores processing", async () => {
+  await configure({ ...DEFAULTS, skipAbove: 720 });
+  const page = await context.newPage();
+  await page.goto(url);
+  await page.evaluate(() => window.fixture.create(30, 1920));
+  await expect(page.locator("webscaly-player")).toHaveAttribute("data-state", "skipped");
+  await configure();
+  await expect(page.locator("webscaly-player")).toHaveAttribute("data-state", "active");
+  const tabId = await worker.evaluate(
+    async (u) => (await chrome.tabs.query({})).find((t) => t.url === u)!.id!,
+    page.url(),
+  );
+  await expect
+    .poll(() => worker.evaluate((id) => chrome.action.getBadgeText({ tabId: id }), tabId))
+    .toBe("ON");
+  await worker.evaluate(async () => {
+    const { webscalyConfig: c } = (await chrome.storage.local.get("webscalyConfig")) as any;
+    await chrome.storage.local.set({
+      webscalyConfig: { ...c, preferences: { ...c.preferences, paused: true } },
+    });
+  });
+  await expect(page.locator("webscaly-player")).toHaveCount(0);
+  expect(await page.locator("video").evaluate((v: HTMLVideoElement) => v.paused)).toBe(false);
+  await expect
+    .poll(() => worker.evaluate((id) => chrome.action.getBadgeText({ tabId: id }), tabId))
+    .toBe("II");
+  await configure();
+  await expect(page.locator("webscaly-player")).toHaveAttribute("data-state", "active");
+  await page.close();
+});
+test("the toolbar saves an enhanced snapshot without touching playback", async () => {
+  await configure({ ...DEFAULTS, controls: true });
+  const page = await fixture();
+  await expect(page.locator("webscaly-player")).toHaveAttribute("data-state", "active");
+  await page.locator("video").hover();
+  const download = page.waitForEvent("download");
+  await page
+    .frameLocator('iframe[title="WebScaly video controls"]')
+    .getByRole("button", { name: "Save snapshot", exact: true })
+    .click();
+  const file = await download;
+  expect(file.suggestedFilename()).toMatch(/^webscaly-127\.0\.0\.1-.+\.png$/);
+  const png = await sharp(await file.path()).metadata();
+  expect(png.format).toBe("png");
+  expect(png.width).toBeGreaterThanOrEqual(640);
+  expect(await page.locator("video").evaluate((v: HTMLVideoElement) => v.paused)).toBe(false);
+  await page.close();
+});
+
+test("plain http:// websites get the overlay and the WebGL fallback", async () => {
+  // Generated footage on a page that is not a secure context: no WebGPU and
+  // no crypto.randomUUID.
+  const page_ = `<!doctype html><video muted playsinline width="640" height="360"></video><script>
+    const c = document.createElement("canvas"); c.width = 640; c.height = 360;
+    const g = c.getContext("2d"); let i = 0;
+    setInterval(() => { g.fillStyle = "#234"; g.fillRect(0, 0, 640, 360); g.fillStyle = "#9cf"; g.fillRect((i += 6) % 600, 120, 40, 120); }, 33);
+    const v = document.querySelector("video"); v.srcObject = c.captureStream(30); v.play();
+  </script>`;
+  const server = createServer((_, response) => {
+    response.writeHead(200, { "Content-Type": "text/html" });
+    response.end(page_);
+  });
+  await new Promise<void>((r) => server.listen(0, "127.0.0.1", r));
+  const plain = `http://plain.webscaly.test:${(server.address() as AddressInfo).port}`;
+  try {
+    await worker.evaluate(async (c) => chrome.storage.local.set({ webscalyConfig: c }), {
+      ...EMPTY,
+      sites: [{ origin: plain, subdomains: false, settings: { ...DEFAULTS, controls: true } }],
+    });
+    const page = await context.newPage();
+    await page.goto(plain + "/");
+    expect(await page.evaluate(() => isSecureContext)).toBe(false);
+    const player = page.locator("webscaly-player");
+    await expect(player).toHaveAttribute("data-state", "active");
+    await expect(player).toHaveAttribute("data-backend", /WebGL/);
+    await expect
+      .poll(() =>
+        page
+          .locator('iframe[title="WebScaly video controls"]')
+          .evaluate((f: HTMLIFrameElement) => f.offsetWidth),
+      )
+      .toBeGreaterThan(100);
+    await page.close();
+  } finally {
+    server.close();
+  }
+});
+
+test("seeking and buffering keep the same renderer", async () => {
+  await configure({ ...DEFAULTS, comparison: true });
+  const page = await context.newPage();
+  await page.goto(url);
+  await page.locator("video").evaluate(async (v: HTMLVideoElement) => {
+    v.src = "/test-results/media/progressive.mp4";
+    await v.play();
+    v.pause();
+  });
+  await expect(page.locator("webscaly-player")).toHaveAttribute("data-state", "active");
+  const replaced = await page.locator("video").evaluate(async (v: HTMLVideoElement) => {
+    const first = document.querySelector("webscaly-player");
+    let count = 0;
+    for (let i = 0; i < 300; i++) {
+      await new Promise((r) => {
+        v.addEventListener("seeked", r, { once: true });
+        v.currentTime = ((i * 37) % 170) / 30 + 1 / 60;
+      });
+      await new Promise((r) => requestAnimationFrame(r));
+      if (document.querySelector("webscaly-player") !== first) count++;
+    }
+    return count;
+  });
+  expect(replaced).toBe(0);
+  await expect(page.locator("webscaly-player")).toHaveAttribute("data-state", "active");
   await page.close();
 });

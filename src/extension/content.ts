@@ -1,10 +1,20 @@
-import type { SiteProfile } from "../shared/settings";
-import { VideoRenderer } from "../core/renderer";
+import {
+  normalizePreferences,
+  normalizeSettings,
+  PREFERENCES,
+  type Preferences,
+  type SiteProfile,
+} from "../shared/settings-core";
+import { download, VideoRenderer } from "../core/renderer";
 declare global {
   var __webscalyContent:
     | { activate: () => void; destroy: () => void }
     | undefined;
 }
+type BadgeState = "active" | "unavailable" | "paused" | "idle";
+// Settings changes arrive through storage events; the worker is only asked to
+// re-authorize after a refresh broadcast, page restore, or this long interval.
+const AUTH_TTL = 30_000;
 if (globalThis.__webscalyContent) globalThis.__webscalyContent.activate();
 else {
   const renderers = new Map<HTMLVideoElement, VideoRenderer>(),
@@ -16,9 +26,31 @@ else {
     shadowCursor = 0,
     active = false,
     dead = false,
+    site: SiteProfile | null = null,
+    prefs: Preferences = PREFERENCES,
+    authorizedAt = 0,
+    discharging = false,
+    battery: (EventTarget & { charging: boolean }) | undefined,
+    reported: BadgeState = "idle",
+    reportTimer: ReturnType<typeof setTimeout> | undefined,
     timer: ReturnType<typeof setTimeout> | undefined,
     heartbeat: ReturnType<typeof setInterval> | undefined;
   const abort = new AbortController();
+  /**
+   * After the extension is reloaded or updated, this orphaned script keeps
+   * running in open tabs and every chrome.* call throws "Extension context
+   * invalidated". Messages go through here so that ends the script quietly
+   * instead of filling the extension's error log.
+   */
+  async function tell(message: unknown): Promise<any> {
+    try {
+      if (!chrome.runtime?.id) throw new Error("context invalidated");
+      return await chrome.runtime.sendMessage(message);
+    } catch {
+      if (!chrome.runtime?.id) destroy();
+      return undefined;
+    }
+  }
   const observer = new MutationObserver((records) => {
     for (const record of records)
       for (const node of record.addedNodes)
@@ -86,17 +118,91 @@ else {
       video.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true })
     );
   }
+  const area = (v: HTMLVideoElement) => v.clientWidth * v.clientHeight;
   function usable() {
     return [...videos]
-      .filter((v) => visible(v) && v.videoWidth > 0 && v.readyState >= 2)
-      .sort(
-        (a, b) =>
-          b.clientWidth * b.clientHeight - a.clientWidth * a.clientHeight,
-      );
+      .filter(
+        (v) =>
+          visible(v) &&
+          v.videoWidth > 0 &&
+          // A seek or buffering stall briefly drops readyState; a video that is
+          // already being enhanced keeps its renderer through it.
+          (v.readyState >= 2 || renderers.has(v)),
+      )
+      .sort((a, b) => area(b) - area(a));
   }
-  async function authorized(): Promise<SiteProfile | null> {
-    const r = await chrome.runtime.sendMessage({ type: "webscaly:authorized" });
-    return r?.ok ? r.value : null;
+  /** The main player, plus a second only when it is a real player (not a hover preview). */
+  function selection() {
+    const [first, ...rest] = usable();
+    if (!first) return [];
+    const second = rest.find(
+      (v) =>
+        v.clientWidth >= 320 &&
+        v.clientHeight >= 180 &&
+        area(v) >= area(first) * 0.4,
+    );
+    return second ? [first, second] : [first];
+  }
+  async function authorize(): Promise<boolean> {
+    const r = await tell({ type: "webscaly:authorized" });
+    const value = r?.ok ? r.value : null;
+    if (!value) {
+      site = null;
+      return false;
+    }
+    site = {
+      origin: value.origin,
+      subdomains: value.subdomains === true,
+      settings: normalizeSettings(value.settings),
+    };
+    prefs = normalizePreferences(value.preferences);
+    authorizedAt = Date.now();
+    void watchBattery();
+    return true;
+  }
+  const batteryActive = () => prefs.batterySaver && discharging;
+  async function watchBattery() {
+    if (!prefs.batterySaver || battery) return;
+    try {
+      const manager = await (
+        navigator as Navigator & {
+          getBattery?: () => Promise<EventTarget & { charging: boolean }>;
+        }
+      ).getBattery?.();
+      if (!manager || battery || dead) return;
+      battery = manager;
+      discharging = !manager.charging;
+      manager.addEventListener(
+        "chargingchange",
+        () => {
+          discharging = !manager.charging;
+          for (const r of renderers.values()) r.setBattery(batteryActive());
+        },
+        { signal: abort.signal },
+      );
+      for (const r of renderers.values()) r.setBattery(batteryActive());
+    } catch {
+      /* Battery status is unavailable in this frame. */
+    }
+  }
+  function badge(): BadgeState {
+    if (!active || !site) return "idle";
+    const states = [...renderers.values()].map((r) => r.diagnostics.state);
+    if (prefs.paused) return usable().length ? "paused" : "idle";
+    if (states.includes("active")) return "active";
+    if (states.includes("unavailable")) return "unavailable";
+    return "idle";
+  }
+  function report(now = false) {
+    clearTimeout(reportTimer);
+    const send = () => {
+      const state = badge();
+      if (state === reported) return;
+      reported = state;
+      void tell({ type: "webscaly:report", state });
+    };
+    if (now) send();
+    else reportTimer = setTimeout(send, 300);
   }
   function clear() {
     revision++;
@@ -105,6 +211,7 @@ else {
   }
   function deactivate() {
     active = false;
+    site = null;
     discoveryEpoch++;
     clear();
     observer.disconnect();
@@ -116,20 +223,32 @@ else {
     timer = undefined;
     clearInterval(heartbeat);
     heartbeat = undefined;
+    report(true);
   }
+  /** Whether renderers should exist at all (a disabled site keeps them only for its toolbar). */
+  const wanted = () =>
+    !!site && !prefs.paused && (site.settings.enabled || site.settings.controls);
   async function scan() {
     if (!active || dead) return;
-    const version = ++revision,
-      site = await authorized();
-    if (version !== revision || !active || dead) return;
-    if (!site) {
-      deactivate();
+    if (!chrome.runtime?.id) {
+      destroy();
       return;
     }
-    if (!site.settings.enabled) {
+    if (!site || Date.now() - authorizedAt > AUTH_TTL) {
+      const version = ++revision,
+        allowed = await authorize();
+      if (version !== revision || !active || dead) return;
+      if (!allowed) {
+        deactivate();
+        return;
+      }
+    }
+    if (!wanted()) {
       clear();
+      report();
       return;
     }
+    const current = site!;
     for (const v of videos) if (!v.isConnected) videos.delete(v);
     const detached = [...roots].filter(
       (root) => root instanceof ShadowRoot && !root.host.isConnected,
@@ -140,34 +259,43 @@ else {
       for (const root of roots)
         observer.observe(root, { childList: true, subtree: true });
     }
-    const selected = new Set(usable().slice(0, 2));
+    const selected = new Set(selection());
     for (const [v, r] of renderers)
       if (!selected.has(v)) {
         r.dispose();
         renderers.delete(v);
       }
     for (const video of selected) {
-      if (version !== revision || !active) return;
-      let r = renderers.get(video);
-      if (!r) {
-        r = new VideoRenderer(
-          video,
-          site.settings,
-          (p) => chrome.runtime.getURL(p),
-          (_s, patch) => {
-            void chrome.runtime
-              .sendMessage({
-                type: "webscaly:site",
-                origin: site.origin,
-                patch,
-              })
-              .catch(() => {});
-          },
-        );
-        renderers.set(video, r);
-        void r.start();
-      }
+      if (renderers.has(video)) continue;
+      const r = new VideoRenderer(
+        video,
+        current.settings,
+        (p) => chrome.runtime.getURL(p),
+        (_s, patch) => {
+          void tell({
+            type: "webscaly:site",
+            origin: current.origin,
+            patch,
+          });
+        },
+        { onState: () => report() },
+      );
+      renderers.set(video, r);
+      r.setBattery(batteryActive());
+      void r.configure(current.settings);
     }
+    report();
+  }
+  function apply() {
+    if (!site) return;
+    if (!wanted()) clear();
+    else
+      for (const r of renderers.values()) {
+        r.setBattery(batteryActive());
+        void r.configure(site.settings);
+      }
+    schedule();
+    report();
   }
   function schedule() {
     if (!active || dead || timer) return;
@@ -202,19 +330,20 @@ else {
   }
   async function refresh() {
     const version = ++revision,
-      site = await authorized();
+      allowed = await authorize();
     if (version !== revision || dead) return;
-    if (!site) {
+    if (!allowed) {
       deactivate();
       return;
     }
     activate();
-    if (!site.settings.enabled) clear();
-    else for (const r of renderers.values()) void r.configure(site.settings);
-    schedule();
+    apply();
   }
+  const primary = () =>
+    [...renderers.values()].find((r) => r.diagnostics.state === "active") ??
+    [...renderers.values()][0];
   const receiver = (
-    m: { type?: string },
+    m: { type?: string; action?: string; value?: unknown },
     sender: chrome.runtime.MessageSender,
     reply: (v: unknown) => void,
   ) => {
@@ -225,6 +354,26 @@ else {
     }
     if (m.type === "webscaly:refresh") {
       void refresh().catch(() => deactivate());
+      reply({ ok: true });
+    }
+    if (m.type === "webscaly:action") {
+      const r = primary();
+      if (!r) {
+        reply({ ok: false });
+        return;
+      }
+      if (m.action === "snapshot")
+        void r
+          .snapshot()
+          .then((blob) => {
+            if (blob) download(blob, location.hostname);
+            r.toast(blob ? "Snapshot saved" : "Snapshot unavailable right now");
+          })
+          .catch(() => r.toast("Snapshot unavailable right now"));
+      if (m.action === "original" && typeof m.value === "boolean")
+        r.setOriginal(m.value);
+      if (m.action === "toast" && typeof m.value === "string")
+        r.toast(m.value);
       reply({ ok: true });
     }
     if (m.type === "webscaly:status") {
@@ -252,25 +401,49 @@ else {
         hiddenVideos: [...videos].filter((v) => !visible(v)).length,
         renderers: [...renderers.values()].map((r) => r.diagnostics),
         embeds,
+        paused: prefs.paused,
       });
     }
   };
   chrome.runtime.onMessage.addListener(receiver);
-  // Storage callbacks cancel stale authorization responses; explicit worker invalidation cancels GPU initialization.
+  // Settings and preference edits apply locally from the storage event; site
+  // removal also invalidates through the worker before access is revoked.
   const storage = (
     changes: Record<string, chrome.storage.StorageChange>,
     area: string,
   ) => {
-    if (area === "local" && changes.webscalyConfig)
-      void refresh().catch(() => deactivate());
+    if (area !== "local" || !changes.webscalyConfig || !active || !site) return;
+    const value = changes.webscalyConfig.newValue as
+      | { sites?: { origin?: unknown; subdomains?: unknown; settings?: unknown }[]; preferences?: unknown }
+      | undefined;
+    const origin = site.origin,
+      profile = Array.isArray(value?.sites)
+        ? value.sites.find((s) => s?.origin === origin)
+        : undefined;
+    if (!profile) {
+      deactivate();
+      return;
+    }
+    site = {
+      origin,
+      subdomains: profile.subdomains === true,
+      settings: normalizeSettings(profile.settings),
+    };
+    prefs = normalizePreferences(value?.preferences);
+    void watchBattery();
+    apply();
   };
   chrome.storage.onChanged.addListener(storage);
   function destroy() {
     dead = true;
     deactivate();
     abort.abort();
-    chrome.runtime.onMessage.removeListener(receiver);
-    chrome.storage.onChanged.removeListener(storage);
+    try {
+      chrome.runtime.onMessage.removeListener(receiver);
+      chrome.storage.onChanged.removeListener(storage);
+    } catch {
+      /* The extension context is already gone; its listeners went with it. */
+    }
     globalThis.__webscalyContent = undefined;
   }
   globalThis.__webscalyContent = {
@@ -295,7 +468,7 @@ else {
   window.addEventListener(
     "pageshow",
     (e) => {
-      if (e.persisted) void refresh();
+      if (e.persisted) void refresh().catch(() => deactivate());
     },
     { signal: abort.signal },
   );

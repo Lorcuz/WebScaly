@@ -1,15 +1,18 @@
 import {
-  hostPattern,
+  mergeConfiguration,
   normalizeConfiguration,
+  normalizePreferences,
   siteOrigin,
   type Configuration,
   type Settings,
   type SiteProfile,
 } from "../shared/settings";
 import { readConfiguration, writeConfiguration } from "../shared/storage";
-import type { Diagnostics } from "../core/overlay";
 import type { PlayerStatus } from "../shared/player-status";
 export const isExtension = !!globalThis.chrome?.runtime?.id;
+export const VERSION: string = isExtension
+  ? chrome.runtime.getManifest().version
+  : __APP_VERSION__;
 export async function request(
   type: string,
   params: Record<string, unknown> = {},
@@ -23,13 +26,28 @@ export async function request(
       throw new Error(result?.error ?? "Reload the extension and this page.");
     return result.value;
   }
+  // Interface preview outside the extension: keep the same shapes in localStorage.
   const config = await readConfiguration();
   let next = config;
   if (type === "defaults")
     next = { ...config, defaults: params.settings as Settings };
   if (type === "presets")
     next = { ...config, presets: params.presets as Configuration["presets"] };
-  if (type === "import") next = normalizeConfiguration(params.config);
+  if (type === "preferences")
+    next = {
+      ...config,
+      preferences: normalizePreferences({
+        ...config.preferences,
+        ...(params.patch as object),
+      }),
+    };
+  if (type === "import") {
+    const incoming = normalizeConfiguration(params.config);
+    next =
+      params.mode === "replace"
+        ? { ...incoming, preferences: config.preferences }
+        : mergeConfiguration(config, incoming);
+  }
   if (type === "remove")
     next = {
       ...config,
@@ -64,11 +82,12 @@ export async function approveSite(
   const site: SiteProfile = { origin: siteOrigin(url), subdomains, settings };
   return request("approve", site as unknown as Record<string, unknown>);
 }
-export async function currentTab(): Promise<{
+export interface Tab {
   id?: number;
   url?: string;
   title?: string;
-}> {
+}
+export async function currentTab(): Promise<Tab> {
   if (!isExtension) return {};
   try {
     const source = Number(new URLSearchParams(location.search).get("tab"));
@@ -77,6 +96,8 @@ export async function currentTab(): Promise<{
       active: true,
       currentWindow: true,
     });
+    // The settings page itself is not a video tab.
+    if (tab?.url?.startsWith(chrome.runtime.getURL(""))) return {};
     return tab ?? {};
   } catch {
     return {};
@@ -95,4 +116,24 @@ export async function tabDiagnostics(
   } catch {
     return null;
   }
+}
+/** Sends a per-frame action (for example "original") to every frame of a tab. */
+export async function tabAction(tabId: number | undefined, action: string, value?: unknown) {
+  if (!isExtension || tabId === undefined) return;
+  try {
+    await chrome.tabs.sendMessage(tabId, { type: "webscaly:action", action, value });
+  } catch {
+    /* The tab has no player script. */
+  }
+}
+export async function shortcuts(): Promise<Record<string, string>> {
+  if (!isExtension || !chrome.commands) return {};
+  const commands = await chrome.commands.getAll();
+  return Object.fromEntries(
+    commands.filter((c) => c.name).map((c) => [c.name!, c.shortcut ?? ""]),
+  );
+}
+export function openShortcutSettings() {
+  if (isExtension)
+    void chrome.tabs.create({ url: "chrome://extensions/shortcuts" });
 }

@@ -1,84 +1,165 @@
+/* In-player controls: a small dark bar on the video, mint when active. */
+:root {
+  color-scheme: dark;
+  background: transparent;
+  --panel: #101820ed;
+  --hover: #1c2a35;
+  --line: #34414d;
+  --text: #e5edf4;
+  --dim: #9aafbd;
+  --accent: #79dfbd;
+}
 * {
   box-sizing: border-box;
 }
+html,
 body {
   margin: 0;
   background: transparent;
-  color: #e8edf2;
-  font: 11px system-ui;
+  overflow: hidden;
+}
+body {
+  color: var(--text);
+  font:
+    500 11.5px/1 Inter,
+    "Segoe UI",
+    system-ui,
+    sans-serif;
 }
 main {
-  display: flex;
+  display: inline-flex;
+  width: max-content;
   align-items: center;
-  justify-content: flex-end;
-  gap: 4px;
-  padding: 5px;
-  background: #111820ed;
-  border: 1px solid #34414d;
-  border-radius: 7px;
+  gap: 2px;
+  padding: 4px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+}
+main.compare {
+  padding: 5px 12px;
+  border-radius: 999px;
 }
 button,
 select {
   font: inherit;
-  min-height: 28px;
-  border: 1px solid #425360;
-  border-radius: 4px;
-  background: #1c2732;
-  color: inherit;
+  height: 28px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--dim);
   cursor: pointer;
-  padding: 4px 7px;
   transition:
-    background 160ms ease,
-    border-color 160ms ease,
-    color 160ms ease;
+    background 140ms ease,
+    color 140ms ease;
+}
+button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 0 8px;
+}
+button.icon {
+  width: 30px;
+  padding: 0;
+}
+button.text {
+  font-weight: 600;
+}
+button.power {
+  font-weight: 600;
+  color: var(--text);
+  padding: 0 9px 0 7px;
 }
 button:hover,
 select:hover:not(:disabled) {
-  background: #263b44;
-  border-color: #57786b;
+  background: var(--hover);
+  color: var(--text);
 }
 button[aria-pressed="true"] {
-  color: #79dfbd;
+  color: var(--accent);
+}
+button.power[aria-pressed="false"] {
+  color: var(--dim);
+}
+main[data-state="unavailable"] button.power {
+  color: #ff9aa4;
+}
+select {
+  appearance: none;
+  padding: 0 20px 0 8px;
+  background: transparent
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none' stroke='%239aafbd' stroke-width='1.6'%3E%3Cpath d='m1 1 4 4 4-4'/%3E%3C/svg%3E")
+    no-repeat right 7px center;
+}
+select:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+select option {
+  background: #17232d;
+  color: var(--text);
+}
+.sep {
+  width: 1px;
+  height: 16px;
+  margin: 0 3px;
+  background: var(--line);
 }
 button:focus-visible,
 select:focus-visible,
 input:focus-visible {
-  outline: 2px solid #79dfbd;
+  outline: 2px solid var(--accent);
   outline-offset: 1px;
 }
 .comparison {
   display: flex;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
-  width: 100%;
+  width: 290px;
+  color: var(--dim);
+}
+.comparison .after {
+  color: var(--accent);
 }
 .comparison input {
+  -webkit-appearance: none;
+  appearance: none;
   min-width: 0;
   flex: 1;
-  accent-color: #79dfbd;
-}
-.help-tooltip {
-  position: fixed;
-  right: auto;
-  bottom: auto;
+  height: 22px;
   margin: 0;
-  z-index: 999;
-  background: #1c2732;
-  border: 1px solid #526370;
-  border-radius: 6px;
-  padding: 7px;
-  width: max-content;
-  max-width: min(228px, calc(100vw - 12px));
-  font: 11px/1.4 system-ui;
-  color: #e8edf2;
-  pointer-events: auto;
+  background: transparent;
+  cursor: ew-resize;
+}
+.comparison input::-webkit-slider-runnable-track {
+  height: 3px;
+  border-radius: 2px;
+  background: linear-gradient(
+    to right,
+    #4c6573 var(--progress, 50%),
+    var(--accent) var(--progress, 50%)
+  );
+}
+.comparison input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 13px;
+  height: 13px;
+  margin-top: -5px;
+  border-radius: 50%;
+  background: var(--accent);
 }
 @media (prefers-reduced-motion: reduce) {
   * {
     transition: none !important;
   }
 }
-:root {
-  color-scheme: dark;
-  background: transparent;
+@media (forced-colors: active) {
+  main {
+    border-color: CanvasText;
+  }
+  button[aria-pressed="true"] {
+    border-color: Highlight;
+  }
 }

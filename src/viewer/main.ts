@@ -1,4 +1,7 @@
 import { attachHelp } from "../ui/help";
+import "@fontsource/inter/latin-400.css";
+import "@fontsource/inter/latin-500.css";
+import "@fontsource/inter/latin-600.css";
 import "../ui/styles.css";
 import "./viewer.css";
 import { VideoRenderer } from "../core/renderer";
@@ -6,13 +9,18 @@ import { DEFAULTS, type Settings } from "../shared/settings";
 import type { Crop } from "../core/crop";
 
 const root = document.querySelector<HTMLDivElement>("#root")!;
-root.innerHTML = `<main class="viewer"><header class="brand"><img src="./icons/32.png" width="32" height="32" alt=""><h1>WebScaly</h1><span class="badge">COMPATIBILITY PLAYER</span></header>
-  <p id="source">Local tab sharing for players that block direct frame access.</p>
-  <p>Choose the playing video tab in Chrome. Only video is captured; audio stays in the original tab. Nothing is recorded, saved, or uploaded. Protected video may stay black. Keep the source playing.</p>
-  <div class="button-row"><button id="share" class="primary">Choose video tab</button><button id="crop" disabled>Select video area</button><button id="enhance" disabled>Enhance selected area</button><button id="fullscreen" disabled>Fullscreen</button><button id="stop" disabled>Stop sharing</button></div>
-  <label class="field">Enhancement algorithm<select id="algorithm"><option value="spatial">Spatial detail</option><option value="anime4k">Anime4K CNN</option><option value="fsrcnnx">FSRCNNX x2</option></select></label>
-  <p id="status" role="status" aria-live="polite">Select a tab to begin.</p><div class="capture-preview"><video muted playsinline></video><div id="selection" hidden></div><button id="exit-fullscreen">Exit fullscreen</button></div>
-  <p class="muted">Tab sharing captures displayed pixels, not the original encoded resolution. This separate player prevents its enhanced output from feeding back into the source. Use the original tab to seek, pause, or change volume.</p></main>`;
+root.innerHTML = `<main class="viewer" data-step="1">
+  <header class="viewer-head"><img src="./icons/32.png" width="28" height="28" alt=""><h1>WebScaly</h1><span class="label">Compatibility player</span></header>
+  <p id="source" class="lede">For players that block direct frame access: share the playing tab with this page and WebScaly enhances the shared picture locally.</p>
+  <ol class="viewer-steps">
+    <li data-step="1"><span class="n" aria-hidden="true">1</span><div><strong>Share the playing tab</strong><p>Chrome asks which tab. Only the picture is shared; sound stays in the original tab. Nothing is recorded or uploaded.</p></div><button id="share" class="btn primary">Choose video tab</button></li>
+    <li data-step="2"><span class="n" aria-hidden="true">2</span><div><strong>Select the video area</strong><p>Drag a rectangle over the video to leave out page borders and player controls.</p></div><button id="crop" class="btn" disabled>Select video area</button></li>
+    <li data-step="3"><span class="n" aria-hidden="true">3</span><div><strong>Enhance</strong><p>Pick an engine and start. Keep the source tab playing; control playback there.</p></div><div class="step-controls"><label class="field"><span class="visually-hidden">Enhancement algorithm</span><select id="algorithm" class="select" aria-label="Enhancement algorithm"><option value="spatial">Spatial Detail</option><option value="anime4k">Anime4K</option><option value="fsrcnnx">FSRCNNX</option></select></label><button id="enhance" class="btn" disabled>Enhance selected area</button></div></li>
+  </ol>
+  <p id="status" role="status" aria-live="polite">Select a tab to begin.</p>
+  <div class="capture-preview"><video muted playsinline></video><div id="selection" hidden></div><button id="exit-fullscreen" class="btn">Exit fullscreen</button></div>
+  <div class="viewer-bar"><button id="fullscreen" class="btn" disabled>Fullscreen</button><button id="stop" class="btn quiet" disabled>Stop sharing</button><span class="muted">Tab sharing captures displayed pixels, not the original encoded resolution. Protected video may stay black.</span></div>
+</main>`;
 const video = root.querySelector<HTMLVideoElement>("video")!;
 const preview = root.querySelector<HTMLDivElement>(".capture-preview")!;
 const selection = root.querySelector<HTMLDivElement>("#selection")!;
@@ -23,6 +31,8 @@ const share = root.querySelector<HTMLButtonElement>("#share")!,
   stopButton = root.querySelector<HTMLButtonElement>("#stop")!,
   fullscreen = root.querySelector<HTMLButtonElement>("#fullscreen")!;
 let sharingEpoch = 0;
+const main = root.querySelector<HTMLElement>(".viewer")!;
+const step = (n: number) => (main.dataset.step = String(n));
 let stream: MediaStream | undefined,
   renderer: VideoRenderer | undefined,
   crop: Crop | undefined,
@@ -49,7 +59,7 @@ if (chrome?.runtime?.id && sourceTab > 0) {
         hud: false,
       };
       root.querySelector("#source")!.textContent =
-        `Source website: ${new URL(result.value.origin).hostname}. Choose its playing tab in Chrome.`;
+        `Source website: ${new URL(result.value.origin).hostname}. Share its playing tab and WebScaly enhances the picture locally.`;
       (root.querySelector("#algorithm") as HTMLSelectElement).value =
         settings.algorithm;
       share.disabled = false;
@@ -77,6 +87,7 @@ function stop() {
   anchor = undefined;
   preview.classList.remove("selecting");
   status.textContent = "Tab sharing stopped.";
+  step(1);
 }
 share.addEventListener("click", async () => {
   stop();
@@ -115,6 +126,7 @@ share.addEventListener("click", async () => {
         false;
     status.textContent =
       "Sharing locally. Select video area, then drag a rectangle over the video.";
+    step(2);
   } catch (error) {
     stop();
     status.textContent = `Tab sharing was not started. ${(error as Error).message}`;
@@ -179,8 +191,10 @@ preview.addEventListener("pointerup", () => {
     crop = undefined;
     selection.hidden = true;
     status.textContent = "Area is too small. Select a larger video area.";
-  } else
+  } else {
     status.textContent = "Video area selected. Click Enhance selected area.";
+    step(3);
+  }
 });
 async function enable() {
   if (!stream) return;

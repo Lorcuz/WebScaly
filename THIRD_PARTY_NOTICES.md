@@ -12,6 +12,7 @@ Keep this file, the `licenses/` directory, and the `compliance/` source director
 | tldts, tldts-core public-suffix parsing | Versions pinned in `package-lock.json` | MIT, `Tldts-MIT.txt`, `Tldts-core-MIT.txt` |
 | Inter font, unmodified local Latin subsets | `@fontsource/inter`, version pinned in lockfile | SIL Open Font License 1.1, `Inter-OFL.txt` |
 | Tabler UI icons | `@tabler/icons-react`, version pinned in lockfile | MIT, `Tabler-MIT.txt` |
+| Contrast-adaptive sharpening approach | Idea from [AMD FidelityFX CAS](https://github.com/GPUOpen-Effects/FidelityFX-CAS) (MIT) | Attribution only: WebScaly's `present.wgsl` is an independent implementation; no FidelityFX source is included |
 | Italy flag image | [Noto Emoji region flags v2.047](https://github.com/googlefonts/noto-emoji/tree/v2.047/third_party/region-flags) | Public domain / copyright-exempt flag, `Country-Flags-NOTICE.txt`; image unchanged |
 
 ## FSRCNNX source and replacement
@@ -20,7 +21,7 @@ Original GLSL SHA-256: `d5a24a271e5d9a3f7f7a053b150c460a44c25b3cf7f770857d57cc3a
 
 Flux's transpiler preserves the trained weights and pass order, fuses the first four hooks, and converts the mpv/libplacebo hooks into WebGPU compute passes. WebScaly adds RGB-to-luma extraction, chroma recombination, resource bindings, and the presentation pipeline. Generated WGSL retains the upstream license and modification header. WebScaly does not claim ownership of those weights.
 
-Every installable build includes `compliance/fsrcnnx/` with the original GLSL, generated WGSL/pass manifest, transpiler, WebScaly adapter and shaders. The release also supplies a complete corresponding source archive, `webscaly-source-<version>.zip`, matching the release version, with the TypeScript source, build scripts and lockfile.
+Every installable build includes `compliance/fsrcnnx/` with the original GLSL, generated WGSL/pass manifest, transpiler, WebScaly adapter and shaders. The release also supplies a complete corresponding source archive, `webscaly-source-<version>.zip`, with the TypeScript source, build scripts and lockfile.
 
 You may modify, debug, replace and rebuild the LGPL-covered portion. WebScaly imposes no prohibition on reverse engineering for debugging those modifications. To replace it, extract the source archive, edit `src/vendor/FSRCNNX_x2_16-0-4-1.wgsl` and its `.passes.json`, run `npm ci` and `npm run build`, then load the rebuilt `dist` directory in Chrome Developer Mode. There is no publisher signature or remote attestation blocking a rebuilt unpacked extension.
 

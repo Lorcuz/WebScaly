@@ -52,7 +52,7 @@ for (const kind of ["missing", "canvas", "webgl1"])
       "active",
     );
     await expect(page.locator("#diagnostics")).toContainText(
-      kind === "webgl1" ? "WebGL spatial" : "WebGL2",
+      kind === "webgl1" ? "WebGL Spatial Detail" : "WebGL2",
     );
     await expect
       .poll(async () =>

@@ -1,16 +1,18 @@
 import { checkedShader, texture } from "./device";
-import spatialWGSL from "./shaders/spatial.wgsl?raw";
-import resampleWGSL from "./shaders/resample.wgsl?raw";
+import prefilterWGSL from "./shaders/prefilter.wgsl?raw";
+import scaleWGSL from "./shaders/scale.wgsl?raw";
 import presentWGSL from "./shaders/present.wgsl?raw";
+import hintWGSL from "./shaders/hint.wgsl?raw";
 import fsrcWGSL from "../vendor/FSRCNNX_x2_16-0-4-1.wgsl?raw";
 import fsrcManifest from "../vendor/FSRCNNX_x2_16-0-4-1.passes.json";
 import { CNNx2M } from "../vendor/anime4k/pipelines/upscale/CNNx2M";
 import { CNNx2VL } from "../vendor/anime4k/pipelines/upscale/CNNx2VL";
 import { CNNSoftM } from "../vendor/anime4k/pipelines/restore/CNNSoftM";
 import type { Anime4KPipeline } from "../vendor/anime4k/pipelines/interfaces";
-import type { Settings } from "../shared/settings";
+import type { Settings } from "../shared/settings-core";
 
 export interface UpscalingEngine {
+  readonly output: GPUTexture;
   encode(encoder: GPUCommandEncoder): GPUTexture;
   destroy(): void;
 }
@@ -37,9 +39,12 @@ class AnimeEngine implements UpscalingEngine {
         }),
       );
   }
+  get output() {
+    return this.stages.at(-1)!.getOutputTexture();
+  }
   encode(encoder: GPUCommandEncoder) {
     this.stages.forEach((s) => s.pass(encoder));
-    return this.stages.at(-1)!.getOutputTexture();
+    return this.output;
   }
   destroy() {
     const textures = new Set<GPUTexture>();
@@ -83,7 +88,7 @@ class FsrcEngine implements UpscalingEngine {
     width: number;
     height: number;
   }[] = [];
-  private output!: GPUTexture;
+  output!: GPUTexture;
   static async create(
     device: GPUDevice,
     input: GPUTexture,
@@ -205,66 +210,123 @@ class FsrcEngine implements UpscalingEngine {
   }
 }
 
+const SCALE_MODES: Record<Settings["quality"], number> = {
+  fast: 0,
+  balanced: 1,
+  quality: 2,
+};
+export const HINT_SIZE = [96, 54] as const;
+const HINT_ROW = 512; // 96 pixels × 4 bytes, padded to the required 256-byte row alignment.
+function dispatch(
+  encoder: GPUCommandEncoder,
+  pipeline: GPUComputePipeline,
+  group: GPUBindGroup,
+  width: number,
+  height: number,
+) {
+  const pass = encoder.beginComputePass();
+  pass.setPipeline(pipeline);
+  pass.setBindGroup(0, group);
+  pass.dispatchWorkgroups(Math.ceil(width / 8), Math.ceil(height / 8));
+  pass.end();
+}
+
+/**
+ * Per-frame pipeline: captured frame (work) → prefilter (denoise, deband) →
+ * engine (spatial passthrough or neural) → scale to display size → present
+ * (adaptive sharpening, colour, comparison).
+ */
 export class Enhancement {
   readonly work: GPUTexture;
-  private spatial: GPUTexture;
+  private pre: GPUTexture;
+  private scaled: GPUTexture;
   private neural?: UpscalingEngine;
-  private params: GPUBuffer;
-  private comparison: GPUBuffer;
+  private preParams: GPUBuffer;
+  private scaleParams: GPUBuffer;
+  private presentParams: GPUBuffer;
   private sampler: GPUSampler;
-  private spatialPipeline!: GPUComputePipeline;
-  private spatialGroup!: GPUBindGroup;
-  private resamplePipeline!: GPUComputePipeline;
+  private prePipeline!: GPUComputePipeline;
+  private scalePipeline!: GPUComputePipeline;
   private presentPipeline!: GPURenderPipeline;
-  private resampleGroups = new Map<GPUTexture, GPUBindGroup>();
-  private presentGroups = new Map<GPUTexture, GPUBindGroup>();
+  private preGroup!: GPUBindGroup;
+  private scaleGroup!: GPUBindGroup;
+  private presentGroup!: GPUBindGroup;
+  private hint?: {
+    texture: GPUTexture;
+    buffer: GPUBuffer;
+    pipeline: GPUComputePipeline;
+    group: GPUBindGroup;
+    busy: boolean;
+  };
+  private destroyed = false;
   constructor(
     private device: GPUDevice,
     width: number,
     height: number,
+    output: readonly [number, number],
     private settings: Settings,
   ) {
     this.work = texture(device, width, height, "WebScaly working frame");
-    this.spatial = texture(device, width, height, "WebScaly spatial output");
-    this.params = device.createBuffer({
-      size: 16,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
-    this.comparison = device.createBuffer({
-      size: 16,
-      usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-    });
+    this.pre = texture(
+      device,
+      width,
+      height,
+      "WebScaly prefiltered frame",
+      "rgba16float",
+    );
+    this.scaled = texture(
+      device,
+      output[0],
+      output[1],
+      "WebScaly display-size frame",
+      "rgba16float",
+    );
+    const uniform = (size: number) =>
+      device.createBuffer({
+        size,
+        usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+      });
+    this.preParams = uniform(16);
+    this.scaleParams = uniform(16);
+    this.presentParams = uniform(32);
     this.sampler = device.createSampler({
       magFilter: "linear",
       minFilter: "linear",
     });
   }
   async initialize(format: GPUTextureFormat, upscale: boolean) {
-    const [spatial, resample, present] = await Promise.all([
-      checkedShader(this.device, spatialWGSL, "Spatial detail"),
-      checkedShader(this.device, resampleWGSL, "Resample"),
+    const [prefilter, scale, present] = await Promise.all([
+      checkedShader(this.device, prefilterWGSL, "Prefilter"),
+      checkedShader(this.device, scaleWGSL, "Scale"),
       checkedShader(this.device, presentWGSL, "Presentation"),
     ]);
-    this.spatialPipeline = await this.device.createComputePipelineAsync({
-      layout: "auto",
-      compute: { module: spatial, entryPoint: "main" },
-    });
-    this.resamplePipeline = await this.device.createComputePipelineAsync({
-      layout: "auto",
-      compute: { module: resample, entryPoint: "main" },
-    });
-    this.presentPipeline = await this.device.createRenderPipelineAsync({
-      layout: "auto",
-      vertex: { module: present, entryPoint: "vert" },
-      fragment: { module: present, entryPoint: "frag", targets: [{ format }] },
-      primitive: { topology: "triangle-list" },
-    });
-    this.spatialGroup = this.device.createBindGroup({
-      layout: this.spatialPipeline.getBindGroupLayout(0),
+    [this.prePipeline, this.scalePipeline, this.presentPipeline] =
+      await Promise.all([
+        this.device.createComputePipelineAsync({
+          layout: "auto",
+          compute: { module: prefilter, entryPoint: "main" },
+        }),
+        this.device.createComputePipelineAsync({
+          layout: "auto",
+          compute: { module: scale, entryPoint: "main" },
+        }),
+        this.device.createRenderPipelineAsync({
+          layout: "auto",
+          vertex: { module: present, entryPoint: "vert" },
+          fragment: {
+            module: present,
+            entryPoint: "frag",
+            targets: [{ format }],
+          },
+          primitive: { topology: "triangle-list" },
+        }),
+      ]);
+    this.preGroup = this.device.createBindGroup({
+      layout: this.prePipeline.getBindGroupLayout(0),
       entries: [
         { binding: 0, resource: this.work.createView() },
-        { binding: 1, resource: this.spatial.createView() },
-        { binding: 2, resource: { buffer: this.params } },
+        { binding: 1, resource: this.pre.createView() },
+        { binding: 2, resource: { buffer: this.preParams } },
       ],
     });
     if (this.settings.algorithm === "anime4k") {
@@ -272,7 +334,7 @@ export class Enhancement {
       try {
         this.neural = new AnimeEngine(
           this.device,
-          this.work,
+          this.pre,
           upscale,
           this.settings.quality,
         );
@@ -282,71 +344,60 @@ export class Enhancement {
       }
     }
     if (this.settings.algorithm === "fsrcnnx")
-      this.neural = await FsrcEngine.create(this.device, this.work);
+      this.neural = await FsrcEngine.create(this.device, this.pre);
+    const enhanced = this.neural?.output ?? this.pre;
+    this.scaleGroup = this.device.createBindGroup({
+      layout: this.scalePipeline.getBindGroupLayout(0),
+      entries: [
+        { binding: 0, resource: enhanced.createView() },
+        { binding: 1, resource: this.scaled.createView() },
+        { binding: 2, resource: this.sampler },
+        { binding: 3, resource: { buffer: this.scaleParams } },
+      ],
+    });
+    this.presentGroup = this.device.createBindGroup({
+      layout: this.presentPipeline.getBindGroupLayout(0),
+      entries: [
+        { binding: 0, resource: this.scaled.createView() },
+        { binding: 1, resource: this.work.createView() },
+        { binding: 2, resource: this.sampler },
+        { binding: 3, resource: { buffer: this.presentParams } },
+      ],
+    });
     this.update(this.settings);
   }
-  update(s: Settings) {
+  update(s: Settings, compare = s.comparison) {
     this.settings = s;
-    this.device.queue.writeBuffer(
-      this.params,
+    const queue = this.device.queue;
+    queue.writeBuffer(this.preParams, 0, new Float32Array([s.denoise, s.deband, 0, 0]));
+    queue.writeBuffer(this.scaleParams, 0, new Uint32Array([SCALE_MODES[s.quality], 0, 0, 0]));
+    queue.writeBuffer(
+      this.presentParams,
       0,
-      new Float32Array([s.strength, s.denoise, 0, 0]),
-    );
-    this.device.queue.writeBuffer(
-      this.comparison,
-      0,
-      new Float32Array([s.split, s.comparison ? 1 : 0, 0, 0]),
+      new Float32Array([
+        s.split,
+        compare ? 1 : 0,
+        s.strength,
+        s.vibrance,
+        s.contrast,
+        s.brightness,
+        0,
+        0,
+      ]),
     );
   }
-  encode(encoder: GPUCommandEncoder, source: GPUTexture, target: GPUTexture) {
-    if (source !== this.work) {
-      let group = this.resampleGroups.get(source);
-      if (!group) {
-        group = this.device.createBindGroup({
-          layout: this.resamplePipeline.getBindGroupLayout(0),
-          entries: [
-            { binding: 0, resource: source.createView() },
-            { binding: 1, resource: this.work.createView() },
-            { binding: 2, resource: this.sampler },
-          ],
-        });
-        this.resampleGroups.set(source, group);
-      }
-      const pass = encoder.beginComputePass();
-      pass.setPipeline(this.resamplePipeline);
-      pass.setBindGroup(0, group);
-      pass.dispatchWorkgroups(
-        Math.ceil(this.work.width / 8),
-        Math.ceil(this.work.height / 8),
-      );
-      pass.end();
-    }
-    let enhanced = this.spatial;
-    if (this.neural) enhanced = this.neural.encode(encoder);
-    else {
-      const pass = encoder.beginComputePass();
-      pass.setPipeline(this.spatialPipeline);
-      pass.setBindGroup(0, this.spatialGroup);
-      pass.dispatchWorkgroups(
-        Math.ceil(this.work.width / 8),
-        Math.ceil(this.work.height / 8),
-      );
-      pass.end();
-    }
-    // Both comparison halves sample the same decoded source frame.
-    let group = this.presentGroups.get(source);
-    if (!group) {
-      group = this.device.createBindGroup({
-        layout: this.presentPipeline.getBindGroupLayout(0),
-        entries: [
-          { binding: 0, resource: enhanced.createView() },
-          { binding: 1, resource: source.createView() },
-          { binding: 2, resource: this.sampler },
-          { binding: 3, resource: { buffer: this.comparison } },
-        ],
-      });
-      this.presentGroups.set(source, group);
-    }
+  /** Copies a same-size RGBA8 texture into the working frame (benchmarks and validation). */
+  load(encoder: GPUCommandEncoder, source: GPUTexture) {
+    encoder.copyTextureToTexture({ texture: source }, { texture: this.work }, [
+      this.work.width,
+      this.work.height,
+    ]);
+  }
+  /** Encodes everything after the capture pass into `target` (the canvas texture). */
+  encode(encoder: GPUCommandEncoder, target: GPUTexture) {
+    dispatch(encoder, this.prePipeline, this.preGroup, this.work.width, this.work.height);
+    this.neural?.encode(encoder);
+    dispatch(encoder, this.scalePipeline, this.scaleGroup, this.scaled.width, this.scaled.height);
     const pass = encoder.beginRenderPass({
       colorAttachments: [
         {
@@ -358,17 +409,76 @@ export class Enhancement {
       ],
     });
     pass.setPipeline(this.presentPipeline);
-    pass.setBindGroup(0, group);
+    pass.setBindGroup(0, this.presentGroup);
     pass.draw(3);
     pass.end();
   }
+  /** Reads a small thumbnail of the current working frame without blocking rendering. */
+  async thumbnail(): Promise<{ data: Uint8Array; stride: number } | null> {
+    if (this.destroyed) return null;
+    if (!this.hint) {
+      const module = await checkedShader(this.device, hintWGSL, "Content hint");
+      const pipeline = await this.device.createComputePipelineAsync({
+        layout: "auto",
+        compute: { module, entryPoint: "main" },
+      });
+      if (this.destroyed) return null;
+      const target = this.device.createTexture({
+        size: [...HINT_SIZE],
+        format: "rgba8unorm",
+        usage: GPUTextureUsage.STORAGE_BINDING | GPUTextureUsage.COPY_SRC,
+      });
+      this.hint = {
+        texture: target,
+        buffer: this.device.createBuffer({
+          size: HINT_ROW * HINT_SIZE[1],
+          usage: GPUBufferUsage.COPY_DST | GPUBufferUsage.MAP_READ,
+        }),
+        pipeline,
+        group: this.device.createBindGroup({
+          layout: pipeline.getBindGroupLayout(0),
+          entries: [
+            { binding: 0, resource: this.work.createView() },
+            { binding: 1, resource: target.createView() },
+            { binding: 2, resource: this.sampler },
+          ],
+        }),
+        busy: false,
+      };
+    }
+    const hint = this.hint;
+    if (hint.busy) return null;
+    hint.busy = true;
+    try {
+      const encoder = this.device.createCommandEncoder();
+      dispatch(encoder, hint.pipeline, hint.group, ...HINT_SIZE);
+      encoder.copyTextureToBuffer(
+        { texture: hint.texture },
+        { buffer: hint.buffer, bytesPerRow: HINT_ROW },
+        [...HINT_SIZE],
+      );
+      this.device.queue.submit([encoder.finish()]);
+      await hint.buffer.mapAsync(GPUMapMode.READ);
+      const data = new Uint8Array(hint.buffer.getMappedRange()).slice();
+      hint.buffer.unmap();
+      return { data, stride: HINT_ROW };
+    } catch {
+      return null;
+    } finally {
+      hint.busy = false;
+    }
+  }
   destroy() {
+    this.destroyed = true;
     this.neural?.destroy();
     this.work.destroy();
-    this.spatial.destroy();
-    this.params.destroy();
-    this.comparison.destroy();
-    this.resampleGroups.clear();
-    this.presentGroups.clear();
+    this.pre.destroy();
+    this.scaled.destroy();
+    this.preParams.destroy();
+    this.scaleParams.destroy();
+    this.presentParams.destroy();
+    this.hint?.texture.destroy();
+    this.hint?.buffer.destroy();
+    this.hint = undefined;
   }
 }

@@ -1,99 +1,60 @@
-
-
-
-
-
-
-
-
-<p align="center"><img src="public/icons/128.png" width="72" height="72" alt="WebScaly logo"></p>
+<p align="center"><img src="public/icons/128.png" width="80" height="80" alt="WebScaly"></p>
 
 <h1 align="center">WebScaly</h1>
-<p align="center">Video enhancement, on your device.</p>
-<p align="center"><a href="https://chromewebstore.google.com/detail/webscaly/hdcnniaagmhkocoeahemlpgjecgpchfa"><strong>Install from the Chrome Web Store</strong></a> · <a href="#see-it-in-action">Watch the demo</a> · <a href="PRIVACY.md">Privacy</a> · <a href="SUPPORT.md">Support</a></p>
+<p align="center">Local video enhancement for Chrome.</p>
+<p align="center"><a href="https://chromewebstore.google.com/detail/webscaly/hdcnniaagmhkocoeahemlpgjecgpchfa"><strong>Install from the Chrome Web Store</strong></a> · <a href="#see-it-in-action">Watch the film</a> · <a href="#getting-started">Get started</a> · <a href="PRIVACY.md">Privacy</a> · <a href="SUPPORT.md">Support</a> · <a href="THIRD_PARTY_NOTICES.md">Licenses</a></p>
 
-WebScaly is a free, open-source Chrome extension that sharpens and upscales accessible web video on websites you approve. Enhancement runs locally while your usual player handles playback and sound.
+WebScaly is a Chrome extension that enhances accessible web video on websites you choose. It can sharpen detail, reduce light noise and upscale video while the website keeps control of playback and sound.
 
-![Full-frame illustration: enhancement OFF on the left, Anime4K Quality ON on the right](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/original-anime-comparison-1920x1080.png)
+## Features
 
-*Full-frame illustration, 960×540 source → 1920×1080 output, Anime4K Quality, 2× scale. [Open the 1920×1080 image](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/original-anime-comparison-1920x1080.png) · [Capture details and credits](docs/media/ATTRIBUTIONS.md).*
+- **Enhancement:** Spatial Detail for any video, Anime4K for animation and FSRCNNX for learned 2× upscaling, each followed by a quality scaler (bicubic or Lanczos) and adaptive sharpening at display size.
+- **Picture controls:** sharpening, denoise, deband, vibrance, contrast and brightness, per-site profiles, and built-in or custom presets.
+- **Smart playback:** adaptive performance steps down when the GPU falls behind, sharp videos can be left untouched, battery saver applies while unplugged, and the popup suggests the engine that suits the content.
+- **Player tools:** optional compact controls, comparison slider, hold-to-show-original, snapshots and performance HUD, all hidden initially.
+- **Shortcuts and status:** keyboard shortcuts for on/off, comparison, engine and pause, and a per-tab ON badge on the toolbar icon.
+- **Website access:** disabled by default. Embedded players require approval for both their own origin and the page hosting them.
+- **Compatibility player:** explicitly share a source tab and select its video area for local enhancement when direct access is restricted. Audio stays in that tab.
 
-![Full-frame Hero comparison: enhancement OFF on the left, Anime4K Quality ON on the right](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/hero-comparison-1920x1080.png)
+Processing follows decoded frames at their native cadence. WebScaly does not generate intermediate frames or increase the source frame rate.
 
-*Full-frame Hero comparison, 960×540 source → 1920×1080 output, Anime4K Quality, 2× scale. Hero © 2018 Blender Foundation, Daniel Martínez Lara, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); cropped, resized and enhanced. [Open the 1920×1080 image](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/hero-comparison-1920x1080.png).*
+![WebScaly playing original demonstration footage with optional comparison controls](docs/store/assets/01-player-1280x800.png)
 
-## Getting started
-
-Use **Chrome 121+** and install WebScaly from the [Chrome Web Store](https://chromewebstore.google.com/detail/webscaly/hdcnniaagmhkocoeahemlpgjecgpchfa). Chrome keeps the store installation updated automatically.
-
-1. Open a video website and click WebScaly in the toolbar.
-2. Choose **Add this website** → **Allow** in Chrome. If the video is embedded, approve the player website shown in the popup too.
-3. Turn on **Enhancement** and choose an algorithm and quality.
-
-Website access starts off. Approve only the websites you want to enhance, and remove access whenever you want. Approval completes even if Chrome closes the popup.
-
-The settings gear opens the current site's profile. **Controls**, **Compare** and **HUD** stay hidden until you enable them; Compare lets you inspect the original and enhanced picture in the same player.
+*Actual extension over original procedural footage: 640×360 source, Spatial Detail, Balanced quality, 2× output scale, 35% sharpening and 12% denoise. This is a controlled demonstration, not a benchmark. [Rendering, permissions and player integration](docs/LOCAL_VIDEO_ENHANCEMENT.md) explains the design and its limits.*
 
 ## See it in action
 
-The 44-second showcase presents matching OFF/ON frames, actual extension controls, output settings and the three processing methods. It includes licensed music and restrained interface sounds; the explanations also work without sound.
+[![WebScaly 0.4.0 presentation film: the same video, original and enhanced](docs/media/webscaly-presentation-thumbnail.png)](https://www.youtube.com/watch?v=ZoKox_mrUsw)
 
-[![Watch WebScaly's 44-second showcase](docs/media/WebScaly-thumbnail-1920x1080.png)]([https://github.com/user-attachments/assets/98b240c8-0479-4f31-a400-3e998706db03](https://github.com/user-attachments/assets/16f0a7b0-f573-4dd9-93d6-19dd66b5409c))
+A one-minute tour of WebScaly 0.4.0: allowing a website, choosing an engine, comparing in the player, each engine on footage that suits it, tuning the picture, and the smart and private defaults.
 
-[Download the 1080p video](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/WebScaly-showcase-1080p.mp4) · [English captions](docs/media/WebScaly-showcase.en.vtt) · [All video formats and comparison gallery](docs/media/README.md)
+[Watch on YouTube (1080p60)](https://www.youtube.com/watch?v=ZoKox_mrUsw) · [Download the MP4 (720p, 9 MB)](docs/media/webscaly-presentation-720p.mp4) · English captions ([SRT](docs/media/webscaly-presentation.en.srt) · [VTT](docs/media/webscaly-presentation.en.vtt)) · [All demonstrations](docs/media/README.md) · [Credits](docs/media/ATTRIBUTIONS.md)
 
-Comparisons hold matching captured frames and use equal crops and enlargement. The 60 fps presentation animates the graphics; it is not an extension frame-rate benchmark. The illustration is original AI-generated demonstration artwork, and the output is actual WebScaly processing. [Video, music and image credits](docs/media/ATTRIBUTIONS.md).
+Every enhanced picture and interface state in the film is a capture of the extension itself. Comparisons use the same decoded frame with identical crops and enlargement; nothing is sharpened or dimmed in editing. Hero © 2018 Blender Foundation, Daniel Martínez Lara, CC BY 4.0. Earth from the International Space Station: NASA. “4K Nature Cinematography” by Aliioss Film, CC BY 3.0. Music: “Divider” by Chris Zabriskie, CC BY 4.0.
 
-### Illustration — 360p source
+## Privacy
 
-![Large matched eye-detail views: original 360p video above, Anime4K Quality output below](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/original-anime-360-detail-1000x1340.png)
+Video processing happens on your device. There are no analytics, tracking scripts, accounts, cloud inference or automatic uploads. Website addresses, video frames and player diagnostics are handled locally to provide enhancement. Settings and approved sites stay in your browser.
 
-*The same 304×144 region is enlarged 3× in both panels. The source was downsampled and encoded as a 360p video before either capture; the OFF panel is its native playback, and the ON panel is actual WebScaly output. No editor sharpening is added. [Open full size](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/original-anime-360-detail-1000x1340.png).*
+You can remove website access at any time. GitHub, email, Discord and PayPal are optional services you can choose to open; their own privacy policies apply. Read the [privacy policy](PRIVACY.md) for storage, retention and support details.
 
-### Hero — 540p source
+## Getting started
 
-![Large matched Hero face-detail views: original video above, Anime4K Quality output below](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/hero-detail-1000x1340.png)
+### Chrome Web Store (recommended)
 
-*960×540 source → 1920×1080 output, Anime4K Quality, 2× scale. Identical crops and enlargement. Hero © 2018 Blender Foundation, Daniel Martínez Lara, [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); cropped, resized and enhanced. [Full frame](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/hero-comparison-1920x1080.png) · [Open detail full size](https://raw.githubusercontent.com/Lorcuz/WebScaly/main/docs/media/hero-detail-1000x1340.png).*
+Use **Chrome 121+**. Install the published extension from the [official WebScaly Chrome Web Store page](https://chromewebstore.google.com/detail/webscaly/hdcnniaagmhkocoeahemlpgjecgpchfa):
 
-## Enhancement options
+1. Click **Add to Chrome** and confirm the installation.
+2. Open a video website, click WebScaly and choose **Allow on this website** → **Allow**.
+3. Choose an engine. If the video is embedded, approve its player website from the popup too. Press **Alt+Shift+E** to switch enhancement off and on.
 
-| Algorithm | Use it for |
-| --- | --- |
-| **Spatial Detail** | Lightweight sharpening and light denoise. Adjust the strengths in settings. |
-| **Anime4K** | Animation and illustrated footage, using bundled restore/upscale shaders. |
-| **FSRCNNX** | Learned 2× upscaling for finer detail. |
+Chrome handles updates to the store installation automatically. Website access starts off; approve only the websites you want to enhance.
 
-Adjust quality, output scale and height limits to suit the video and your device. Save different settings for different websites. Sharpening and denoise strengths apply to Spatial Detail; neural weights use their fixed processing strength.
+The permission approval completes even when Chrome closes the popup. The settings gear opens the full settings for your current video profile, including a live before/after preview. Technical options have short help on hover or keyboard focus; Escape dismisses it.
 
-WebScaly follows decoded video frames at their native cadence. It does not generate intermediate frames or increase the source frame rate.
+### Build from source (for development)
 
-<details>
-<summary>View enhancement settings</summary>
-
-![WebScaly enhancement settings](docs/store/assets/02-settings-1280x800.png)
-
-</details>
-
-## Privacy and website access
-
-Video processing happens on your device. There are **no accounts, analytics, tracking scripts, cloud processing or automatic uploads**. Settings and approved websites stay in your browser. Frames and local diagnostics are used to provide enhancement.
-
-An embedded player needs approval for both its own origin and the website hosting it. Removing either approval stops enhancement for that page. The optional compatibility player requires an explicit Chrome tab-sharing choice; audio remains in the source tab.
-
-External support links open only when you select them and have their own privacy policies. Read [PRIVACY.md](PRIVACY.md) for local storage, retention and support details.
-
-## Compatibility
-
-WebScaly works with accessible HTML5 video and common player layouts. Anime4K and FSRCNNX require a supported WebGPU device; a WebGL spatial fallback is available where supported. Quality and speed depend on the source, browser and GPU.
-
-Protected media, browser pixel-access rules and inaccessible player internals can prevent enhancement. Native video-element fullscreen may show the original picture; container fullscreen can retain enhancement. The compatibility player can help with restricted direct access, but protected content can still appear black.
-
-See [recorded compatibility results](docs/COMPATIBILITY.md) for tested, partial and unverified cases. Support is not guaranteed for every website or GPU. [Rendering and permission design](docs/LOCAL_VIDEO_ENHANCEMENT.md) explains how it works.
-
-## Build and contribute
-
-For development, use **Node.js 22.12+ or 24 LTS**, npm and Chrome 121+:
+Use **Node.js 22.12+ or 24 LTS**, npm and **Chrome 121+**.
 
 ```sh
 npm ci
@@ -101,9 +62,23 @@ npm test
 npm run build
 ```
 
-Open `chrome://extensions`, enable **Developer mode**, choose **Load unpacked** and select `dist`. After rebuilding, reload the extension and refresh video tabs. An unpacked ZIP is also available in [GitHub Releases](https://github.com/Lorcuz/WebScaly/releases/latest).
+1. Open `chrome://extensions` and enable **Developer mode**.
+2. Choose **Load unpacked** and select the generated `dist` folder.
+3. Follow the website approval and enhancement steps above.
 
-Browser checks and packaging:
+To update an unpacked installation, rebuild and reload WebScaly on the extensions page, then refresh your video tabs. You can also extract the extension ZIP from [GitHub Releases](https://github.com/Lorcuz/WebScaly/releases/latest) and load it as an unpacked extension.
+
+![WebScaly enhancement settings](docs/store/assets/02-settings-1280x800.png)
+
+### Compatibility and limits
+
+WebScaly supports accessible HTML5 video and common player layouts. Neural algorithms need a supported WebGPU device; a WebGL spatial fallback is available when possible. Quality and speed depend on the video, browser and GPU.
+
+Protected media, browser pixel-access restrictions, unapproved embedded players and inaccessible player internals can prevent enhancement. Native video fullscreen may show the original video; container fullscreen can retain enhancement. The compatibility player requires an explicit Chrome tab-sharing choice, and protected content can still remain black.
+
+This release does not promise support for every website or GPU. See [compatibility results](docs/COMPATIBILITY.md) for tested, partial and unverified cases.
+
+## Develop, test and package
 
 ```sh
 npx playwright install chromium
@@ -111,20 +86,20 @@ npm run test:browser
 npm run package
 ```
 
-Packaging uses explicit allowlists and checks the extension and corresponding source for private data. `npm run verify:release` checks the extracted build; `npm run verify:source` rebuilds its bundled source and compares runtime files. Raw browser profiles and device reports belong in ignored `test-results/`.
+Browser tests use original generated footage and isolated profiles. Raw profiles, screenshots and device reports belong in ignored `test-results/`. See [testing](docs/TESTING.md), [architecture](docs/ARCHITECTURE.md) and [contributing](CONTRIBUTING.md).
 
-[Contributing](CONTRIBUTING.md) · [Testing](docs/TESTING.md) · [Architecture](docs/ARCHITECTURE.md) · [Store maintenance](CHROMEWEBSTORE.md)
+`npm run package` produces `release/webscaly-<version>.zip`, a corresponding-source archive and a clean public source tree. The extension ZIP contains runtime files and required license/source material. Packaging validates the runtime allowlist and recursively scans corresponding source for private paths, credentials and retired runtime files. `npm run verify:release` checks the extracted ZIP's interface and asset loading; `npm run verify:source` installs and rebuilds from its bundled source and compares every runtime file. [CHROMEWEBSTORE.md](CHROMEWEBSTORE.md) contains the published listing link, store copy, permission explanations and future-update instructions.
 
-## Support
+## Support and feedback
 
-Report reproducible bugs through [GitHub Issues](https://github.com/Lorcuz/WebScaly/issues), email [notlorcuz@gmail.com](mailto:notlorcuz@gmail.com), or contact [Lorcuz on Discord](https://discord.com/users/754255237195235369). Include the player, algorithm and steps to reproduce; omit private video addresses and personal configuration exports. Use the private process in [SECURITY.md](SECURITY.md) for security issues.
+Report a reproducible problem through [GitHub Issues](https://github.com/Lorcuz/webscaly/issues), email [notlorcuz@gmail.com](mailto:notlorcuz@gmail.com), or contact [Lorcuz on Discord](https://discord.com/users/754255237195235369). Avoid posting personal configuration exports, private video addresses or browser profiles. For security issues, use the private email process in [SECURITY.md](SECURITY.md).
 
-Optional PayPal support is available in **Settings → About → Support WebScaly**. Donations are never required.
+Optional PayPal support is available from **Settings → About → Support WebScaly**. A donation is never required to use the extension.
 
 ## License
 
-WebScaly-authored code and the scale logo use the [MIT License](LICENSE). Bundled components retain their own licenses: FSRCNNX weights and derived shaders remain **LGPL-3.0-or-later**, with corresponding source and rebuild instructions. See [third-party notices](THIRD_PARTY_NOTICES.md).
+WebScaly-authored code and its scale logo use the [MIT License](LICENSE). Bundled third-party material retains its own license. In particular, the FSRCNNX weights and derived shaders are **LGPL-3.0-or-later**; the package includes corresponding source, notices and rebuild/replacement instructions. See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). The MIT license does not relicense those components.
 
-Demonstration media has separate credits and terms in [the asset attribution](docs/media/ATTRIBUTIONS.md); the code license does not relicense the Hero film.
+Demonstration media has separate credits and terms in [docs/media/ATTRIBUTIONS.md](docs/media/ATTRIBUTIONS.md); the code license does not relicense the demonstration footage or music.
 
 <p align="center">Built in Italy 🇮🇹<br><sub>by Lorenzo Gresio</sub></p>

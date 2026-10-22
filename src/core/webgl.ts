@@ -1,9 +1,22 @@
-import type { Settings } from "../shared/settings";
+import type { Settings } from "../shared/settings-core";
 import { snapshot, releaseSnapshot } from "./source-frame";
 import { pixelCrop, type Crop } from "./crop";
 
-// A small, real GPU spatial filter for devices/browsers without WebGPU.
-// No float render targets, optional extensions, vendor checks, or neural weights.
+const UNIFORMS = [
+  "texel",
+  "region",
+  "strength",
+  "denoise",
+  "split",
+  "compare",
+  "bicubic",
+  "vibrance",
+  "contrast",
+  "brightness",
+] as const;
+// A single-pass GPU spatial filter for devices/browsers without WebGPU:
+// optional Catmull-Rom upscaling, edge-aware denoise and bounded sharpening,
+// colour adjustment and the comparison split. No float targets or extensions.
 export class WebGLSpatial {
   readonly gl: WebGLRenderingContext | WebGL2RenderingContext;
   readonly backend: string;
@@ -12,6 +25,7 @@ export class WebGLSpatial {
   private vertices: WebGLBuffer;
   private shaders: WebGLShader[] = [];
   private settings: Settings;
+  private locations = new Map<string, WebGLUniformLocation | null>();
   constructor(
     canvas: HTMLCanvasElement,
     settings: Settings,
@@ -46,16 +60,29 @@ export class WebGLSpatial {
     )?.precision
       ? "highp"
       : "mediump";
+    const sample = v2 ? "texture" : "texture2D";
     const fragment = `${prefix}precision ${precision} float;
       ${v2 ? "in" : "varying"} vec2 uv; ${v2 ? "out vec4 color;" : ""}
-      uniform sampler2D image; uniform vec2 texel; uniform vec4 region; uniform float strength,denoise,split,compare;
-      vec3 pixel(vec2 p){return ${v2 ? "texture" : "texture2D"}(image,clamp(p,texel*.5,vec2(1.)-texel*.5)).rgb;}
-      void main(){vec2 p=region.xy+uv*region.zw;vec3 c=pixel(p),n=pixel(p-vec2(0.,texel.y)),s=pixel(p+vec2(0.,texel.y)),e=pixel(p+vec2(texel.x,0.)),w=pixel(p-vec2(texel.x,0.));
-        vec3 average=(n+s+e+w)*.25,lo=min(c,min(min(n,s),min(e,w))),hi=max(c,max(max(n,s),max(e,w)));
-        vec3 range=hi-lo;float contrast=max(max(range.r,range.g),range.b);
-        vec3 base=mix(c,average,denoise*(1.-smoothstep(.01,.10,contrast)));
-        vec3 processed=clamp(base+(base-average)*strength,lo,hi);
-        ${v2 ? "color" : "gl_FragColor"}=vec4(compare>.5&&uv.x<split?c:processed,1.);}`;
+      uniform sampler2D image; uniform vec2 texel; uniform vec4 region;
+      uniform float strength,denoise,split,compare,bicubic,vibrance,contrast,brightness;
+      vec3 pixel(vec2 p){return ${sample}(image,clamp(p,texel*.5,vec2(1.)-texel*.5)).rgb;}
+      float cr(float x){x=abs(x);return x<1.?(1.5*x-2.5)*x*x+1.:x<2.?((-.5*x+2.5)*x-4.)*x+2.:0.;}
+      vec3 cubic(vec2 p){
+        vec2 pos=p/texel-.5,base=floor(pos),f=pos-base;vec3 sum=vec3(0.);float total=0.;
+        for(int j=-1;j<=2;j++){float wy=cr(float(j)-f.y);
+          for(int i=-1;i<=2;i++){float w=cr(float(i)-f.x)*wy;
+            sum+=pixel((base+vec2(float(i),float(j))+.5)*texel)*w;total+=w;}}
+        return clamp(sum/total,0.,1.);}
+      vec3 grade(vec3 x){x+=brightness*.2;x=(x-.5)*(1.+contrast*.5)+.5;
+        float l=dot(x,vec3(.2126,.7152,.0722)),c=max(x.r,max(x.g,x.b))-min(x.r,min(x.g,x.b));
+        return clamp(mix(vec3(l),x,1.+vibrance*(1.-clamp(c,0.,1.))),0.,1.);}
+      void main(){vec2 p=region.xy+uv*region.zw;vec3 raw=pixel(p);
+        vec3 c=bicubic>.5?cubic(p):raw,n=pixel(p-vec2(0.,texel.y)),s=pixel(p+vec2(0.,texel.y)),e=pixel(p+vec2(texel.x,0.)),w=pixel(p-vec2(texel.x,0.));
+        vec3 average=(n+s+e+w)*.25,lo=min(raw,min(min(n,s),min(e,w))),hi=max(raw,max(max(n,s),max(e,w)));
+        vec3 range=hi-lo;float spread=max(max(range.r,range.g),range.b);
+        vec3 base=mix(c,average,denoise*(1.-smoothstep(.01,.10,spread)));
+        vec3 processed=grade(clamp(base+(base-average)*strength,lo,hi));
+        ${v2 ? "color" : "gl_FragColor"}=vec4(compare>.5&&uv.x<split?raw:processed,1.);}`;
     const compile = (type: number, code: string) => {
       const shader = gl.createShader(type);
       if (!shader) throw new Error("Cannot allocate a WebGL shader.");
@@ -105,6 +132,8 @@ export class WebGLSpatial {
       for (const p of [gl.TEXTURE_MIN_FILTER, gl.TEXTURE_MAG_FILTER])
         gl.texParameteri(gl.TEXTURE_2D, p, gl.LINEAR);
       gl.uniform1i(gl.getUniformLocation(program, "image"), 0);
+      for (const name of UNIFORMS)
+        this.locations.set(name, gl.getUniformLocation(program, name));
     } catch (error) {
       this.destroy();
       throw error;
@@ -113,7 +142,7 @@ export class WebGLSpatial {
   update(settings: Settings) {
     this.settings = settings;
   }
-  render(video: HTMLVideoElement, mediaTime: number) {
+  render(video: HTMLVideoElement, mediaTime: number, compare: boolean) {
     const gl = this.gl,
       s = this.settings,
       frame = snapshot(video, mediaTime);
@@ -130,26 +159,28 @@ export class WebGLSpatial {
       );
       gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
       gl.useProgram(this.program);
-      gl.uniform2f(
-        gl.getUniformLocation(this.program, "texel"),
-        1 / video.videoWidth,
-        1 / video.videoHeight,
-      );
+      const at = (name: (typeof UNIFORMS)[number]) => this.locations.get(name)!;
+      gl.uniform2f(at("texel"), 1 / video.videoWidth, 1 / video.videoHeight);
       const region = pixelCrop(video.videoWidth, video.videoHeight, this.crop);
       gl.uniform4f(
-        gl.getUniformLocation(this.program, "region"),
+        at("region"),
         region.x / video.videoWidth,
         region.y / video.videoHeight,
         region.width / video.videoWidth,
         region.height / video.videoHeight,
       );
-      for (const [name, value] of Object.entries({
-        strength: s.strength,
-        denoise: s.denoise,
-        split: s.split,
-        compare: s.comparison ? 1 : 0,
-      }))
-        gl.uniform1f(gl.getUniformLocation(this.program, name), value);
+      const upscaling = gl.drawingBufferHeight > region.height * 1.05;
+      for (const [name, value] of [
+        ["strength", s.strength],
+        ["denoise", s.denoise],
+        ["split", s.split],
+        ["compare", compare ? 1 : 0],
+        ["bicubic", upscaling && s.quality !== "fast" ? 1 : 0],
+        ["vibrance", s.vibrance],
+        ["contrast", s.contrast],
+        ["brightness", s.brightness],
+      ] as const)
+        gl.uniform1f(at(name), value);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       const error = gl.getError();
       if (error !== gl.NO_ERROR)

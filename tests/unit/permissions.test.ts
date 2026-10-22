@@ -12,7 +12,10 @@ let listener: any,
   allow: (v: boolean) => void,
   gesture: boolean,
   requestGesture: boolean,
-  requests: number;
+  requests: number,
+  messages: { tabId: number; message: any; options?: any }[],
+  frameWrites: number,
+  status: any;
 const event = () => ({ addListener: vi.fn(), removeListener: vi.fn() });
 async function setup(pending: Record<string, unknown> = {}) {
   vi.resetModules();
@@ -22,9 +25,15 @@ async function setup(pending: Record<string, unknown> = {}) {
   gesture = false;
   requestGesture = false;
   requests = 0;
+  messages = [];
+  frameWrites = 0;
+  status = {};
   const area = (state: Record<string, any>) => ({
     get: async (key: string) => ({ [key]: structuredClone(state[key]) }),
-    set: async (v: object) => Object.assign(state, structuredClone(v)),
+    set: async (v: object) => {
+      if ("webscalyFrames" in v) frameWrites++;
+      Object.assign(state, structuredClone(v));
+    },
   });
   (globalThis as any).chrome = {
     runtime: {
@@ -63,13 +72,24 @@ async function setup(pending: Record<string, unknown> = {}) {
     tabs: {
       query: async () => [],
       get: async () => ({ url: "https://parent.test" }),
-      sendMessage: async () => ({}),
+      sendMessage: async (tabId: number, message: any, options?: any) => {
+        messages.push({ tabId, message, options });
+        return message.type === "webscaly:status" ? status : {};
+      },
       onRemoved: event(),
+      onUpdated: event(),
+      create: vi.fn(async () => ({})),
     },
+    action: {
+      setBadgeText: vi.fn(async () => {}),
+      setBadgeBackgroundColor: vi.fn(async () => {}),
+      setBadgeTextColor: vi.fn(async () => {}),
+    },
+    commands: { onCommand: event() },
     scripting: {
       getRegisteredContentScripts: async () => [],
       unregisterContentScripts: async () => {},
-      registerContentScripts: async () => {},
+      registerContentScripts: vi.fn(async () => {}),
       executeScript: async () => [],
     },
   };
@@ -312,4 +332,106 @@ it("authorizes inherited-origin frames while rejecting opaque sandbox origins", 
     (await send({ type: "webscaly:authorized" }, { ...sender, origin: "null" }))
       .value,
   ).toBe(null);
+});
+
+const content = (origin = "https://example.com", tab = 4, frameId = 0) => ({
+  id: "test",
+  url: origin + "/watch",
+  tab: { id: tab },
+  frameId,
+});
+function approved(...origins: string[]) {
+  local.webscalyConfig = {
+    ...EMPTY,
+    sites: origins.map((origin) => ({ origin, subdomains: false, settings: DEFAULTS })),
+  };
+  for (const origin of origins) scopes.add(origin + "/*");
+}
+it("settings-only edits neither re-register scripts nor broadcast to every tab", async () => {
+  approved("https://example.com");
+  const chrome = (globalThis as any).chrome;
+  chrome.tabs.query = async () => [{ id: 1, url: "https://example.com/" }];
+  await send({ type: "webscaly:defaults", settings: DEFAULTS });
+  const registrations = chrome.scripting.registerContentScripts.mock.calls.length;
+  messages = [];
+  for (const strength of [0.2, 0.3, 0.4])
+    await send({ type: "webscaly:site", origin: "https://example.com", patch: { strength } });
+  expect(local.webscalyConfig.sites[0].settings.strength).toBe(0.4);
+  expect(messages).toEqual([]);
+  expect(chrome.scripting.registerContentScripts.mock.calls.length).toBe(registrations);
+  await send({ type: "webscaly:remove", origin: "https://example.com" });
+  expect(messages.map((m) => m.message.type)).toContain("webscaly:invalidate");
+});
+it("authorization reports preferences and writes the frame registry only when it changes", async () => {
+  approved("https://example.com");
+  local.webscalyConfig.preferences = { paused: true, batterySaver: false, welcomed: true };
+  (globalThis as any).chrome.tabs.get = async () => ({ url: "https://example.com/watch" });
+  const first = await send({ type: "webscaly:authorized" }, content());
+  expect(first.value.preferences.paused).toBe(true);
+  await send({ type: "webscaly:authorized" }, content());
+  await send({ type: "webscaly:authorized" }, content());
+  expect(frameWrites).toBe(1);
+});
+it("imports merge by default and only a replace revokes missing sites", async () => {
+  approved("https://keep.test");
+  const file = {
+    ...EMPTY,
+    sites: [{ origin: "https://new.test", subdomains: false, settings: DEFAULTS }],
+  };
+  await send({ type: "webscaly:import", config: file });
+  expect(local.webscalyConfig.sites.map((s: any) => s.origin)).toEqual([
+    "https://keep.test",
+    "https://new.test",
+  ]);
+  expect(scopes.has("https://keep.test/*")).toBe(true);
+  await send({ type: "webscaly:import", config: file, mode: "replace" });
+  expect(local.webscalyConfig.sites.map((s: any) => s.origin)).toEqual(["https://new.test"]);
+  expect(scopes.has("https://keep.test/*")).toBe(false);
+});
+it("keyboard commands change only the profile rendering in the active tab", async () => {
+  approved("https://example.com", "https://other.test");
+  const chrome = (globalThis as any).chrome;
+  chrome.tabs.get = async () => ({ id: 7, url: "https://example.com/watch" });
+  status = {
+    origin: "https://example.com",
+    videos: 1,
+    renderers: [{ state: "active" }],
+    embeds: [],
+  };
+  let result = await send({ type: "webscaly:command", command: "toggle-enhancement", tabId: 7 });
+  expect(result.ok).toBe(true);
+  expect(local.webscalyConfig.sites[0].settings.enabled).toBe(false);
+  expect(local.webscalyConfig.sites[1].settings.enabled).toBe(true);
+  await send({ type: "webscaly:command", command: "cycle-engine", tabId: 7 });
+  expect(local.webscalyConfig.sites[0].settings.algorithm).toBe("anime4k");
+  expect(local.webscalyConfig.sites[0].settings.enabled).toBe(true);
+  await send({ type: "webscaly:command", command: "toggle-pause", tabId: 7 });
+  expect(local.webscalyConfig.preferences.paused).toBe(true);
+  result = await send({ type: "webscaly:command", command: "format-disk", tabId: 7 });
+  expect(result.ok).toBe(false);
+  expect(
+    (await send({ type: "webscaly:command", command: "toggle-pause", tabId: 7 }, content())).ok,
+  ).toBe(false);
+});
+it("combines frame reports into one per-tab toolbar badge", async () => {
+  const chrome = (globalThis as any).chrome;
+  await send({ type: "webscaly:report", state: "active" }, content("https://example.com", 3, 2));
+  await new Promise((r) => setTimeout(r, 0));
+  expect(chrome.action.setBadgeText).toHaveBeenLastCalledWith({ tabId: 3, text: "ON" });
+  await send({ type: "webscaly:report", state: "unavailable" }, content("https://example.com", 3, 0));
+  await new Promise((r) => setTimeout(r, 0));
+  expect(chrome.action.setBadgeText).toHaveBeenLastCalledWith({ tabId: 3, text: "ON" });
+  await send({ type: "webscaly:report", state: "idle" }, content("https://example.com", 3, 2));
+  await new Promise((r) => setTimeout(r, 0));
+  expect(chrome.action.setBadgeText).toHaveBeenLastCalledWith({ tabId: 3, text: "!" });
+  await send({ type: "webscaly:report", state: "bogus" }, content("https://example.com", 3, 0));
+  await send({ type: "webscaly:report", state: "active" });
+  expect(chrome.action.setBadgeText).toHaveBeenCalledTimes(3);
+});
+it("stores preference patches from settings pages only", async () => {
+  await send({ type: "webscaly:preferences", patch: { batterySaver: true, extra: 1 } });
+  expect(local.webscalyConfig.preferences).toEqual({ paused: false, batterySaver: true, welcomed: false });
+  expect(
+    (await send({ type: "webscaly:preferences", patch: { paused: true } }, content())).ok,
+  ).toBe(false);
 });

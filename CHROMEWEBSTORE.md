@@ -1,6 +1,6 @@
 # Chrome Web Store Listing — WebScaly
 
-Last updated: 2026-10-15. Project version: 0.3.1. Status: published on the Chrome Web Store.
+Last updated: 2026-10-20. Project version: 0.4.0 (prepared; the store currently serves 0.3.1). Status: published on the Chrome Web Store.
 
 **Live listing:** [WebScaly on the Chrome Web Store](https://chromewebstore.google.com/detail/webscaly/hdcnniaagmhkocoeahemlpgjecgpchfa). This is the recommended installation method. Source and development releases are available on [GitHub](https://github.com/Lorcuz/WebScaly).
 
@@ -12,7 +12,7 @@ Last updated: 2026-10-15. Project version: 0.3.1. Status: published on the Chrom
 | Summary from package | Local video enhancement with WebGPU and WebGL on websites you approve. |
 | Category | Entertainment |
 | Language | English |
-| Global promo video | https://youtu.be/Oy77dm2rm-s — published on YouTube as Unlisted, with custom thumbnail and English captions. |
+| Global promo video | The YouTube URL of the 0.4.0 presentation once it is published there; leave empty until then. |
 | Official URL | None. Use a verified site only if you actually own it. |
 | Homepage URL | https://github.com/Lorcuz/webscaly |
 | Support URL | https://github.com/Lorcuz/webscaly/blob/main/SUPPORT.md |
@@ -29,29 +29,34 @@ The repository, support and privacy links are public on GitHub. Settings → Abo
 
 Paste the plain text from `docs/store/description.txt` into Description (under 16,000 characters):
 
-Enhance the videos you watch, right in your browser. WebScaly adds sharper detail and local upscaling on websites you approve, while your usual player keeps control of playback and sound.
+Enhance the videos you watch, right in your browser. WebScaly sharpens detail, cleans up noise and banding, and upscales video on websites you approve, while your usual player keeps control of playback and sound.
 
 CHOOSE YOUR ENHANCEMENT
-Spatial Detail: light sharpening and noise reduction.
-Anime4K: restore detail in animation.
-FSRCNNX: reconstruct finer detail with 2× upscaling.
+Spatial Detail: light, works on any video.
+Anime4K: restores line art and flat colour in animation.
+FSRCNNX: reconstructs finer detail in camera footage with 2× upscaling.
+Every engine is followed by a high-quality scaler (bicubic or Lanczos) and adaptive sharpening at your screen size.
 
-Adjust quality and output size to suit your device. Keep different settings for different websites. Turn on comparison to see the original and enhanced image side by side.
+FINE-TUNE THE PICTURE
+Adjust sharpening, denoise, deband, vibrance, contrast and brightness. Keep different settings for different websites, or apply a built-in preset: Anime, Live action, Low-res rescue or Battery friendly. A live before/after preview in Settings shows the effect on generated test footage.
+
+SMOOTH ON ANY DEVICE
+Adaptive performance steps down quality when your graphics card falls behind instead of stuttering. Leave already-sharp videos untouched, save battery while unplugged, or pause everything with one click.
 
 A QUIET, COMPACT INTERFACE
-Start with the popup: approve a website, enable Enhancement and choose an algorithm. In-player controls, comparison and the performance HUD stay hidden until you turn them on. Advanced settings offer more control, clear diagnostics and short help for technical options.
+The popup shows the engine, resolution and speed at a glance. Optional in-player controls, comparison slider, snapshot and performance HUD stay hidden until you turn them on, and the controls hide while you watch. Keyboard shortcuts switch enhancement, comparison and engine, and the toolbar badge shows when a video is being enhanced.
 
 YOU CONTROL WEBSITE ACCESS
-WebScaly has no website access by default. Click Add this website, then Allow in Chrome. If a page uses an embedded player, approve that player's website too. Remove access whenever you want.
+WebScaly has no website access by default. Click Allow on this website, then Allow in Chrome. If a page uses an embedded player, approve that player's website too. Remove access whenever you want.
 
 YOUR VIDEOS STAY ON YOUR DEVICE
-No accounts, tracking, analytics, cloud processing or automatic uploads. Website addresses, video frames and settings are used locally to provide enhancement. The developer does not receive your browsing activity or videos.
+No accounts, tracking, analytics, cloud processing or automatic uploads. Website addresses, video frames and settings are used locally to provide enhancement. Snapshots are saved only when you ask, to your own downloads. The developer does not receive your browsing activity or videos.
 
 WHEN DIRECT ACCESS IS RESTRICTED
 The optional compatibility player lets you explicitly share your source tab and select the video area for local enhancement. Audio remains in the original tab. Nothing is recorded or uploaded.
 
 COMPATIBILITY
-Requires Chrome 121 or newer. Performance and available algorithms depend on your browser, GPU and video player. A lighter spatial fallback is available when supported. Protected video and browser security restrictions can prevent enhancement. Support is not guaranteed for every website or device.
+Requires Chrome 121 or newer. Performance and available engines depend on your browser, GPU and video player. A lighter spatial fallback is available when supported. Protected video and browser security restrictions can prevent enhancement. Support is not guaranteed for every website or device.
 
 SUPPORT
 Questions or feedback: notlorcuz@gmail.com
@@ -71,19 +76,15 @@ Use files from the Chrome Web Store handoff folder's `assets/` directory:
 | Field | File | Format |
 | --- | --- | --- |
 | Store icon | icon-128.png | 128×128 PNG |
-| Screenshot 1 | 01-player-1280x800.png — enlarged original-illustration OFF/ON detail, 360p source | 1280×800, 24-bit PNG, no alpha |
-| Screenshot 2 | 06-hero-detail-1280x800.png — enlarged Hero OFF/ON detail, 540p source | 1280×800, 24-bit PNG, no alpha |
+| Screenshot 1 | 01-player-1280x800.png | 1280×800, 24-bit PNG, no alpha |
+| Screenshot 2 | 02-settings-1280x800.png | 1280×800, 24-bit PNG, no alpha |
 | Screenshot 3 | 03-popup-1280x800.png | 1280×800, 24-bit PNG, no alpha |
-| Screenshot 4 | 02-settings-1280x800.png | 1280×800, 24-bit PNG, no alpha |
-| Screenshot 5 | 04-site-profiles-1280x800.png | 1280×800, 24-bit PNG, no alpha |
+| Screenshot 4 | 04-site-profiles-1280x800.png | 1280×800, 24-bit PNG, no alpha |
+| Screenshot 5 | 05-about-1280x800.png | 1280×800, 24-bit PNG, no alpha |
 | Small promo tile | small-promo-440x280.png | 440×280, 24-bit PNG, no alpha |
 | Marquee promo tile | marquee-promo-1400x560.png | 1400×560, 24-bit PNG, no alpha |
 
-Image 01 uses a 640×360 illustration video with Automatic scale to 1920×1080. Image 06 uses a 960×540 Hero film still with 2× scale to 1920×1080. Both compare identical enlarged regions from native playback and actual Anime4K Quality output. Keep their visible source notes and [full attribution](docs/media/ATTRIBUTIONS.md). The About screenshot is an optional alternative if you replace one of the five images above. Other screenshots show the current installed extension on an isolated local demonstration website. All player tools remain hidden by default in a new installation. The popup overview contains an unaltered capture of the actual popup; `popup-ui.png` is supporting artwork, not a store-sized screenshot. No user history or device report is included.
-
-The YouTube upload is complete. The new screenshots and promo-video URL are ready for the next listing update. Updating GitHub assets does not update the live store listing.
-
-The [media gallery](docs/media/README.md) also provides the showcase MP4, English captions and additional comparison images. Repository artwork updates do not update the live store listing automatically; the publisher uploads chosen assets in the store dashboard.
+Screenshots show the current installed extension. Player footage is original and generated locally. Optional comparison/controls are enabled for the demo; all overlays remain hidden by default in a new installation. The popup screenshot is a presentation layout containing an unaltered capture of the actual popup. No website artwork, user history or device report is included. Do not upload `popup-ui.png`, which is a supporting capture rather than a store-sized screenshot.
 
 ## Permission explanations — copy each into its field
 
@@ -97,11 +98,15 @@ Loads the bundled video-enhancement content script only on websites with matchin
 
 **activeTab**
 
-Temporarily reads the active website address when the user opens WebScaly from the toolbar, so the popup can show the current website and offer Add this website. It does not read browsing history or grant ongoing access to all tabs.
+Temporarily reads the active website address when the user opens WebScaly from the toolbar or presses a WebScaly keyboard shortcut, so the popup can show the current website and offer Allow on this website, and shortcuts act on that tab. It does not read browsing history or grant ongoing access to all tabs.
 
 **Optional host permissions — http://*/* and https://*/***
 
 Users can choose any ordinary HTTP or HTTPS video website. These optional declarations allow a request for the specific origin, or explicitly selected subdomain scope, after Add/Allow. No host is granted at installation. Both the parent page and an embedded player must be approved; revoking either stops processing for that page. No cookies, private form data or video content are sent to the developer.
+
+**Keyboard shortcuts (`commands` manifest key, not a permission)**
+
+Declares optional shortcuts to switch enhancement, comparison and engine, save a snapshot or pause. Chrome shows and lets users change them at chrome://extensions/shortcuts. No extra permission or warning is involved.
 
 **Remote code**
 
@@ -121,7 +126,7 @@ Google requires disclosure even when information is only processed or stored loc
 | Location | No | No geolocation collection. |
 | Web history | Yes — local website-address handling | Reads current/approved page and player origins to enforce access; stores approved origins locally. It does not keep a browsing-history log or upload URLs. |
 | User activity | No | No behavioral tracking, analytics or interaction history. |
-| Website content | Yes — local video processing | Decoded video frames or explicitly shared tab images are used locally for enhancement, then discarded. Nothing is uploaded or recorded. |
+| Website content | Yes — local video processing | Decoded video frames or explicitly shared tab images are used locally for enhancement, then discarded; a small thumbnail is analysed locally to suggest an engine. A snapshot is saved to the user's downloads only when they ask. Nothing is uploaded or recorded. |
 
 These are disclosures of local handling, not claims of developer-side collection. Do not use a blanket "handles no user data" answer. Use the exact category labels presented by the dashboard and retain the policy's explanation of local-only use.
 
@@ -137,7 +142,7 @@ For a future extension update, use a version newer than the one published on the
 
 A repository documentation update does not require a new extension version or store package. Publish future code changes and their corresponding source on GitHub, and update store screenshots, listing text and privacy disclosures when the shipped behavior changes.
 
-Suggested reviewer notes: "WebScaly has no website access on installation. Open an ordinary video page, click the extension, choose Add this website and Allow, then enable Enhancement. Embedded players need their own approval in addition to the parent page. Player Controls/Compare/HUD are off by default. The compatibility player requires an explicit Chrome tab-sharing choice. Local processing can be restricted by protected media or pixel-access rules. The bundled compliance archive contains LGPL corresponding source and rebuild instructions."
+Suggested reviewer notes: "WebScaly has no website access on installation. A Getting started page opens once after install. Open an ordinary video page, click the extension, choose Allow on this website and Allow; enhancement starts automatically. Embedded players need their own approval in addition to the parent page. Player Controls/Compare/HUD are off by default. The compatibility player requires an explicit Chrome tab-sharing choice. Local processing can be restricted by protected media or pixel-access rules. The bundled compliance archive contains LGPL corresponding source and rebuild instructions."
 
 Use Chrome 121+ with a supported graphics context. No login is required. The supplied local test results do not certify every website, physical GPU or Chrome version. See docs/COMPATIBILITY.md for passed, partial and unverified outcomes. Native browser denial/restart recovery and physical AMD/Intel qualification remain manual validation limits.
 
@@ -145,10 +150,11 @@ Use Chrome 121+ with a supported graphics context. No login is required. The sup
 
 | Version | Release prepared | Changes | Distribution |
 | --- | --- | --- | --- |
+| 0.4.0 | 2026-10-20 | New image pipeline (quality scalers, adaptive sharpening, deband, colour), adaptive performance, skip-sharp, battery saver, pause, snapshots, hold-original, content suggestions, keyboard shortcuts, toolbar badge, built-in presets, redesigned popup/settings/player controls in the original palette, many reliability and performance fixes. No new permissions. | Prepared; upload after release checks |
 | 0.3.1 | 2026-10-13 | GitHub repository link and icon in About; refreshed UI screenshots and corresponding source. | [Current GitHub release](https://github.com/Lorcuz/WebScaly/releases/tag/v0.3.1) |
 | 0.3.0 | 2026-10-13 | Enhancement-only release, opt-in site access, refined interface, About/support, current artwork and corresponding source. | [Earlier GitHub release](https://github.com/Lorcuz/WebScaly/releases/tag/v0.3.0); superseded by 0.3.1 |
 
-The GitHub repository and Chrome Web Store listing are public. Repository artwork and documentation were updated on 15 October 2026 with the showcase video and comparison gallery. The Chrome Web Store remains the recommended installation method.
+The GitHub repository and Chrome Web Store listing are public. This documentation was updated on 14 October 2026 to reflect store publication and recommend the store installation first.
 
 For subsequent releases, verify Add/Allow and revocation in the installed Chrome profile, retain compatibility limits, and keep publisher/contact and any required trader disclosures current. Google and the publisher control review and publication of store updates.
 

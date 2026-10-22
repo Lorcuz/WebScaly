@@ -1,7 +1,11 @@
-# Upgrade to 0.3.0
+# Upgrade to 0.4.0
 
-Reload the unpacked `dist` extension in Chrome and refresh video tabs. Configuration version 1 is migrated once to version 2: enhancement values, profiles, approvals and presets remain; retired settings are discarded; Controls, Compare and HUD become false. Manual version-2 choices remain saved. Version-1 configuration imports receive the same migration.
+Reload the unpacked `dist` extension in Chrome and refresh video tabs. Store installations update automatically. No new permissions are requested.
 
-The old motion-generation feature and its separate build are removed. This version keeps Spatial detail, Anime4K and FSRCNNX and operates at native decoded frame rate. A new abstract scale logo replaces the old letter mark.
+Existing profiles, approvals and presets carry over. New picture settings start neutral (deband 0, colour 0, skip-above off, adaptive performance on), so the picture changes only through the improved scaler and sharpening. Sharpening, denoise and deband now apply to every engine; lower them on a profile if a neural engine looks too crisp. Quality now chooses the upscaling filter for every engine.
 
-Website approval now completes in the worker after Chrome Allow. Removal stops active renderers, including players whose parent website lost approval, and removes overlapping host grants. The compact popup exposes optional tools and the settings gear; detailed errors and measurements are available in settings.
+Imports merge into existing profiles by default and never grant access; replacing everything is a separate, confirmed choice. Settings links that use the old section names (Video Enhancement, Site Profiles, Advanced) still open the matching section.
+
+## Upgrade to 0.3.0
+
+Configuration version 1 is migrated once to version 2: enhancement values, profiles, approvals and presets remain; retired settings are discarded; Controls, Compare and HUD become false. The old motion-generation feature and its separate build were removed.

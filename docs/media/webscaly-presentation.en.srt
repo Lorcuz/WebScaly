@@ -1,0 +1,126 @@
+1
+00:00:00,000 --> 00:00:02,500
+[Instrumental music]
+
+2
+00:00:02,500 --> 00:00:03,800
+Left: original. Right: WebScaly.
+
+3
+00:00:03,800 --> 00:00:05,900
+Same video. More detail.
+640×360 source, Anime4K.
+
+4
+00:00:06,000 --> 00:00:08,000
+WebScaly
+Local video enhancement for Chrome.
+
+5
+00:00:08,000 --> 00:00:10,000
+On your graphics card,
+only on websites you approve.
+
+6
+00:00:10,100 --> 00:00:12,800
+Low-resolution video looks soft
+on a big screen.
+
+7
+00:00:12,800 --> 00:00:15,500
+WebScaly upscales and sharpens it
+live, on your device.
+
+8
+00:00:15,700 --> 00:00:18,900
+Step 1: Allow a website.
+Access starts off. You choose where.
+
+9
+00:00:18,900 --> 00:00:21,100
+Chrome asks once. Choose Allow.
+
+10
+00:00:21,200 --> 00:00:23,600
+Step 2: Pick an engine.
+WebScaly suggests one.
+
+11
+00:00:23,600 --> 00:00:26,000
+Anime4K for animation,
+FSRCNNX for camera footage.
+
+12
+00:00:26,100 --> 00:00:29,200
+Step 3: Compare in the player.
+Drag the split.
+
+13
+00:00:29,200 --> 00:00:32,200
+The website's own player keeps
+playback and sound.
+
+14
+00:00:32,400 --> 00:00:36,200
+Three engines. One frame, same crop.
+Anime4K and FSRCNNX need WebGPU.
+
+15
+00:00:36,800 --> 00:00:40,500
+Spatial Detail, the lightest engine,
+for any kind of video.
+
+16
+00:00:41,400 --> 00:00:44,800
+FSRCNNX: learned 2× upscaling
+for detail in real camera footage.
+
+17
+00:00:44,880 --> 00:00:47,580
+Tune the picture: sharpening, denoise,
+deband and colour.
+
+18
+00:00:47,580 --> 00:00:50,380
+A live before-and-after preview.
+Saved for each website.
+
+19
+00:00:50,480 --> 00:00:52,380
+Smart by default.
+Steps down to keep playback smooth.
+
+20
+00:00:52,380 --> 00:00:54,080
+Pause everywhere, save battery.
+
+21
+00:00:54,080 --> 00:00:55,780
+Shortcuts: Alt+Shift+E turns it on or off.
+
+22
+00:00:55,780 --> 00:00:57,380
+An optional HUD shows live stats.
+
+23
+00:00:57,480 --> 00:00:59,580
+Runs on your device.
+Only on websites you approve.
+
+24
+00:00:59,580 --> 00:01:01,580
+No accounts. No tracking. No uploads.
+
+25
+00:01:01,680 --> 00:01:03,980
+WebScaly. Free and open source.
+Get it on the Chrome Web Store.
+
+26
+00:01:03,980 --> 00:01:05,480
+Source code: github.com/Lorcuz/WebScaly
+
+27
+00:01:05,480 --> 00:01:08,480
+Hero © 2018 Blender Foundation · CC BY 4.0
+“Divider” by Chris Zabriskie · CC BY 4.0

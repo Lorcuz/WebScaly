@@ -1,104 +1,70 @@
 {
-  "version": "0.3.1",
-  "footage": "Image 01: original demonstration illustration prepared as a 640×360 video, Automatic scale to 1920×1080. Image 06: Hero film still, 960×540 to 1920×1080 with 2× scale. Both use matching native playback and actual Anime4K Quality output. Source credits: docs/media/ATTRIBUTIONS.md.",
-  "screenshots": "The two comparisons use matching detail crops enlarged equally. Other screenshots show the installed extension on an isolated local demonstration website, with an unaltered popup capture.",
+  "version": "0.4.0",
+  "footage": "Original procedural video, created locally for WebScaly",
+  "screenshots": "Actual installed extension with test-only loopback approval; popup overview contains its unaltered UI capture",
   "files": [
     {
       "file": "icon-128.png",
       "width": 128,
       "height": 128,
       "alpha": true,
-      "channels": 4,
-      "bytes": 6661,
-      "sha256": "db7ffb0024f8ea0f041335f5b10340f2849adec32279cbe8d46b642b881747a9"
+      "channels": 4
     },
     {
       "file": "small-promo-440x280.png",
       "width": 440,
       "height": 280,
       "alpha": false,
-      "channels": 3,
-      "bytes": 11170,
-      "sha256": "28f93fd397e27dab91a0b5013769c17983c9f0c8a56bacc11d62f1c13243697d"
+      "channels": 3
     },
     {
       "file": "marquee-promo-1400x560.png",
       "width": 1400,
       "height": 560,
       "alpha": false,
-      "channels": 3,
-      "bytes": 56967,
-      "sha256": "6058d33d69ecea60f4701f286f837e7797294d1e3edcfb1feb8a2fae671c6d8b"
+      "channels": 3
     },
     {
       "file": "01-player-1280x800.png",
       "width": 1280,
       "height": 800,
       "alpha": false,
-      "channels": 3,
-      "bytes": 418952,
-      "sha256": "b7b21dd2f44b1825f42e9881f831c6eb8a4109c0fac963df4ef1625cc8872b7c"
+      "channels": 3
     },
     {
       "file": "02-settings-1280x800.png",
       "width": 1280,
       "height": 800,
       "alpha": false,
-      "channels": 3,
-      "bytes": 54873,
-      "sha256": "43b74e40cefb99e50ac48173040598c8d1d65dd2eb497a125c643c30128f3157"
+      "channels": 3
     },
     {
       "file": "03-popup-1280x800.png",
       "width": 1280,
       "height": 800,
       "alpha": false,
-      "channels": 3,
-      "bytes": 61459,
-      "sha256": "bcbf1e260de6fe8e681b11d44c4185f92da892816d5b7a5857a40cdcd6a662a0"
+      "channels": 3
     },
     {
       "file": "04-site-profiles-1280x800.png",
       "width": 1280,
       "height": 800,
       "alpha": false,
-      "channels": 3,
-      "bytes": 48042,
-      "sha256": "500066bf54a325564762cfd73201dd3b735fee484ad2d4b094bcb94133268d71"
+      "channels": 3
     },
     {
       "file": "05-about-1280x800.png",
       "width": 1280,
       "height": 800,
       "alpha": false,
-      "channels": 3,
-      "bytes": 64792,
-      "sha256": "5a63c37472baebd0e67c3fa4a6971705e0ff86d88c30302067d2f37883508a25"
+      "channels": 3
     },
     {
       "file": "popup-ui.png",
       "width": 360,
-      "height": 441,
+      "height": 465,
       "alpha": false,
-      "channels": 3,
-      "bytes": 14837,
-      "sha256": "dde77985fe450fca757f50b1df52691751350499e452f9a05fbd9689fbcc4671"
-    },
-    {
-      "file": "06-hero-detail-1280x800.png",
-      "width": 1280,
-      "height": 800,
-      "alpha": false,
-      "channels": 3,
-      "bytes": 292296,
-      "sha256": "8516c7e006e1e9c6df6b5c34cc8311e84a7f215da964c31559782d4d42690c9c"
+      "channels": 3
     }
-  ],
-  "recommendedScreenshotOrder": [
-    "01-player-1280x800.png",
-    "06-hero-detail-1280x800.png",
-    "03-popup-1280x800.png",
-    "02-settings-1280x800.png",
-    "04-site-profiles-1280x800.png"
   ]
 }

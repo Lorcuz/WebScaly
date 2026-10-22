@@ -30,14 +30,14 @@ const granted=await worker.evaluate(()=>chrome.permissions.getAll());
 assert.deepEqual((granted.origins??[]).filter(origin=>/^https?:/.test(origin)),[]);
 checks.push("No website permission granted on installation");
 const options=await context.newPage();await options.goto(`chrome-extension://${id}/options.html`);
-await expect(options.getByRole("heading",{name:"Video Enhancement",exact:true})).toBeVisible();
+await expect(options.getByRole("heading",{name:"Enhancement",exact:true})).toBeVisible();
 for(const name of ["Controls","Compare","HUD"])await expect(options.getByRole("switch",{name,exact:true})).not.toBeChecked();
 checks.push("Hidden player-tool defaults preserved");
-for(const section of ["Site Profiles","Advanced","Diagnostics","About"]){
+for(const section of ["Websites","Presets","Behavior","Diagnostics","Getting started","About"]){
  await options.getByRole("button",{name:section,exact:true}).click();
  await expect(options.getByRole("heading",{name:section,exact:true})).toBeVisible();
 }
-checks.push("All five settings sections load from the ZIP");
+checks.push("All seven settings sections load from the ZIP");
 const flag=options.getByRole("img",{name:"🇮🇹",exact:true});
 assert(await flag.evaluate(img=>img.complete&&img.naturalWidth>0));
 await expect(options.getByRole("img",{name:"PayPal donation QR code",exact:true})).toBeHidden();
@@ -48,10 +48,10 @@ assert(await qr.locator("img").evaluate(img=>img.complete&&img.naturalWidth===81
 checks.push("About flag and hidden/revealed QR assets work");
 await options.screenshot({path:"test-results/packaged-about.png",animations:"disabled"});
 const popup=await context.newPage();await popup.goto(`chrome-extension://${id}/popup.html`);
-await expect(popup.getByRole("button",{name:"Advanced settings",exact:true})).toBeVisible();
+await expect(popup.getByRole("button",{name:"Settings",exact:true})).toBeVisible();
 const dims=await popup.locator("main.popup").evaluate(el=>({width:el.getBoundingClientRect().width,height:el.getBoundingClientRect().height,scroll:el.scrollHeight-el.clientHeight}));
-assert.equal(dims.width,360);assert(dims.height<=560&&dims.scroll<=1);
-const icon=await popup.getByRole("button",{name:"Advanced settings",exact:true}).locator("svg").evaluate(el=>({width:el.getBoundingClientRect().width,height:el.getBoundingClientRect().height}));
+assert.equal(dims.width,360);assert(dims.height<=600&&dims.scroll<=1);
+const icon=await popup.getByRole("button",{name:"Settings",exact:true}).locator("svg").evaluate(el=>({width:el.getBoundingClientRect().width,height:el.getBoundingClientRect().height}));
 assert.equal(icon.width,icon.height);assert.equal(icon.width,20);
 checks.push("Compact popup and square gear preserved");
 for(const entry of ["viewer.html","lab.html","benchmark.html"]){

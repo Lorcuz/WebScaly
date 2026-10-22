@@ -48,7 +48,7 @@ export function audit(files, depth = 0) {
 export const storeAssetNames = [
   "assets.json","icon-128.png","small-promo-440x280.png","marquee-promo-1400x560.png",
   "01-player-1280x800.png","02-settings-1280x800.png","03-popup-1280x800.png",
-  "04-site-profiles-1280x800.png","05-about-1280x800.png","06-hero-detail-1280x800.png","popup-ui.png",
+  "04-site-profiles-1280x800.png","05-about-1280x800.png","popup-ui.png",
 ];
 export async function collectSource() {
   const source = {};
@@ -62,9 +62,7 @@ export async function collectSource() {
   const docs = ["ARCHITECTURE","COMPATIBILITY","DELIVERY","DESIGN","LOCAL_VIDEO_ENHANCEMENT","PERFORMANCE","PLAN","RESEARCH","REVIEW","TESTING","UPGRADE"].map(n=>`docs/${n}.md`);
   for (const name of [...roots,...scripts.map(n=>"scripts/"+n),...docs,
     ...["README","PRIVACY","PERMISSIONS","LISTING"].map(n=>`docs/store/${n}.md`),
-    "docs/store/description.txt","docs/publishing/GITHUB.md",
-    ...["README.md","ATTRIBUTIONS.md","LUCIDE-LICENSE.txt","WebScaly-showcase.en.vtt","assets.json"].map(n=>"docs/media/"+n),
-    ...storeAssetNames.map(n=>"docs/store/assets/"+n)])
+    "docs/store/description.txt","docs/publishing/GITHUB.md",...storeAssetNames.map(n=>"docs/store/assets/"+n)])
     source[name] = new Uint8Array(await readFile(name));
   audit(source);
   return source;

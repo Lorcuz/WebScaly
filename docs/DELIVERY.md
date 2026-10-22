@@ -1,6 +1,6 @@
 # Distribution
 
-WebScaly 0.3.1 is an enhancement-only build with opt-in website access, hidden player tools by default, an abstract scale logo, a compact popup and portable source/rebuild material. Settings → About links to the public repository. Existing local Git history and raw test evidence stay private.
+WebScaly 0.4.0 is an enhancement-only build with opt-in website access, hidden player tools by default, the scale logo, a compact popup with live status, a rebuilt image pipeline and portable source/rebuild material. Settings → About links to the public repository. Existing local Git history and raw test evidence stay private.
 
 Install from the [Chrome Web Store](https://chromewebstore.google.com/detail/webscaly/hdcnniaagmhkocoeahemlpgjecgpchfa) for the recommended installation and automatic updates. The [public GitHub repository](https://github.com/Lorcuz/WebScaly) provides source, documentation and [release downloads](https://github.com/Lorcuz/WebScaly/releases/latest).
 

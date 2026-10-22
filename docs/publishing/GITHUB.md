@@ -7,16 +7,14 @@ The public repository is [Lorcuz/WebScaly](https://github.com/Lorcuz/WebScaly), 
 | Field | Value |
 | --- | --- |
 | Owner / repository | Lorcuz/WebScaly |
-| Description | Local video enhancement for Chrome. Sharpen and upscale videos on websites you approve. |
+| Description | Privacy-friendly, local video enhancement for Chrome with Spatial Detail, Anime4K and FSRCNNX. |
 | About website | https://chromewebstore.google.com/detail/webscaly/hdcnniaagmhkocoeahemlpgjecgpchfa |
 | Visibility | Public |
 | Default branch | main |
 | Issues | Enabled for the included bug and feature forms. |
-| Topics | chrome-extension, video-enhancement, upscaling, webgpu, webgl, anime4k, fsrcnnx, privacy |
+| Topics | chrome-extension, video-enhancement, upscaling, webgpu, anime4k, fsrcnnx, privacy |
 
 README.md puts the store installation first and retains source-build instructions for development. The project-specific `.gitignore`, `.gitattributes`, MIT LICENSE and third-party notices are already included. Keep these files rather than replacing them with repository-creation templates.
-
-The README includes the showcase video and large detail comparisons of both the 360p original illustration and 540p Hero source. The showcase also has an [Unlisted YouTube upload](https://youtu.be/Oy77dm2rm-s). [docs/media](../media/README.md) holds full-size images, captions, credits and checksums. Preserve the embedded video URL when editing the page. Master media is repository documentation; the source package includes its small documentation/notice files and the store-sized comparison assets, without the master video or gallery image files.
 
 WebScaly-authored code uses **MIT**. FSRCNNX remains **LGPL-3.0-or-later**, and other bundled components retain their own terms. Preserve notices and the required corresponding source/rebuild material.
 

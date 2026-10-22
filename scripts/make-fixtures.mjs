@@ -71,4 +71,10 @@ for (const format of ["hls", "dash"]) {
         ];
   execFileSync(ffmpeg, [...input, ...mux], { cwd: folder, stdio: "inherit" });
 }
-console.log("Generated local HLS and DASH fixtures.");
+// A plain progressive MP4, where seeking briefly drops readyState below
+// HAVE_CURRENT_DATA, as on most video websites.
+execFileSync(ffmpeg, [...input, "-movflags", "+faststart", "progressive.mp4"], {
+  cwd: root,
+  stdio: "inherit",
+});
+console.log("Generated local HLS, DASH and progressive fixtures.");

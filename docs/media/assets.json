@@ -1,4 +1,47 @@
 {
+  "presentation": {
+    "extensionVersion": "0.4.0",
+    "credits": "ATTRIBUTIONS.md",
+    "files": [
+      {
+        "file": "webscaly-presentation-720p.mp4",
+        "bytes": 9467404,
+        "sha256": "0d0378f82b57bdff1972605ced82c48d35ffaf1084250fe6fc584e5d3834b7e5",
+        "durationSeconds": 68.6,
+        "width": 1280,
+        "height": 720,
+        "fps": 30,
+        "video": "H.264 High",
+        "audio": "AAC-LC stereo 48 kHz"
+      },
+      {
+        "file": "webscaly-presentation.en.srt",
+        "bytes": 2264,
+        "sha256": "c7f48aabd240cad50b62e2360f4f1172bbfe9e2d4666ebfeb8bff57e1bfbf373",
+        "format": "SubRip",
+        "language": "en"
+      },
+      {
+        "file": "webscaly-presentation.en.vtt",
+        "bytes": 2272,
+        "sha256": "a486efd9df9bf40f867187ef62374506d4f2aabb711a3ff733199a2701836a41",
+        "format": "WebVTT",
+        "language": "en"
+      },
+      {
+        "file": "webscaly-presentation-thumbnail.png",
+        "bytes": 923990,
+        "sha256": "9b6ceebcedf769cffaecf9c0953506223475ec9c60760bf00faca710f3e5e394",
+        "width": 1280,
+        "height": 720
+      }
+    ],
+    "youtube": {
+      "url": "https://www.youtube.com/watch?v=ZoKox_mrUsw",
+      "visibility": "Unlisted",
+      "captions": "webscaly-presentation.en.srt"
+    }
+  },
   "extensionVersion": "0.3.1",
   "algorithm": "Anime4K CNN",
   "quality": "Quality",

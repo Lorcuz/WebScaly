@@ -55,10 +55,11 @@ document.querySelector("#run")!.addEventListener("click", async () => {
     );
     for (const algorithm of ["spatial", "anime4k", "fsrcnnx"] as Algorithm[]) {
       result.textContent = `Benchmarking ${algorithm}…`;
-      const engine = new Enhancement(device, 1280, 720, {
+      const engine = new Enhancement(device, 1280, 720, [1920, 1080], {
         ...DEFAULTS,
         algorithm,
-        quality: "fast",
+        quality: "balanced",
+        deband: 0.2,
       });
       try {
         await engine.initialize(navigator.gpu.getPreferredCanvasFormat(), true);
@@ -66,7 +67,8 @@ document.querySelector("#run")!.addEventListener("click", async () => {
         for (let i = 0; i < 95; i++) {
           const start = performance.now();
           const encoder = device.createCommandEncoder();
-          engine.encode(encoder, input, context.getCurrentTexture());
+          engine.load(encoder, input);
+          engine.encode(encoder, context.getCurrentTexture());
           device.queue.submit([encoder.finish()]);
           await device.queue.onSubmittedWorkDone();
           if (i >= 5) times.push(performance.now() - start);

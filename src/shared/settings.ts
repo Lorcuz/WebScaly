@@ -1,95 +1,14 @@
-export type Algorithm = "spatial" | "anime4k" | "fsrcnnx";
-export type Quality = "fast" | "balanced" | "quality";
-export interface Settings {
-  enabled: boolean;
-  algorithm: Algorithm;
-  quality: Quality;
-  scale: "auto" | "native" | "1.5" | "2";
-  maxHeight: number;
-  strength: number;
-  denoise: number;
-  hud: boolean;
-  comparison: boolean;
-  split: number;
-  controls: boolean;
-}
-export interface SiteProfile {
-  origin: string;
-  subdomains: boolean;
-  settings: Settings;
-}
-export interface Configuration {
-  version: 2;
-  defaults: Settings;
-  sites: SiteProfile[];
-  presets: { name: string; settings: Settings }[];
-}
-export const DEFAULTS: Settings = {
-  enabled: true,
-  algorithm: "spatial",
-  quality: "balanced",
-  scale: "auto",
-  maxHeight: 1080,
-  strength: 0.35,
-  denoise: 0.12,
-  hud: false,
-  comparison: false,
-  split: 0.5,
-  controls: false,
-};
-export const EMPTY: Configuration = {
-  version: 2,
-  defaults: DEFAULTS,
-  sites: [],
-  presets: [],
-};
-const choices = <T extends string>(
-  x: unknown,
-  valid: readonly T[],
-  fallback: T,
-): T => (valid.includes(x as T) ? (x as T) : fallback);
-const bounded = (x: unknown, min: number, max: number, fallback: number) =>
-  typeof x === "number" && Number.isFinite(x)
-    ? Math.max(min, Math.min(max, x))
-    : fallback;
-const flag = (x: unknown, fallback: boolean) =>
-  typeof x === "boolean" ? x : fallback;
-export function normalizeSettings(input: unknown): Settings {
-  const s =
-    input && typeof input === "object" ? (input as Partial<Settings>) : {};
-  return {
-    enabled: flag(s.enabled, DEFAULTS.enabled),
-    algorithm: choices(
-      s.algorithm,
-      ["spatial", "anime4k", "fsrcnnx"],
-      DEFAULTS.algorithm,
-    ),
-    quality: choices(
-      s.quality,
-      ["fast", "balanced", "quality"],
-      DEFAULTS.quality,
-    ),
-    scale: choices(s.scale, ["auto", "native", "1.5", "2"], DEFAULTS.scale),
-    maxHeight: Math.round(bounded(s.maxHeight, 240, 2160, DEFAULTS.maxHeight)),
-    strength: bounded(s.strength, 0, 1, DEFAULTS.strength),
-    denoise: bounded(s.denoise, 0, 1, DEFAULTS.denoise),
-    hud: flag(s.hud, false),
-    comparison: flag(s.comparison, false),
-    split: bounded(s.split, 0, 1, 0.5),
-    controls: flag(s.controls, false),
-  };
-}
-export function siteOrigin(input: string): string {
-  const url = new URL(input);
-  if (
-    !["https:", "http:"].includes(url.protocol) ||
-    url.username ||
-    url.password ||
-    url.hostname.includes("*")
-  )
-    throw new Error("Use a specific HTTP or HTTPS website.");
-  return `${url.protocol}//${url.hostname}`;
-}
+import { getDomain } from "tldts";
+import {
+  EMPTY,
+  normalizePreferences,
+  normalizeSettings,
+  siteOrigin,
+  type Configuration,
+  type SiteProfile,
+} from "./settings-core";
+export * from "./settings-core";
+
 export function hostPattern(
   site: Pick<SiteProfile, "origin" | "subdomains">,
 ): string {
@@ -106,28 +25,6 @@ export function hostPattern(
       ? "*."
       : "";
   return `${url.protocol}//${prefix}${url.hostname}/*`;
-}
-export function matchesSite(urlString: string, site: SiteProfile): boolean {
-  try {
-    const url = new URL(urlString),
-      approved = new URL(site.origin);
-    return (
-      url.protocol === approved.protocol &&
-      (url.hostname === approved.hostname ||
-        (site.subdomains && url.hostname.endsWith(`.${approved.hostname}`)))
-    );
-  } catch {
-    return false;
-  }
-}
-export function profileFor(
-  url: string,
-  config: Configuration,
-): SiteProfile | undefined {
-  return (
-    config.sites.find((s) => !s.subdomains && matchesSite(url, s)) ??
-    config.sites.find((s) => matchesSite(url, s))
-  );
 }
 export function normalizeConfiguration(input: unknown): Configuration {
   if (!input || typeof input !== "object") return structuredClone(EMPTY);
@@ -160,17 +57,43 @@ export function normalizeConfiguration(input: unknown): Configuration {
       /* Ignore invalid imported sites. */
     }
   }
+  const presets: Configuration["presets"] = [];
+  for (const p of (Array.isArray(value.presets) ? value.presets : []).slice(
+    0,
+    30,
+  )) {
+    if (!p || typeof p.name !== "string" || !p.name.trim()) continue;
+    const name = p.name.trim().slice(0, 50);
+    if (!presets.some((q) => q.name === name))
+      presets.push({ name, settings: migrate(p.settings) });
+  }
   return {
     version: 2,
     defaults: migrate(value.defaults),
     sites,
-    presets: (Array.isArray(value.presets) ? value.presets : [])
-      .slice(0, 30)
-      .filter((p) => p && typeof p.name === "string")
-      .map((p) => ({
-        name: p.name.slice(0, 50),
-        settings: migrate(p.settings),
-      })),
+    presets,
+    preferences: normalizePreferences(value.preferences),
   };
 }
-import { getDomain } from "tldts";
+/** Adds or updates sites and presets from an import without removing anything already approved. */
+export function mergeConfiguration(
+  current: Configuration,
+  incoming: Configuration,
+): Configuration {
+  const sites = current.sites.map(
+    (s) => incoming.sites.find((i) => i.origin === s.origin) ?? s,
+  );
+  for (const site of incoming.sites)
+    if (!sites.some((s) => s.origin === site.origin)) sites.push(site);
+  const presets = current.presets.map(
+    (p) => incoming.presets.find((i) => i.name === p.name) ?? p,
+  );
+  for (const preset of incoming.presets)
+    if (!presets.some((p) => p.name === preset.name)) presets.push(preset);
+  return normalizeConfiguration({
+    ...current,
+    defaults: incoming.defaults,
+    sites,
+    presets,
+  });
+}

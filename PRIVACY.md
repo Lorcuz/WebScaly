@@ -1,15 +1,18 @@
 # WebScaly Privacy Policy
 
-Last updated: 13 October 2026. Applies to WebScaly 0.3.1.
+Last updated: 20 October 2026. Applies to WebScaly 0.4.0.
 
 WebScaly enhances video on your device, on websites you approve. It does not send your videos or browsing activity to the developer, run analytics, sell data or use cloud processing. You do not need an account.
 
 ## Information handled on your device
 
 - **Website addresses and permissions.** WebScaly reads the current website after you open its popup, stores the website origins you approve and checks parent/embedded-player addresses to enforce your choices. It does not keep a log of your browsing history. Temporary tab and frame context may contain page addresses while the browser session is running.
-- **Video content.** Decoded video frames and video dimensions are used locally for enhancement and comparison. Frames are not uploaded, recorded or saved by WebScaly. Audio and playback remain with the website.
+- **Video content.** Decoded video frames and video dimensions are used locally for enhancement and comparison. Every few seconds a small thumbnail of the frame is analysed on your device to suggest an engine (for example, Anime4K for animation); it is discarded immediately. Frames are not uploaded or recorded. Audio and playback remain with the website.
+- **Snapshots.** When you choose Snapshot, the current enhanced frame is saved as a PNG through Chrome's normal download, on your device only. WebScaly never takes snapshots on its own.
 - **Settings.** Enhancement preferences, approved sites and presets are saved in the extension's local browser storage. They are not synced to a WebScaly account or a remote server.
-- **Diagnostics.** Current player state, processing timings, errors and browser/GPU capabilities can be displayed locally to help troubleshoot. WebScaly does not send diagnostic reports automatically.
+- **Diagnostics.** Current player state, processing timings, errors and browser/GPU capabilities can be displayed locally to help troubleshoot. Copy report places them on your clipboard only when you ask. WebScaly does not send diagnostic reports automatically.
+- **Battery state.** If you turn on Battery saver, WebScaly checks whether the device is charging so it can use lighter processing while unplugged. The charging state is not stored.
+- **Toolbar badge and shortcuts.** The per-tab badge reflects whether a video in that tab is being enhanced. Keyboard shortcuts are handled by Chrome and act only on the current tab.
 
 WebScaly does not read passwords, cookies, authentication tokens, payment details, personal communications or unrelated form content to perform enhancement. It has no analytics, advertising integrations or remote executable code.
 

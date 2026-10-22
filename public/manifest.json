@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "WebScaly",
-  "version": "0.3.1",
+  "version": "0.4.0",
   "minimum_chrome_version": "121",
   "description": "Local video enhancement with WebGPU and WebGL on websites you approve.",
   "permissions": [
@@ -20,6 +20,26 @@
   "action": {
     "default_popup": "popup.html",
     "default_title": "WebScaly"
+  },
+  "commands": {
+    "toggle-enhancement": {
+      "suggested_key": { "default": "Alt+Shift+E" },
+      "description": "Turn enhancement on or off for the video in this tab"
+    },
+    "toggle-compare": {
+      "suggested_key": { "default": "Alt+Shift+S" },
+      "description": "Show or hide the original/enhanced comparison"
+    },
+    "cycle-engine": {
+      "suggested_key": { "default": "Alt+Shift+M" },
+      "description": "Switch to the next enhancement engine"
+    },
+    "snapshot": {
+      "description": "Save the current enhanced frame as an image"
+    },
+    "toggle-pause": {
+      "description": "Pause or resume WebScaly on every website"
+    }
   },
   "options_ui": {
     "page": "options.html",

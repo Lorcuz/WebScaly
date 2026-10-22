@@ -51,14 +51,16 @@ export async function validateGpu() {
   );
   const results = [];
   const baseline = texture(device, width * 2, height * 2, "Bilinear reference");
-  const plain = new Enhancement(device, width, height, {
+  const plain = new Enhancement(device, width, height, [width * 2, height * 2], {
     ...DEFAULTS,
+    quality: "fast",
     strength: 0,
     denoise: 0,
   });
   await plain.initialize("rgba8unorm", true);
   const referenceEncoder = device.createCommandEncoder();
-  plain.encode(referenceEncoder, source, baseline);
+  plain.load(referenceEncoder, source);
+  plain.encode(referenceEncoder, baseline);
   device.queue.submit([referenceEncoder.finish()]);
   const reference = await readPixels(device, baseline);
   plain.destroy();
@@ -70,18 +72,20 @@ export async function validateGpu() {
       height * 2,
       `Validation ${algorithm}`,
     );
-    const engine = new Enhancement(device, width, height, {
+    const engine = new Enhancement(device, width, height, [width * 2, height * 2], {
       ...DEFAULTS,
       algorithm,
       quality: "fast",
       strength: 0.7,
       denoise: 0.2,
+      deband: 0.3,
     });
     const start = performance.now();
     try {
       await engine.initialize("rgba8unorm", true);
       const encoder = device.createCommandEncoder();
-      engine.encode(encoder, source, target);
+      engine.load(encoder, source);
+      engine.encode(encoder, target);
       device.queue.submit([encoder.finish()]);
       const out = await readPixels(device, target);
       let changed = 0,

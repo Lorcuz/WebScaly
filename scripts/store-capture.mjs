@@ -53,8 +53,8 @@ const context=await chromium.launchPersistentContext(await mkdtemp(resolve("test
 async function save(page,name){const bytes=await page.screenshot({animations:"disabled"});await sharp(bytes).flatten({background:"#10181f"}).removeAlpha().png().toFile(`${folder}/${name}`);}
 try{
 const worker=context.serviceWorkers()[0]??await context.waitForEvent("serviceworker"),id=new URL(worker.url()).host;
-const settings={enabled:true,algorithm:"spatial",quality:"balanced",scale:"2",maxHeight:1080,strength:.35,denoise:.12,hud:false,comparison:true,split:.5,controls:true};
-await worker.evaluate(async(config)=>chrome.storage.local.set({webscalyConfig:config}),{version:2,defaults:{...settings,controls:false,comparison:false},sites:[{origin:"http://127.0.0.1",subdomains:false,settings}],presets:[]});
+const settings={enabled:true,algorithm:"fsrcnnx",quality:"quality",scale:"2",maxHeight:1440,strength:.35,denoise:.12,deband:.2,vibrance:0,contrast:0,brightness:0,skipAbove:0,adaptive:true,hud:true,comparison:true,split:.5,controls:true};
+await worker.evaluate(async(config)=>chrome.storage.local.set({webscalyConfig:config}),{version:2,defaults:{...settings,controls:false,comparison:false,hud:false},sites:[{origin:"http://127.0.0.1",subdomains:false,settings}],presets:[],preferences:{paused:false,batterySaver:false,welcomed:true}});
 const page=await context.newPage(); await page.goto(base+"/demo.html");await page.getByRole("button",{name:"Play demo",exact:true}).click();
 await page.locator('webscaly-player[data-state="active"]').waitFor();
 await page.frameLocator('iframe[title="WebScaly video controls"]').getByRole("button",{name:"HUD",exact:true}).waitFor();
@@ -65,8 +65,10 @@ const tabId=await worker.evaluate(async()=>{const tabs=await chrome.tabs.query({
 if(!tabId)throw Error("Demo tab unavailable");
 const options=await context.newPage();await options.goto(`chrome-extension://${id}/options.html?tab=${tabId}&profile=${encodeURIComponent("http://127.0.0.1")}`);
 await options.getByLabel("Editing profile").selectOption("http://127.0.0.1");
+// Let the live before/after preview start before capturing.
+await options.waitForTimeout(2500);await options.evaluate(()=>document.fonts.ready);
 await save(options,"02-settings-1280x800.png");
-await options.getByRole("button",{name:"Site Profiles",exact:true}).click();await save(options,"04-site-profiles-1280x800.png");
+await options.getByRole("button",{name:"Websites",exact:true}).click();await save(options,"04-site-profiles-1280x800.png");
 await options.getByRole("button",{name:"About",exact:true}).click();await save(options,"05-about-1280x800.png");
 const popup=await context.newPage();await popup.goto(`chrome-extension://${id}/popup.html?tab=${tabId}`);
 await popup.getByRole("button",{name:"Remove website access",exact:true}).waitFor();
@@ -78,7 +80,7 @@ const css=`@font-face{font-family:Inter;src:url('${base}/inter.woff2')}*{box-siz
 await graphics.setContent(`<!doctype html><html lang="en"><head><title>WebScaly popup overview</title><style>${css}
 main{height:800px;display:flex;align-items:center;padding:68px 88px;gap:115px}section{width:575px}.brand{display:flex;align-items:center;gap:14px;font-size:27px;margin-bottom:48px}.brand img{width:54px;height:54px}h1{font-size:49px;line-height:1.15;letter-spacing:-1.8px}p{font-size:20px;line-height:1.65;margin-top:25px}
 .capture{width:360px;height:auto;border-radius:10px;box-shadow:0 20px 65px #080e15}footer{font-size:13px;color:#96afbd;margin-top:35px;line-height:1.6}
-</style></head><body><main><section><div class="brand"><img src="${base}/icon.png" alt="">WebScaly</div><h1>Approve a site.<br><span class="accent">Choose your detail.</span></h1><p class="muted">Enhancement, quality and optional player tools in one compact popup.</p><footer>Access starts off. You choose the websites.<br>Actual popup shown with the original local video demo.</footer></section><img class="capture" src="${base}/popup.png" alt="Actual WebScaly popup"></main></body></html>`);
+</style></head><body><main><section><div class="brand"><img src="${base}/icon.png" alt="">WebScaly</div><h1>Approve a site.<br><span class="accent">Choose your detail.</span></h1><p class="muted">Engine, quality and live speed at a glance, with presets, fine-tuning and optional player tools in one compact popup.</p><footer>Access starts off. You choose the websites.<br>Actual popup shown with the original local video demo.</footer></section><img class="capture" src="${base}/popup.png" alt="Actual WebScaly popup"></main></body></html>`);
 await graphics.locator(".capture").evaluate(img=>img.decode()); await graphics.evaluate(()=>document.fonts.ready);
 await save(graphics,"03-popup-1280x800.png");
 await graphics.setViewportSize({width:440,height:280});

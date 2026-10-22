@@ -6,7 +6,7 @@ await build({
   bundle: true,
   format: "iife",
   target: "chrome121",
-  loader: { ".wgsl": "text" },
+  loader: { ".wgsl": "text", ".woff2": "binary" },
   minify: true,
 });
 await build({
@@ -30,12 +30,14 @@ for (const file of [
   await copyFile(`src/vendor/${file}`, `dist/compliance/fsrcnnx/${file}`);
 for (const file of ["enhancement.ts", "device.ts"])
   await copyFile(`src/core/${file}`, `dist/compliance/fsrcnnx/${file}`);
-await copyFile("src/shared/settings.ts", "dist/compliance/fsrcnnx/settings.ts");
+for (const file of ["settings.ts", "settings-core.ts"])
+  await copyFile(`src/shared/${file}`, `dist/compliance/fsrcnnx/${file}`);
 for (const file of [
-  "spatial.wgsl",
-  "resample.wgsl",
-  "present.wgsl",
   "capture.wgsl",
+  "prefilter.wgsl",
+  "scale.wgsl",
+  "present.wgsl",
+  "hint.wgsl",
 ])
   await copyFile(
     `src/core/shaders/${file}`,
