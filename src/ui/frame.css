@@ -163,3 +163,7 @@ input:focus-visible {
     border-color: Highlight;
   }
 }
+
+:lang(ja) body {
+  font-family: Inter, "Noto Sans CJK JP", "Yu Gothic UI", Meiryo, system-ui, sans-serif;
+}

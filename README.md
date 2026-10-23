@@ -94,6 +94,12 @@ Protected media, browser pixel-access restrictions, unapproved embedded players 
 
 This release does not promise support for every website or GPU. See [compatibility results](docs/COMPATIBILITY.md) for tested, partial and unverified cases.
 
+## Interface language
+
+WebScaly supports English and Japanese. Open **Settings → Behavior → Language** to choose **Automatic (Chrome language)**, **日本語**, or **English**. Automatic uses Chrome’s interface language; languages other than Japanese fall back to English. Changes apply to open extension pages and player controls without reloading the video.
+
+The language choice is saved locally as a device preference. Existing profiles and presets keep their settings, and importing profiles preserves your language choice. Chrome’s own extension and shortcut descriptions follow Chrome’s language independently of this setting. Driver errors and raw diagnostic reports retain their original technical text.
+
 ## Develop, test and package
 
 ```sh

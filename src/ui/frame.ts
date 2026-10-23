@@ -1,3 +1,5 @@
+import { bindLocale } from "../shared/i18n/dom";
+import { getLocale, subscribeLocale, t } from "../shared/i18n";
 import "@fontsource/inter/latin-500.css";
 import "@fontsource/inter/latin-600.css";
 import "./frame.css";
@@ -133,3 +135,11 @@ if (
   });
   send("ready");
 }
+
+const updateDocumentLanguage = () => {
+  document.documentElement.lang = getLocale();
+  document.title = t("WebScaly player controls");
+};
+subscribeLocale(updateDocumentLanguage);
+updateDocumentLanguage();
+bindLocale(root);

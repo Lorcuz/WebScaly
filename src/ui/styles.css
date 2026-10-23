@@ -1603,3 +1603,13 @@ pre {
     border: 1px solid CanvasText;
   }
 }
+
+/* Japanese uses installed system fonts; no remote font requests. */
+:lang(ja) {
+  font-family: Inter, "Noto Sans CJK JP", "Yu Gothic UI", Meiryo, system-ui, sans-serif;
+  line-break: strict;
+  overflow-wrap: anywhere;
+}
+:lang(ja) .seg label > span { white-space: normal; }
+:lang(ja) .popup .tools .tool { min-width: 0; }
+:lang(ja) .settings-main .field { max-width: 100%; }

@@ -430,7 +430,7 @@ it("combines frame reports into one per-tab toolbar badge", async () => {
 });
 it("stores preference patches from settings pages only", async () => {
   await send({ type: "webscaly:preferences", patch: { batterySaver: true, extra: 1 } });
-  expect(local.webscalyConfig.preferences).toEqual({ paused: false, batterySaver: true, welcomed: false });
+  expect(local.webscalyConfig.preferences).toEqual({ language: "auto", paused: false, batterySaver: true, welcomed: false });
   expect(
     (await send({ type: "webscaly:preferences", patch: { paused: true } }, content())).ok,
   ).toBe(false);

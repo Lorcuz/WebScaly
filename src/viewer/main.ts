@@ -1,3 +1,5 @@
+import { bindLocale, localize } from "../shared/i18n/dom";
+import { getLocale, initializeLocale, subscribeLocale, t } from "../shared/i18n";
 import { attachHelp } from "../ui/help";
 import "@fontsource/inter/latin-400.css";
 import "@fontsource/inter/latin-500.css";
@@ -8,6 +10,14 @@ import { VideoRenderer } from "../core/renderer";
 import { DEFAULTS, type Settings } from "../shared/settings";
 import type { Crop } from "../core/crop";
 
+async function startViewer() {
+await initializeLocale();
+const updateLanguage = () => {
+  document.documentElement.lang = getLocale();
+  document.title = t("WebScaly Compatibility Player");
+};
+subscribeLocale(updateLanguage);
+updateLanguage();
 const root = document.querySelector<HTMLDivElement>("#root")!;
 root.innerHTML = `<main class="viewer" data-step="1">
   <header class="viewer-head"><img src="./icons/32.png" width="28" height="28" alt=""><h1>WebScaly</h1><span class="label">Compatibility player</span></header>
@@ -47,8 +57,7 @@ if (chrome?.runtime?.id && sourceTab > 0) {
     .then((result) => {
       if (!result?.ok) {
         share.disabled = true;
-        status.textContent =
-          result?.error ?? "Approve the source website first.";
+        setText(status, result?.error ?? "Approve the source website first.");
         return;
       }
       settings = {
@@ -58,15 +67,14 @@ if (chrome?.runtime?.id && sourceTab > 0) {
         comparison: false,
         hud: false,
       };
-      root.querySelector("#source")!.textContent =
-        `Source website: ${new URL(result.value.origin).hostname}. Share its playing tab and WebScaly enhances the picture locally.`;
+      setText(root.querySelector("#source")!, `Source website: ${new URL(result.value.origin).hostname}. Share its playing tab and WebScaly enhances the picture locally.`);
       (root.querySelector("#algorithm") as HTMLSelectElement).value =
         settings.algorithm;
       share.disabled = false;
     })
     .catch(() => {
       share.disabled = true;
-      status.textContent = "Reload WebScaly and open this player again.";
+      setText(status, "Reload WebScaly and open this player again.");
     });
 }
 function stop() {
@@ -86,7 +94,7 @@ function stop() {
   selecting = false;
   anchor = undefined;
   preview.classList.remove("selecting");
-  status.textContent = "Tab sharing stopped.";
+  setText(status, "Tab sharing stopped.");
   step(1);
 }
 share.addEventListener("click", async () => {
@@ -124,12 +132,11 @@ share.addEventListener("click", async () => {
       stopButton.disabled =
       fullscreen.disabled =
         false;
-    status.textContent =
-      "Sharing locally. Select video area, then drag a rectangle over the video.";
+    setText(status, "Sharing locally. Select video area, then drag a rectangle over the video.");
     step(2);
   } catch (error) {
     stop();
-    status.textContent = `Tab sharing was not started. ${(error as Error).message}`;
+    setText(status, `Tab sharing was not started. ${(error as Error).message}`);
   }
 });
 cropButton.addEventListener("click", async () => {
@@ -139,17 +146,16 @@ cropButton.addEventListener("click", async () => {
   selecting = true;
   selection.hidden = true;
   preview.classList.add("selecting");
-  status.textContent =
-    "Drag from one corner of the video to the opposite corner.";
+  setText(status, "Drag from one corner of the video to the opposite corner.");
 });
 fullscreen.addEventListener("click", () => {
   void preview.requestFullscreen().catch((error) => {
-    status.textContent = (error as Error).message;
+    setText(status, (error as Error).message);
   });
 });
 root.querySelector("#exit-fullscreen")!.addEventListener("click", () => {
   void document.exitFullscreen().catch((error) => {
-    status.textContent = (error as Error).message;
+    setText(status, (error as Error).message);
   });
 });
 function position(event: PointerEvent) {
@@ -190,9 +196,9 @@ preview.addEventListener("pointerup", () => {
   if (!crop || crop.width < 0.02 || crop.height < 0.02) {
     crop = undefined;
     selection.hidden = true;
-    status.textContent = "Area is too small. Select a larger video area.";
+    setText(status, "Area is too small. Select a larger video area.");
   } else {
-    status.textContent = "Video area selected. Click Enhance selected area.";
+    setText(status, "Video area selected. Click Enhance selected area.");
     step(3);
   }
 });
@@ -210,7 +216,7 @@ async function enable() {
     { crop },
   );
   await renderer.start();
-  status.textContent = renderer.diagnostics.message;
+  setText(status, renderer.diagnostics.message);
 }
 enhance.addEventListener("click", () => {
   void enable();
@@ -235,7 +241,7 @@ async function validateSource() {
     if (!r?.ok) {
       stop();
       share.disabled = true;
-      status.textContent = "Source website access was removed.";
+      setText(status, "Source website access was removed.");
     }
   } catch {
     stop();
@@ -253,8 +259,7 @@ if (globalThis.chrome?.runtime?.id) {
 
 if (globalThis.chrome?.runtime?.id && !(sourceTab > 0)) {
   share.disabled = true;
-  status.textContent =
-    "Open this player from the popup on an approved video tab.";
+  setText(status, "Open this player from the popup on an approved video tab.");
 }
 const hints: Record<string, string> = {
   share:
@@ -272,3 +277,11 @@ for (const [id, text] of Object.entries(hints)) {
   if (e) e.dataset.help = text;
 }
 attachHelp(root);
+
+bindLocale(root);
+}
+function setText(element: HTMLElement, source: string) {
+  element.textContent = source;
+  localize(element);
+}
+void startViewer();

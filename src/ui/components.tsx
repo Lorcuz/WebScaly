@@ -1,3 +1,5 @@
+import { useLocale } from "./locale";
+import { t, translateMessage } from "../shared/i18n";
 import React, {
   createContext,
   useCallback,
@@ -190,6 +192,7 @@ const ConfirmContext = createContext<
 export const useConfirm = () => useContext(ConfirmContext);
 /** A native modal dialog for decisions that revoke access or replace data. */
 export function ConfirmProvider({ children }: { children: ReactNode }) {
+  useLocale();
   const [request, setRequest] = useState<ConfirmRequest>();
   const dialog = useRef<HTMLDialogElement>(null);
   const ask = useCallback(
@@ -223,8 +226,7 @@ export function ConfirmProvider({ children }: { children: ReactNode }) {
             <div>{request.body}</div>
             <div className="actions">
               <button className="btn quiet" autoFocus onClick={() => finish(false)}>
-                Cancel
-              </button>
+                {t("Cancel")}</button>
               <button
                 className={`btn ${request.danger ? "danger" : "primary"}`}
                 onClick={() => finish(true)}
@@ -247,16 +249,17 @@ export function Feedback({
   notice: string;
   compact?: boolean;
 }) {
+  useLocale();
   return (
     <div className="feedback" aria-live="polite">
       {error ? (
         <p className="message error" role="alert" tabIndex={0}>
           {compact && error.length > 140
-            ? "That did not work. Open Settings → Diagnostics for the full error."
-            : error}
+            ? t("That did not work. Open Settings → Diagnostics for the full error.")
+            : translateMessage(error)}
         </p>
       ) : notice ? (
-        <p className="message success">{notice}</p>
+        <p className="message success">{translateMessage(notice)}</p>
       ) : null}
     </div>
   );

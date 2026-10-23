@@ -138,7 +138,7 @@ describe("0.4 settings model", () => {
   });
   it("normalizes device preferences and keeps them out of picture presets", () => {
     const c = normalizeConfiguration({ version: 2, preferences: { paused: true, batterySaver: "yes" } });
-    expect(c.preferences).toEqual({ paused: true, batterySaver: false, welcomed: false });
+    expect(c.preferences).toEqual({ language: "auto", paused: true, batterySaver: false, welcomed: false });
     expect(normalizeConfiguration({ version: 2 }).preferences.paused).toBe(false);
     const picture = pictureOf({ ...DEFAULTS, hud: true, enabled: false, algorithm: "fsrcnnx" });
     expect(picture).not.toHaveProperty("hud");
