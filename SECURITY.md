@@ -2,7 +2,7 @@
 
 ## Supported version
 
-Security fixes target the latest WebScaly release, currently 0.3.0. Update before reporting a problem where possible.
+Security fixes target the latest WebScaly release, currently 0.4.0. Update before reporting a problem where possible.
 
 ## Report privately
 
