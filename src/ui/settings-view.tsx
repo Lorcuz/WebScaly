@@ -214,7 +214,7 @@ export function Settings() {
               store={store}
               edit={(origin) => {
                 setEditing(origin);
-                select(t("Enhancement"));
+                select("Enhancement");
               }}
             />
           )}
@@ -227,7 +227,7 @@ export function Settings() {
               store={store}
               done={() => {
                 void store.preferences({ welcomed: true });
-                select(t("Enhancement"));
+                select("Enhancement");
               }}
             />
           )}

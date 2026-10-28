@@ -1613,3 +1613,6 @@ pre {
 :lang(ja) .seg label > span { white-space: normal; }
 :lang(ja) .popup .tools .tool { min-width: 0; }
 :lang(ja) .settings-main .field { max-width: 100%; }
+
+/* Keep the agreed Japanese player-tool labels on one line in the 360px popup. */
+:lang(ja) .popup .tool { font-size: 10.5px; white-space: nowrap; }

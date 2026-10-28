@@ -62,21 +62,39 @@ test("Japanese settings, built-in presets and help fit; user preset names stay u
     await chrome.storage.local.set({ webscalyConfig: { ...config,
       preferences: { ...config.preferences, language: "ja" },
       presets: [{ name: "Settings", settings: config.defaults }],
+      sites: [{ origin: "https://example.com", subdomains: false, settings: config.defaults }],
     } });
   }, EMPTY);
   const page = await context.newPage();
   await page.goto(`${extension}/options.html`);
-  for (const section of ["映像補正", "ウェブサイト", "プリセット", "動作設定", "診断", "この拡張機能について", "使い方"]) {
+  for (const section of ["高画質化", "ウェブサイト", "プリセット", "動作設定", "診断", "この拡張機能について", "使い方"]) {
     await page.getByRole("navigation").getByRole("button", { name: section, exact: true }).click();
     await expect(page.getByRole("heading", { name: section, exact: true })).toBeVisible();
     expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
     await page.screenshot({ path: `test-results/i18n-${section}.png`, fullPage: true });
   }
+  await page.getByRole("navigation").getByRole("button", { name: "ウェブサイト", exact: true }).click();
+  for (const name of ["設定をエクスポート", "設定を追加読み込み", "設定を上書き読み込み…"]) {
+    await expect(page.getByRole("button", { name, exact: true })).toBeVisible();
+  }
+  await page.getByRole("button", { name: "example.comを編集", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "高画質化", exact: true })).toBeVisible();
+  await expect(page.getByRole("combobox", { name: "編集中のプロファイル", exact: true })).toHaveValue("https://example.com");
+  await expect(page.getByText("保存済み", { exact: true })).toBeVisible();
+  await expect(page.getByText("動画はこの端末内で処理されます", { exact: true })).toBeVisible();
+  await page.getByRole("navigation").getByRole("button", { name: "使い方", exact: true }).click();
+  await expect(page.getByRole("button", { name: "設定を始める", exact: true })).toBeVisible();
+  await page.getByRole("button", { name: "設定を始める", exact: true }).click();
+  await expect(page.getByRole("heading", { name: "高画質化", exact: true })).toBeVisible();
   await page.getByRole("navigation").getByRole("button", { name: "プリセット", exact: true }).click();
   await expect(page.getByText("Settings", { exact: true })).toBeVisible();
   await expect(page.getByText("省電力向け", { exact: true })).toBeVisible();
-  await page.getByRole("navigation").getByRole("button", { name: "映像補正", exact: true }).click();
-  await page.getByRole("radiogroup", { name: "アルゴリズム", exact: true }).hover();
+  await page.getByRole("navigation").getByRole("button", { name: "高画質化", exact: true }).click();
+  const algorithm = page.getByRole("radiogroup", { name: "アルゴリズム", exact: true });
+  await algorithm.scrollIntoViewIfNeeded();
+  await page.mouse.move(0, 0);
+  await page.waitForTimeout(200);
+  await algorithm.hover();
   await expect(page.locator("#webscaly-help")).toContainText("Anime4Kはアニメ");
   await page.screenshot({ path: "test-results/i18n-help.png", fullPage: true });
   await expect(page.getByText("自然な彩度", { exact: true })).toBeVisible();
@@ -96,9 +114,9 @@ test("Japanese player controls switch without replacing the video or changing pi
   await page.goto("http://127.0.0.1:5173/tests/browser/fixture.html");
   await page.evaluate(() => window.fixture.create(30, 640, true));
   const toolbar = page.frameLocator('iframe[title="WebScaly video controls"]');
-  await expect(toolbar.getByRole("button", { name: "この動画を補正", exact: true })).toBeVisible();
+  await expect(toolbar.getByRole("button", { name: "この動画を高画質化", exact: true })).toBeVisible();
   await expect(toolbar.getByRole("combobox", { name: "動画の品質", exact: true })).toHaveValue("balanced");
-  await expect(page.locator("webscaly-player output")).toContainText("元映像");
+  await expect(page.locator("webscaly-player output")).toContainText("オリジナル");
   await page.evaluate(() => {
     (window as any).originalI18nVideo = document.querySelector("video");
     (window as any).originalI18nCanvas = document.querySelector("webscaly-player")!.shadowRoot!.querySelector("canvas");
@@ -110,6 +128,12 @@ test("Japanese player controls switch without replacing the video or changing pi
   await expect(popup.getByRole("button", { name: "設定", exact: true })).toBeVisible();
   await expect(popup.getByRole("radiogroup", { name: "品質", exact: true })).toBeVisible();
   expect(await popup.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  for (const label of ["比較", "オリジナル", "ツールバー", "再生情報", "画像保存"]) {
+    await expect(popup.getByRole("button", { name: label, exact: true })).toBeVisible();
+  }
+  await expect(popup.getByText("登録済み", { exact: true })).toBeVisible();
+  await expect(popup.getByRole("button", { name: "サイトの登録を解除", exact: true })).toBeVisible();
+  await expect(popup.getByText("高画質化中", { exact: true })).toBeVisible();
   await popup.screenshot({ path: "test-results/i18n-popup.png", fullPage: true });
   await page.locator("video").hover();
   await expect(page.locator('iframe[title="WebScaly video controls"]')).toHaveCSS("opacity", "1");
@@ -138,10 +162,30 @@ test("compatibility player translates static instructions, help and live status"
   await expect(page).toHaveTitle("WebScaly 互換プレイヤー");
   await expect(page.getByRole("button", { name: "動画タブを選ぶ", exact: true })).toBeVisible();
   await expect(page.locator("#share")).toHaveAttribute("data-help", "映像に直接アクセスできない場合に、再生中の動画タブを共有します。");
-  await expect(page.locator("#status")).toContainText("許可済みの動画タブ");
+  await expect(page.locator("#status")).toContainText("登録済みの動画タブ");
   await page.screenshot({ path: "test-results/i18n-viewer.png", fullPage: true });
   await worker.evaluate(async (config) => { await chrome.storage.local.set({ webscalyConfig: config }); }, EMPTY);
   await expect(page.getByRole("button", { name: "Choose video tab", exact: true })).toBeVisible();
   await expect(page).toHaveTitle("WebScaly Compatibility Player");
+  await page.close();
+});
+
+test("packaged benchmark translates without replacing its layout or canvas", async () => {
+  await worker.evaluate(async (config) => { await chrome.storage.local.set({
+    webscalyConfig: { ...config, preferences: { ...config.preferences, language: "ja" } },
+  }); }, EMPTY);
+  const page = await context.newPage();
+  await page.goto(`${extension}/benchmark.html`);
+  await expect(page.getByRole("heading", { name: "WebScaly GPUベンチマーク", exact: true })).toBeVisible();
+  await expect(page.locator("#result")).toHaveText("実行待ち");
+  await expect(page.getByRole("button", { name: "描画をチェック", exact: true })).toBeVisible();
+  await page.evaluate(() => {
+    (window as any).benchmarkCanvas = document.querySelector("canvas");
+  });
+  await worker.evaluate(async (config) => { await chrome.storage.local.set({ webscalyConfig: config }); }, EMPTY);
+  await expect(page.getByRole("heading", { name: "WebScaly GPU benchmark", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Run benchmark", exact: true })).toBeVisible();
+  await expect(page.getByRole("link", { name: "Settings", exact: true })).toHaveAttribute("href", "./options.html");
+  expect(await page.evaluate(() => (window as any).benchmarkCanvas === document.querySelector("canvas"))).toBe(true);
   await page.close();
 });

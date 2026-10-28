@@ -35,7 +35,7 @@ describe("interface language", () => {
   });
   it("interpolates site names without translating their contents", () => {
     setLanguage("ja");
-    expect(format("Remove {host}?", { host: "Settings" })).toBe("Settingsを削除しますか？");
+    expect(format("Remove {host}?", { host: "Settings" })).toBe("Settingsの登録を解除しますか？");
     expect(translateMessage("1080p source is already sharp, so it plays natively."))
       .toBe("元動画は1080pで十分な解像度のため、そのまま再生します。");
     expect(translateMessage("Adaptive: Balanced quality")).toBe("自動調整：バランスモード");

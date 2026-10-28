@@ -1,3 +1,5 @@
+import { bindLocale, localize } from "../shared/i18n/dom";
+import { getLocale, initializeLocale, subscribeLocale, translateMessage } from "../shared/i18n";
 import { gpuDevice, texture } from "../core/device";
 import { Enhancement } from "../core/enhancement";
 import { DEFAULTS, type Algorithm } from "../shared/settings";
@@ -5,21 +7,39 @@ import "../ui/styles.css";
 import "./gpu-validation";
 import { validateGpu } from "./gpu-validation";
 document.querySelector("#root")!.innerHTML =
-  `<main class="lab"><h1>WebScaly GPU benchmark</h1><p>Runs 90 GPU submissions on a generated 720p frame. Queue-completion wall time includes submission overhead. This is a pipeline benchmark, not video output FPS.</p><button id="run" class="primary">Run benchmark</button><pre id="result">Ready.</pre><canvas id="output" width="1920" height="1080"></canvas><a href="./options.html">Settings</a></main>`;
+  `<main class="lab"><h1>WebScaly GPU benchmark</h1><p>Runs 90 GPU submissions on a generated 720p frame. Queue-completion wall time includes submission overhead. This is a pipeline benchmark, not video output FPS.</p><button id="run" class="primary">Run benchmark</button><pre id="result" data-user-text>Ready.</pre><canvas id="output" width="1920" height="1080"></canvas><a href="./options.html">Settings</a></main>`;
 const validateButton = document.createElement("button");
 validateButton.textContent = "Validate GPU algorithms";
 document.querySelector("#run")!.after(validateButton);
+const root = document.querySelector<HTMLElement>("#root")!;
+const resultNode = document.querySelector<HTMLElement>("#result")!;
+let status = "Ready.";
+const showStatus = (message: string) => {
+  status = message;
+  resultNode.textContent = translateMessage(message);
+};
+const refresh = () => {
+  document.documentElement.lang = getLocale();
+  document.title = translateMessage("WebScaly · GPU benchmark");
+  localize(root);
+  if (status) resultNode.textContent = translateMessage(status);
+};
+bindLocale(root);
+subscribeLocale(refresh);
+void initializeLocale().then(refresh);
 validateButton.addEventListener("click", async () => {
   validateButton.disabled = true;
-  document.querySelector("#result")!.textContent = "Validating…";
+  showStatus("Validating…");
   try {
+    const report = await validateGpu();
+    status = "";
     document.querySelector("#result")!.textContent = JSON.stringify(
-      await validateGpu(),
+      report,
       null,
       2,
     );
   } catch (e) {
-    document.querySelector("#result")!.textContent = String(e);
+    showStatus(String(e));
   } finally {
     validateButton.disabled = false;
   }
@@ -54,7 +74,7 @@ document.querySelector("#run")!.addEventListener("click", async () => {
       [1280, 720],
     );
     for (const algorithm of ["spatial", "anime4k", "fsrcnnx"] as Algorithm[]) {
-      result.textContent = `Benchmarking ${algorithm}…`;
+      showStatus(`Benchmarking ${algorithm}…`);
       const engine = new Enhancement(device, 1280, 720, [1920, 1080], {
         ...DEFAULTS,
         algorithm,
@@ -100,9 +120,10 @@ document.querySelector("#run")!.addEventListener("click", async () => {
         "Synthetic texture; sequential queue fences; 5 warmups; no decode or frame generation",
       records,
     };
+    status = "";
     result.textContent = JSON.stringify(report, null, 2);
   } catch (e) {
-    result.textContent = String(e);
+    showStatus(String(e));
   } finally {
     (document.querySelector("#run") as HTMLButtonElement).disabled = false;
   }

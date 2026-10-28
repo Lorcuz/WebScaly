@@ -3,21 +3,21 @@
     "message": "WebScaly"
   },
   "extensionDescription": {
-    "message": "許可したサイトの動画を、WebGPUとWebGLで端末内で補正します。"
+    "message": "登録したサイトの動画を、WebGPUとWebGLで端末内で高画質化します。"
   },
   "toggle_enhancement": {
-    "message": "このタブの動画補正をオン／オフにする"
+    "message": "このタブの動画高画質化をオン／オフにする"
   },
   "toggle_compare": {
-    "message": "元映像と補正後の比較表示を切り替える"
+    "message": "オリジナルと高画質化後の比較表示を切り替える"
   },
   "cycle_engine": {
-    "message": "次の補正エンジンに切り替える"
+    "message": "次の高画質化エンジンに切り替える"
   },
   "snapshot": {
-    "message": "現在の補正フレームを画像として保存する"
+    "message": "現在の高画質化フレームを画像として保存する"
   },
   "toggle_pause": {
-    "message": "すべてのサイトで補正を一時停止／再開する"
+    "message": "すべてのサイトで高画質化を一時停止／再開する"
   }
 }
