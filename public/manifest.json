@@ -1,9 +1,9 @@
 {
   "manifest_version": 3,
-  "name": "WebScaly",
+  "name": "__MSG_extensionName__",
   "version": "0.4.0",
   "minimum_chrome_version": "121",
-  "description": "Local video enhancement with WebGPU and WebGL on websites you approve.",
+  "description": "__MSG_extensionDescription__",
   "permissions": [
     "storage",
     "scripting",
@@ -23,22 +23,28 @@
   },
   "commands": {
     "toggle-enhancement": {
-      "suggested_key": { "default": "Alt+Shift+E" },
-      "description": "Turn enhancement on or off for the video in this tab"
+      "suggested_key": {
+        "default": "Alt+Shift+E"
+      },
+      "description": "__MSG_toggle_enhancement__"
     },
     "toggle-compare": {
-      "suggested_key": { "default": "Alt+Shift+S" },
-      "description": "Show or hide the original/enhanced comparison"
+      "suggested_key": {
+        "default": "Alt+Shift+S"
+      },
+      "description": "__MSG_toggle_compare__"
     },
     "cycle-engine": {
-      "suggested_key": { "default": "Alt+Shift+M" },
-      "description": "Switch to the next enhancement engine"
+      "suggested_key": {
+        "default": "Alt+Shift+M"
+      },
+      "description": "__MSG_cycle_engine__"
     },
     "snapshot": {
-      "description": "Save the current enhanced frame as an image"
+      "description": "__MSG_snapshot__"
     },
     "toggle-pause": {
-      "description": "Pause or resume WebScaly on every website"
+      "description": "__MSG_toggle_pause__"
     }
   },
   "options_ui": {
@@ -64,5 +70,6 @@
         "https://*/*"
       ]
     }
-  ]
+  ],
+  "default_locale": "en"
 }

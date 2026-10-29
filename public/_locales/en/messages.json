@@ -1,0 +1,23 @@
+{
+  "extensionName": {
+    "message": "WebScaly"
+  },
+  "extensionDescription": {
+    "message": "Local video enhancement with WebGPU and WebGL on websites you approve."
+  },
+  "toggle_enhancement": {
+    "message": "Turn enhancement on or off for the video in this tab"
+  },
+  "toggle_compare": {
+    "message": "Show or hide the original/enhanced comparison"
+  },
+  "cycle_engine": {
+    "message": "Switch to the next enhancement engine"
+  },
+  "snapshot": {
+    "message": "Save the current enhanced frame as an image"
+  },
+  "toggle_pause": {
+    "message": "Pause or resume WebScaly on every website"
+  }
+}

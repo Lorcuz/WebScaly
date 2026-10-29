@@ -73,6 +73,7 @@ export const runtimeNames = new Set([
 ]);
 export function runtimeAllowed(name) {
   return runtimeNames.has(name) ||
+    /^_locales\/(?:en|ja)\/messages\.json$/.test(name) ||
     /^assets\/[\w.-]+\.(?:js|css|woff2?)$/.test(name) ||
     /^icons\/(?:16|32|48|128)\.png$/.test(name) ||
     /^(?:images\/italy\.svg|images\/support-paypal\.png)$/.test(name) ||
@@ -83,7 +84,7 @@ export function validateRuntime(runtime) {
   audit(runtime);
   for (const name of Object.keys(runtime)) if (!runtimeAllowed(name)) throw Error(`Unexpected runtime file: ${name}`);
   for (const name of [...runtimeNames,`compliance/${sourceName}`,"licenses/LGPL-3.0.txt","licenses/GPL-3.0.txt",
-    "licenses/Tabler-MIT.txt","licenses/Country-Flags-NOTICE.txt","images/italy.svg","images/support-paypal.png",
+    "_locales/en/messages.json","_locales/ja/messages.json","licenses/Tabler-MIT.txt","licenses/Country-Flags-NOTICE.txt","images/italy.svg","images/support-paypal.png",
     ...[16,32,48,128].map(n=>`icons/${n}.png`)])
     if (!runtime[name]) throw Error(`Missing runtime asset: ${name}`);
   const manifest = JSON.parse(decoder.decode(runtime["manifest.json"]));

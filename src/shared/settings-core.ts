@@ -23,7 +23,13 @@ export interface Settings {
   split: number;
   controls: boolean;
 }
+export type Language = "auto" | "ja" | "en";
+export const LANGUAGES: readonly Language[] = ["auto", "ja", "en"];
+export function normalizeLanguage(value: unknown): Language {
+  return LANGUAGES.includes(value as Language) ? value as Language : "auto";
+}
 export interface Preferences {
+  language: Language;
   paused: boolean;
   batterySaver: boolean;
   welcomed: boolean;
@@ -78,6 +84,7 @@ export const DEFAULTS: Settings = {
   controls: false,
 };
 export const PREFERENCES: Preferences = {
+  language: "auto",
   paused: false,
   batterySaver: false,
   welcomed: false,
@@ -223,6 +230,7 @@ export function normalizePreferences(input: unknown): Preferences {
   const p =
     input && typeof input === "object" ? (input as Partial<Preferences>) : {};
   return {
+    language: normalizeLanguage(p.language),
     paused: flag(p.paused, false),
     batterySaver: flag(p.batterySaver, false),
     welcomed: flag(p.welcomed, false),

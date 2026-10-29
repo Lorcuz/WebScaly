@@ -1,3 +1,5 @@
+import { useLocale } from "./locale";
+import { t, format, translateMessage } from "../shared/i18n";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   IconActivity,
@@ -52,44 +54,44 @@ const SECTIONS: { id: string; icon: Icon; title: string; description: string }[]
   {
     id: "Enhancement",
     icon: IconSparkles,
-    title: "Enhancement",
-    description: "How video looks for the selected profile. Changes save as you make them.",
+    get title() { return t("Enhancement"); },
+    get description() { return t("How video looks for the selected profile. Changes save as you make them."); },
   },
   {
     id: "Websites",
     icon: IconWorld,
-    title: "Websites",
-    description: "Websites WebScaly may enhance. Access starts off, and you can remove it at any time.",
+    get title() { return t("Websites"); },
+    get description() { return t("Websites WebScaly may enhance. Access starts off, and you can remove it at any time."); },
   },
   {
     id: "Presets",
     icon: IconBookmarks,
-    title: "Presets",
-    description: "Named picture settings you can apply to any profile in one step.",
+    get title() { return t("Presets"); },
+    get description() { return t("Named picture settings you can apply to any profile in one step."); },
   },
   {
     id: "Behavior",
     icon: IconKeyboard,
-    title: "Behavior",
-    description: "Pause, battery saving and keyboard shortcuts for every website.",
+    get title() { return t("Behavior"); },
+    get description() { return t("Pause, battery saving and keyboard shortcuts for every website."); },
   },
   {
     id: "Diagnostics",
     icon: IconActivity,
-    title: "Diagnostics",
-    description: "What WebScaly sees on the video tab and on this device's graphics.",
+    get title() { return t("Diagnostics"); },
+    get description() { return t("What WebScaly sees on the video tab and on this device's graphics."); },
   },
   {
     id: "About",
     icon: IconInfoCircle,
-    title: "About",
-    description: "Local video enhancement, made with care.",
+    get title() { return t("About"); },
+    get description() { return t("Local video enhancement, made with care."); },
   },
   {
     id: "Welcome",
     icon: IconPlayerPlay,
-    title: "Getting started",
-    description: "Three steps to a sharper picture.",
+    get title() { return t("Getting started"); },
+    get description() { return t("Three steps to a sharper picture."); },
   },
 ];
 // Section names from 0.3 links keep working.
@@ -99,17 +101,18 @@ const LEGACY: Record<string, string> = {
   Advanced: "Behavior",
 };
 const ENGINE_OPTIONS = [
-  { value: "spatial" as const, label: "Spatial Detail", hint: "Light, any video" },
-  { value: "anime4k" as const, label: "Anime4K", hint: "Animation" },
-  { value: "fsrcnnx" as const, label: "FSRCNNX", hint: "Camera footage" },
+  { value: "spatial" as const, get label() { return t("Spatial Detail"); }, get hint() { return t("Light, any video"); } },
+  { value: "anime4k" as const, label: "Anime4K", get hint() { return t("Animation"); } },
+  { value: "fsrcnnx" as const, label: "FSRCNNX", get hint() { return t("Camera footage"); } },
 ];
 const QUALITY_OPTIONS = [
-  { value: "fast" as const, label: "Fast", hint: "Lightest" },
-  { value: "balanced" as const, label: "Balanced", hint: "Bicubic" },
-  { value: "quality" as const, label: "Quality", hint: "Sharpest" },
+  { value: "fast" as const, get label() { return t("Fast"); }, get hint() { return t("Lightest"); } },
+  { value: "balanced" as const, get label() { return t("Balanced"); }, get hint() { return t("Bicubic"); } },
+  { value: "quality" as const, get label() { return t("Quality"); }, get hint() { return t("Sharpest"); } },
 ];
 
 export function Settings() {
+  const locale = useLocale();
   const store = useStore(1500);
   const params = new URLSearchParams(location.search);
   const [section, setSection] = useState(() => {
@@ -121,7 +124,7 @@ export function Settings() {
   const { config } = store;
   useEffect(() => {
     document.title = `${SECTIONS.find((s) => s.id === section)!.title} · WebScaly`;
-  }, [section]);
+  }, [section, locale]);
   // A profile link for a website that was removed falls back to the defaults, visibly.
   useEffect(() => {
     if (config && editing && !config.sites.some((s) => s.origin === editing)) {
@@ -152,11 +155,10 @@ export function Settings() {
   return (
     <div className="settings-shell">
       <a className="skip-link" href="#settings-content">
-        Skip to settings
-      </a>
+        {t("Skip to settings")}</a>
       <aside className="sidebar">
         <Brand />
-        <nav aria-label="Settings sections">
+        <nav aria-label={t("Settings sections")}>
           {SECTIONS.map((s) => (
             <button
               key={s.id}
@@ -164,31 +166,31 @@ export function Settings() {
               onClick={() => select(s.id)}
             >
               <s.icon size={19} stroke={1.7} aria-hidden="true" />
-              <span>{s.title}</span>
+              <span>{t(s.title)}</span>
             </button>
           ))}
         </nav>
         <div className="foot">
-          <span>Processed on this device. No accounts, no uploads.</span>
+          <span>{t("Processed on this device. No accounts, no uploads.")}</span>
           <span>WebScaly {VERSION}</span>
         </div>
       </aside>
       <main className="settings-main" id="settings-content" tabIndex={-1}>
         <header className="page-head">
           <div>
-            <h1>{meta.title}</h1>
-            <p>{meta.description}</p>
+            <h1>{t(meta.title)}</h1>
+            <p>{t(meta.description)}</p>
           </div>
           {profiled && (
             <label className="field">
-              <span className="label">Editing profile</span>
+              <span className="label">{t("Editing profile")}</span>
               <select
                 className="select"
-                aria-label="Editing profile"
+                aria-label={t("Editing profile")}
                 value={editing ?? ""}
                 onChange={(e) => setEditing(e.target.value || undefined)}
               >
-                <option value="">Default settings</option>
+                <option value="">{t("Default settings")}</option>
                 {config.sites.map((s) => (
                   <option key={s.origin} value={s.origin}>
                     {hostLabel(s.origin)}
@@ -200,8 +202,7 @@ export function Settings() {
         </header>
         {!isExtension && (
           <p className="notice">
-            Interface preview. Install WebScaly to approve website access.
-          </p>
+            {t("Interface preview. Install WebScaly to approve website access.")}</p>
         )}
         <Feedback error={store.error} notice={store.notice} />
         <div className="page" key={section}>
@@ -232,7 +233,7 @@ export function Settings() {
           )}
         </div>
         <footer className="settings-footer">
-          <span aria-live="polite">{store.busy ? "Saving…" : "All changes saved"}</span>
+          <span aria-live="polite">{store.busy ? t("Saving…") : t("All changes saved")}</span>
         </footer>
       </main>
     </div>
@@ -304,21 +305,21 @@ function Enhancement({ store, target }: { store: Store; target: Target }) {
     <>
       <Preview settings={settings} />
       <Group
-        title="Engine"
+        title={t("Engine")}
         note={
           target
-            ? `Settings for ${scope}.`
-            : "Defaults apply to websites you approve from now on. Each website keeps its own copy."
+            ? format("Settings for {scope}.", { scope })
+            : t("Defaults apply to websites you approve from now on. Each website keeps its own copy.")
         }
       >
         <div className="rows">
           <div className="row">
             <Switch
-              label="Enhance video"
+              label={t("Enhance video")}
               description={
                 target
-                  ? `Turn enhancement on or off for ${scope}.`
-                  : "Newly approved websites start with enhancement on."
+                  ? format("Turn enhancement on or off for {scope}.", { scope })
+                  : t("Newly approved websites start with enhancement on.")
               }
               checked={settings.enabled}
               onChange={(enabled) => set({ enabled })}
@@ -326,59 +327,59 @@ function Enhancement({ store, target }: { store: Store; target: Target }) {
           </div>
           <Row wide>
             <Segmented
-              label="Algorithm"
+              label={t("Algorithm")}
               tall
               value={settings.algorithm}
               options={ENGINE_OPTIONS}
-              help="Spatial Detail is lightest. Anime4K suits animation. FSRCNNX restores camera footage."
+              help={t("Spatial Detail is lightest. Anime4K suits animation. FSRCNNX restores camera footage.")}
               onChange={(algorithm) => set({ algorithm })}
             />
           </Row>
           <Row wide>
             <Segmented
-              label="Quality"
+              label={t("Quality", "label")}
               tall
               value={settings.quality}
               options={QUALITY_OPTIONS}
-              help="Sets the upscaling filter, and the larger network for Anime4K."
+              help={t("Sets the upscaling filter, and the larger network for Anime4K.")}
               onChange={(quality) => set({ quality })}
             />
           </Row>
         </div>
       </Group>
       <Group
-        title="Detail"
-        note="Cleanup runs before the engine; sharpening runs at display size, after upscaling. All apply to every engine."
+        title={t("Detail")}
+        note={t("Cleanup runs before the engine; sharpening runs at display size, after upscaling. All apply to every engine.")}
       >
         <div className="rows">
           <Row wide>
             <Slider
-              label="Sharpening"
+              label={t("Sharpening")}
               value={settings.strength}
-              help="Adaptive sharpening restores edges without halos on already-strong edges."
+              help={t("Adaptive sharpening restores edges without halos on already-strong edges.")}
               onChange={(strength) => set({ strength }, 150)}
             />
           </Row>
           <Row wide>
             <Slider
-              label="Denoise"
+              label={t("Denoise")}
               value={settings.denoise}
-              help="Smooths grain and blocking in flat areas while keeping edges."
+              help={t("Smooths grain and blocking in flat areas while keeping edges.")}
               onChange={(denoise) => set({ denoise }, 150)}
             />
           </Row>
           <Row wide>
             <Slider
-              label="Deband"
+              label={t("Deband")}
               value={settings.deband}
-              help="Removes stepped bands in gradients such as skies and shadows. Needs WebGPU."
+              help={t("Removes stepped bands in gradients such as skies and shadows. Needs WebGPU.")}
               onChange={(deband) => set({ deband }, 150)}
             />
           </Row>
         </div>
       </Group>
       <Group
-        title="Colour"
+        title={t("Colour")}
         aside={
           <button
             className="link subtle"
@@ -386,8 +387,7 @@ function Enhancement({ store, target }: { store: Store; target: Target }) {
             disabled={!settings.vibrance && !settings.contrast && !settings.brightness}
             onClick={() => set({ vibrance: 0, contrast: 0, brightness: 0 })}
           >
-            Reset colour
-          </button>
+            {t("Reset colour")}</button>
         }
       >
         <div className="rows">
@@ -400,11 +400,11 @@ function Enhancement({ store, target }: { store: Store; target: Target }) {
           ).map(([key, label, help]) => (
             <Row wide key={key}>
               <Slider
-                label={label}
+                label={t(label)}
                 value={settings[key]}
                 min={-1}
                 max={1}
-                help={help}
+                help={t(help)}
                 format={(v) => `${v > 0 ? "+" : ""}${Math.round(v * 100)}`}
                 onChange={(value) => set({ [key]: value }, 150)}
               />
@@ -412,25 +412,25 @@ function Enhancement({ store, target }: { store: Store; target: Target }) {
           ))}
         </div>
       </Group>
-      <Group title="Output and performance">
+      <Group title={t("Output and performance")}>
         <div className="rows">
-          <Row title="Output scale" note="Automatic matches the player's size on screen.">
+          <Row title={t("Output scale")} note={t("Automatic matches the player's size on screen.")}>
             <Segmented
-              label="Output scale"
+              label={t("Output scale")}
               value={settings.scale}
               options={[
-                { value: "auto", label: "Auto" },
-                { value: "native", label: "Native" },
+                { value: "auto", get label() { return t("Auto"); } },
+                { value: "native", get label() { return t("Native"); } },
                 { value: "1.5", label: "1.5×" },
                 { value: "2", label: "2×" },
               ]}
               onChange={(scale) => set({ scale })}
             />
           </Row>
-          <Row title="Height limit" note="Caps output size. Lower it on slower graphics.">
+          <Row title={t("Height limit")} note={t("Caps output size. Lower it on slower graphics.")}>
             <select
               className="select"
-              aria-label="Output height limit"
+              aria-label={t("Output height limit")}
               value={settings.maxHeight}
               onChange={(e) => set({ maxHeight: Number(e.target.value) })}
             >
@@ -443,51 +443,51 @@ function Enhancement({ store, target }: { store: Store; target: Target }) {
                 ))}
             </select>
           </Row>
-          <Row title="Skip sharp videos" note="Leaves high-resolution video untouched and saves power.">
+          <Row title={t("Skip sharp videos")} note={t("Leaves high-resolution video untouched and saves power.")}>
             <select
               className="select"
-              aria-label="Skip sharp videos"
+              aria-label={t("Skip sharp videos")}
               value={settings.skipAbove}
               onChange={(e) => set({ skipAbove: Number(e.target.value) as SkipAbove })}
             >
-              <option value={0}>Never</option>
-              <option value={720}>Above 720p</option>
-              <option value={1080}>Above 1080p</option>
-              <option value={1440}>Above 1440p</option>
+              <option value={0}>{t("Never")}</option>
+              <option value={720}>{t("Above 720p")}</option>
+              <option value={1080}>{t("Above 1080p")}</option>
+              <option value={1440}>{t("Above 1440p")}</option>
             </select>
           </Row>
           <div className="row">
             <Switch
-              label="Adaptive performance"
-              description="If the graphics card falls behind, WebScaly steps down quality, then size, then engine, and says so in the popup."
+              label={t("Adaptive performance")}
+              description={t("If the graphics card falls behind, WebScaly steps down quality, then size, then engine, and says so in the popup.")}
               checked={settings.adaptive}
               onChange={(adaptive) => set({ adaptive })}
             />
           </div>
         </div>
       </Group>
-      <Group title="On the video" note="Everything here starts hidden and stays out of the picture until you want it.">
+      <Group title={t("On the video")} note={t("Everything here starts hidden and stays out of the picture until you want it.")}>
         <div className="rows">
           <div className="row">
             <Switch
-              label="Controls"
-              description="A compact toolbar on the video that hides while you watch."
+              label={t("Controls")}
+              description={t("A compact toolbar on the video that hides while you watch.")}
               checked={settings.controls}
               onChange={(controls) => set({ controls })}
             />
           </div>
           <div className="row">
             <Switch
-              label="Compare"
-              description="Original and enhanced side by side with a draggable split."
+              label={t("Compare")}
+              description={t("Original and enhanced side by side with a draggable split.")}
               checked={settings.comparison}
               onChange={(comparison) => set({ comparison })}
             />
           </div>
           <div className="row">
             <Switch
-              label="HUD"
-              description="Live resolution, frame rate and GPU time."
+              label={t("HUD")}
+              description={t("Live resolution, frame rate and GPU time.")}
               checked={settings.hud}
               onChange={(hud) => set({ hud })}
             />
@@ -563,20 +563,15 @@ function Preview({ settings }: { settings: SettingsModel }) {
     void renderer.current?.configure(effective());
   }, [picture]);
   return (
-    <section className="screen" aria-label="Live preview">
+    <section className="screen" aria-label={t("Live preview")}>
       <div className="frame" ref={frame}>
         {state === "failed" && (
           <p className="placeholder">
-            The preview needs WebGPU or WebGL. Enhancement may still work in video
-            tabs; see Diagnostics.
-          </p>
+            {t("The preview needs WebGPU or WebGL. Enhancement may still work in video tabs; see Diagnostics.")}</p>
         )}
       </div>
       <p className="caption">
-        Generated test footage at 480×270, enhanced live on this device
-        {backend ? ` with ${backend}` : ""}. Drag the split on the picture to compare
-        with the original.
-      </p>
+        {t("Generated test footage at 480×270, enhanced live on this device")}{backend ? format(" with {backend}", { backend }) : ""}{t(". Drag the split on the picture to compare with the original.")}</p>
     </section>
   );
 }
@@ -596,19 +591,17 @@ function Websites({ store, edit }: { store: Store; edit: (origin: string) => voi
       (s) => s.origin !== origin && s.subdomains && host.endsWith(`.${hostLabel(s.origin)}`),
     );
     const ok = await confirm({
-      title: `Remove ${host}?`,
+      title: format("Remove {host}?", { host }),
       body: (
         <p>
-          Enhancement stops on {host} immediately and Chrome's access for it is
-          revoked.
-          {covered.length > 0 &&
-            ` Broader approvals that include it (${covered.map((s) => `*.${hostLabel(s.origin)}`).join(", ")}) are removed too.`}
+          {t("Enhancement stops on")}{" "}{host} {" "}{t("immediately and Chrome's access for it is revoked.")}{covered.length > 0 &&
+            format(" Broader approvals that include it ({hosts}) are removed too.", { hosts: covered.map((s) => `*.${hostLabel(s.origin)}`).join(", ") })}
         </p>
       ),
-      confirm: "Remove website",
+      get confirm() { return t("Remove website"); },
       danger: true,
     });
-    if (ok) await store.run(() => request("remove", { origin }), `${host} removed.`);
+    if (ok) await store.run(() => request("remove", { origin }), format("{host} removed.", { host }));
   };
   const exportConfig = () => {
     const url = URL.createObjectURL(
@@ -628,7 +621,7 @@ function Websites({ store, edit }: { store: Store; edit: (origin: string) => voi
       if (input.size > 256000) throw new Error("This file is larger than 256 KB.");
       imported = normalizeConfiguration(JSON.parse(await input.text()));
     } catch (e) {
-      store.reportError(`Could not read that file. ${(e as Error).message}`);
+      store.reportError(format("Could not read that file. {error}", { error: translateMessage((e as Error).message) }));
       return;
     }
     const mode = replace.current ? "replace" : "merge";
@@ -637,12 +630,11 @@ function Websites({ store, edit }: { store: Store; edit: (origin: string) => voi
         (s) => !imported.sites.some((i) => i.origin === s.origin),
       );
       const ok = await confirm({
-        title: "Replace all websites and presets?",
+        get title() { return t("Replace all websites and presets?"); },
         body: (
           <>
             <p>
-              Your current profiles are replaced by the file
-              {dropped.length ? ", and access is revoked for:" : "."}
+              {t("Your current profiles are replaced by the file")}{dropped.length ? t(", and access is revoked for:") : "."}
             </p>
             {dropped.length > 0 && (
               <ul>
@@ -653,19 +645,19 @@ function Websites({ store, edit }: { store: Store; edit: (origin: string) => voi
             )}
           </>
         ),
-        confirm: "Replace",
+        get confirm() { return t("Replace"); },
         danger: true,
       });
       if (!ok) return;
     }
     await store.run(
       () => request("import", { config: imported, mode }),
-      `Imported ${imported.sites.length} website profile${imported.sites.length === 1 ? "" : "s"}. Approve each website before it can be enhanced.`,
+      format("Imported {count} website profiles. Approve each website before it can be enhanced.", { count: imported.sites.length }),
     );
   };
   return (
     <>
-      <Group title="Add a website" note="Chrome asks you to confirm. Embedded players need their own approval too.">
+      <Group title={t("Add a website")} note={t("Chrome asks you to confirm. Embedded players need their own approval too.")}>
         <div className="rows">
           <div className="row wide">
             <form
@@ -679,7 +671,7 @@ function Websites({ store, edit }: { store: Store; edit: (origin: string) => voi
             >
               <input
                 className="input"
-                aria-label="Website address"
+                aria-label={t("Website address")}
                 placeholder="https://www.example.com"
                 value={address}
                 onChange={(e) => setAddress(e.target.value)}
@@ -688,27 +680,24 @@ function Websites({ store, edit }: { store: Store; edit: (origin: string) => voi
                 className="btn primary"
                 disabled={store.busy || !address.trim() || !isExtension}
               >
-                Add website
-              </button>
+                {t("Add website")}</button>
             </form>
           </div>
           <div className="row">
             <Switch
-              label="Include subdomains"
-              description="Also covers hosts like player.example.com. Use only when a site needs it."
+              label={t("Include subdomains")}
+              description={t("Also covers hosts like player.example.com. Use only when a site needs it.")}
               checked={subdomains}
               onChange={setSubdomains}
             />
           </div>
         </div>
       </Group>
-      <Group title={<>Websites<span className="count">{config.sites.length}</span></>}>
+      <Group title={<>{t("Websites")}<span className="count">{config.sites.length}</span></>}>
         <div className="rows">
           {!config.sites.length ? (
             <p className="empty">
-              No websites yet. Open a video page and choose “Allow on this website”
-              in the WebScaly popup.
-            </p>
+              {t("No websites yet. Open a video page and choose “Allow on this website” in the WebScaly popup.")}</p>
           ) : (
             config.sites.map((site) => {
               const host = hostLabel(site.origin);
@@ -718,37 +707,34 @@ function Websites({ store, edit }: { store: Store; edit: (origin: string) => voi
                   <div className="text">
                     <span className="host">{host}</span>
                     <small>
-                      {site.subdomains ? "Includes subdomains" : "This host only"} ·{" "}
-                      {ALGORITHM_LABELS[site.settings.algorithm]} ·{" "}
+                      {site.subdomains ? t("Includes subdomains") : t("This host only")} ·{" "}
+                      {t(ALGORITHM_LABELS[site.settings.algorithm])} ·{" "}
                       {!store.grants
-                        ? "Checking access…"
+                        ? t("Checking access…")
                         : !ok
-                          ? "Access not granted"
+                          ? t("Access not granted")
                           : site.settings.enabled
-                            ? "On"
-                            : "Off"}
+                            ? t("On")
+                            : t("Off")}
                     </small>
                   </div>
                   <div className="controls">
                     {store.grants && !ok && (
                       <button
                         className="btn small primary"
-                        aria-label={`Approve ${host}`}
+                        aria-label={format("Approve {host}", { host })}
                         onClick={() => void store.approve(site.origin, site.subdomains, site.settings)}
                       >
-                        Approve
-                      </button>
+                        {t("Approve")}</button>
                     )}
-                    <button className="btn small" aria-label={`Edit ${host}`} onClick={() => edit(site.origin)}>
-                      Edit
-                    </button>
+                    <button className="btn small" aria-label={format("Edit {host}", { host })} onClick={() => edit(site.origin)}>
+                      {t("Edit")}</button>
                     <button
                       className="btn small danger"
-                      aria-label={`Remove ${host}`}
+                      aria-label={format("Remove {host}", { host })}
                       onClick={() => void remove(site.origin)}
                     >
-                      Remove
-                    </button>
+                      {t("Remove")}</button>
                   </div>
                 </div>
               );
@@ -757,15 +743,14 @@ function Websites({ store, edit }: { store: Store; edit: (origin: string) => voi
         </div>
       </Group>
       <Group
-        title="Back up and move"
-        note="Profiles export as a small JSON file. Importing never grants access by itself; approve each website afterwards."
+        title={t("Back up and move")}
+        note={t("Profiles export as a small JSON file. Importing never grants access by itself; approve each website afterwards.")}
       >
         <div className="rows">
           <div className="row wide">
             <div className="controls" style={{ justifyContent: "flex-start" }}>
               <button className="btn" onClick={exportConfig}>
-                Export profiles
-              </button>
+                {t("Export profiles")}</button>
               <button
                 className="btn"
                 onClick={() => {
@@ -773,8 +758,7 @@ function Websites({ store, edit }: { store: Store; edit: (origin: string) => voi
                   file.current?.click();
                 }}
               >
-                Import and merge
-              </button>
+                {t("Import and merge")}</button>
               <button
                 className="btn quiet"
                 onClick={() => {
@@ -782,14 +766,13 @@ function Websites({ store, edit }: { store: Store; edit: (origin: string) => voi
                   file.current?.click();
                 }}
               >
-                Replace from file…
-              </button>
+                {t("Replace from file…")}</button>
               <input
                 ref={file}
                 className="visually-hidden"
                 type="file"
                 accept="application/json"
-                aria-label="Profile file"
+                aria-label={t("Profile file")}
                 tabIndex={-1}
                 onChange={(e) => {
                   const f = e.target.files?.[0];
@@ -811,22 +794,22 @@ function Presets({ store, target }: { store: Store; target: Target }) {
   const settings = settingsFor(config, target);
   const [name, setName] = useState("");
   const confirm = useConfirm();
-  const scope = target ? hostLabel(target) : "default settings";
+  const scope = target ? hostLabel(target) : t("default settings");
   const same = (picture: Partial<SettingsModel>) =>
     PICTURE_KEYS.every((k) => picture[k] === undefined || picture[k] === settings[k]);
   const save = (presets: Configuration["presets"]) =>
     store.run(() => request("presets", { presets }));
   return (
     <>
-      <Group title="Built in" note={`Applying a preset changes the picture for ${scope}; player tools stay as they are.`}>
+      <Group title={t("Built in")} note={format("Applying a preset changes the picture for {scope}; player tools stay as they are.", { scope })}>
         <div className="rows">
           {BUILTIN_PRESETS.map((p) => (
             <div className="row" key={p.id}>
               <div className="text">
-                <strong>{p.name}</strong>
+                <strong>{t(p.name)}</strong>
                 <small>
-                  {p.description} {ALGORITHM_LABELS[p.picture.algorithm]} ·{" "}
-                  {QUALITY_LABELS[p.picture.quality]}
+                  {t(p.description)} {t(ALGORITHM_LABELS[p.picture.algorithm])} ·{" "}
+                  {t(QUALITY_LABELS[p.picture.quality])}
                 </small>
               </div>
               <div className="controls">
@@ -835,14 +818,14 @@ function Presets({ store, target }: { store: Store; target: Target }) {
                   disabled={same(p.picture)}
                   onClick={() => store.patch(target, p.picture)}
                 >
-                  {same(p.picture) ? "In use" : "Apply"}
+                  {same(p.picture) ? t("In use") : t("Apply")}
                 </button>
               </div>
             </div>
           ))}
         </div>
       </Group>
-      <Group title="Your presets" note="Save the current picture settings under a name, then apply them anywhere.">
+      <Group title={t("Your presets")} note={t("Save the current picture settings under a name, then apply them anywhere.")}>
         <div className="rows">
           <div className="row wide">
             <form
@@ -859,15 +842,14 @@ function Presets({ store, target }: { store: Store; target: Target }) {
             >
               <input
                 className="input"
-                aria-label="Preset name"
-                placeholder="Name, for example Late-night anime"
+                aria-label={t("Preset name")}
+                placeholder={t("Name, for example Late-night anime")}
                 maxLength={50}
                 value={name}
                 onChange={(e) => setName(e.target.value)}
               />
               <button className="btn" disabled={!name.trim()}>
-                Save preset
-              </button>
+                {t("Save preset")}</button>
             </form>
           </div>
           {config.presets.map((p) => (
@@ -875,8 +857,8 @@ function Presets({ store, target }: { store: Store; target: Target }) {
               <div className="text">
                 <strong>{p.name}</strong>
                 <small>
-                  {ALGORITHM_LABELS[p.settings.algorithm]} ·{" "}
-                  {QUALITY_LABELS[p.settings.quality]} · sharpen{" "}
+                  {t(ALGORITHM_LABELS[p.settings.algorithm])} ·{" "}
+                  {t(QUALITY_LABELS[p.settings.quality])} {" "}{t("· sharpen")}{" "}
                   {Math.round(p.settings.strength * 100)}%
                 </small>
               </div>
@@ -886,25 +868,23 @@ function Presets({ store, target }: { store: Store; target: Target }) {
                   disabled={same(pictureOf(p.settings))}
                   onClick={() => store.patch(target, pictureOf(p.settings))}
                 >
-                  Apply
-                </button>
+                  {t("Apply")}</button>
                 <button
                   className="btn small danger"
-                  aria-label={`Delete ${p.name}`}
+                  aria-label={format("Delete {name}", { name: p.name })}
                   onClick={async () => {
                     if (
                       await confirm({
-                        title: `Delete “${p.name}”?`,
-                        body: <p>Profiles that used it keep their current settings.</p>,
-                        confirm: "Delete preset",
+                        title: format("Delete “{name}”?", { name: p.name }),
+                        body: <p>{t("Profiles that used it keep their current settings.")}</p>,
+                        get confirm() { return t("Delete preset"); },
                         danger: true,
                       })
                     )
                       void save(config.presets.filter((q) => q.name !== p.name));
                   }}
                 >
-                  Delete
-                </button>
+                  {t("Delete")}</button>
               </div>
             </div>
           ))}
@@ -930,12 +910,22 @@ function Behavior({ store }: { store: Store }) {
   }, []);
   return (
     <>
-      <Group title="Everywhere">
+      <Group title={t("Language")} note={t("Choose the interface language. Automatic follows Chrome; other languages use English.")}>
+        <div className="rows"><div className="row"><label className="field">
+          <span>{t("Language")}</span>
+          <select className="select" aria-label={t("Language")} value={prefs.language}
+            onChange={(e) => void store.preferences({ language: e.target.value as "auto" | "ja" | "en" })}>
+            <option value="auto">{t("Automatic (Chrome language)")}</option>
+            <option value="ja">日本語</option><option value="en">English</option>
+          </select>
+        </label></div></div>
+      </Group>
+      <Group title={t("Everywhere")}>
         <div className="rows">
           <div className="row">
             <Switch
-              label="Pause on every website"
-              description="Stops all enhancement without changing any website's settings."
+              label={t("Pause on every website")}
+              description={t("Stops all enhancement without changing any website's settings.")}
               checked={prefs.paused}
               disabled={!isExtension}
               onChange={(paused) => void store.preferences({ paused })}
@@ -943,8 +933,8 @@ function Behavior({ store }: { store: Store }) {
           </div>
           <div className="row">
             <Switch
-              label="Battery saver"
-              description="While unplugged, use Fast quality and at most 1080p."
+              label={t("Battery saver")}
+              description={t("While unplugged, use Fast quality and at most 1080p.")}
               checked={prefs.batterySaver}
               disabled={!isExtension}
               onChange={(batterySaver) => void store.preferences({ batterySaver })}
@@ -953,48 +943,38 @@ function Behavior({ store }: { store: Store }) {
         </div>
       </Group>
       <Group
-        title="Keyboard shortcuts"
-        note="Shortcuts act on the video in the current tab. Chrome lets you change them."
+        title={t("Keyboard shortcuts")}
+        note={t("Shortcuts act on the video in the current tab. Chrome lets you change them.")}
         aside={
           <button className="link" style={{ marginLeft: 12, fontSize: 13 }} onClick={openShortcutSettings}>
-            Change shortcuts
-          </button>
+            {t("Change shortcuts")}</button>
         }
       >
         <div className="rows">
           {Object.entries(COMMAND_LABELS).map(([name, label]) => (
             <div className="row" key={name}>
               <div className="text">
-                <strong>{label}</strong>
+                <strong>{t(label)}</strong>
               </div>
               <div className="controls">
-                {keys[name] ? <Shortcut keys={keys[name]} /> : <span className="muted">Not set</span>}
+                {keys[name] ? <Shortcut keys={keys[name]} /> : <span className="muted">{t("Not set")}</span>}
               </div>
             </div>
           ))}
         </div>
       </Group>
       <Group
-        title="Compatibility"
-        note="What can and cannot be enhanced, and why."
+        title={t("Compatibility")}
+        note={t("What can and cannot be enhanced, and why.")}
       >
         <div className="rows">
           <Row wide>
             <p className="muted" style={{ lineHeight: 1.6 }}>
-              Chrome 121 or newer with WebGPU runs every engine; without it,
-              Spatial Detail runs on WebGL. Embedded players need approval for
-              both the page and the player's own website. Protected (DRM)
-              video, closed player internals and some cross-origin players
-              block direct access; the compatibility player can enhance a
-              shared tab instead. Fullscreen from WebScaly's toolbar keeps the
-              enhanced picture; a player's own fullscreen may show the
-              original.
-            </p>
+              {t("Chrome 121 or newer with WebGPU runs every engine; without it, Spatial Detail runs on WebGL. Embedded players need approval for both the page and the player's own website. Protected (DRM) video, closed player internals and some cross-origin players block direct access; the compatibility player can enhance a shared tab instead. Fullscreen from WebScaly's toolbar keeps the enhanced picture; a player's own fullscreen may show the original.")}</p>
           </Row>
-          <Row title="GPU benchmark" note="Measures each engine on generated frames.">
+          <Row title={t("GPU benchmark")} note={t("Measures each engine on generated frames.")}>
             <a className="btn small" href="./benchmark.html" target="_blank" rel="noreferrer">
-              Open benchmark
-            </a>
+              {t("Open benchmark")}</a>
           </Row>
         </div>
       </Group>
@@ -1057,58 +1037,51 @@ function DiagnosticsPage({ store }: { store: Store }) {
   return (
     <>
       {store.lastError && (
-        <Group title="Last action error">
-          <pre>{store.lastError}</pre>
+        <Group title={t("Last action error")}>
+          <pre>{translateMessage(store.lastError)}</pre>
           <div>
             <button className="btn small" onClick={store.clearError}>
-              Clear error
-            </button>
+              {t("Clear error")}</button>
           </div>
         </Group>
       )}
-      <Group title="This device">
+      <Group title={t("This device")}>
         <dl className="facts">
           <Fact label="Chrome" value={browser} />
           <Fact
             label="WebGPU"
-            value={device === undefined ? "Checking…" : device.webgpu ? (device.fallback ? "Software fallback" : "Available") : "Unavailable"}
+            value={device === undefined ? t("Checking…") : device.webgpu ? (device.fallback ? t("Software fallback") : t("Available")) : t("Unavailable")}
           />
-          <Fact label="Graphics" value={device?.adapter ?? (device ? "—" : "…")} />
-          <Fact label="GPU timing" value={device?.timestamp === undefined ? "—" : device.timestamp ? "Reported" : "Not reported"} />
-          <Fact label="Largest texture" value={device?.maxTexture ? `${device.maxTexture} px` : "—"} />
+          <Fact label={t("Graphics")} value={device?.adapter ?? (device ? "—" : "…")} />
+          <Fact label={t("GPU timing")} value={device?.timestamp === undefined ? "—" : device.timestamp ? t("Reported") : t("Not reported")} />
+          <Fact label={t("Largest texture")} value={device?.maxTexture ? `${device.maxTexture} px` : "—"} />
         </dl>
       </Group>
       <Group
-        title="Current video tab"
+        title={t("Current video tab")}
         aside={
           status ? (
             <button className="link" style={{ marginLeft: 12, fontSize: 13 }} onClick={() => void copy()}>
-              {copied ? "Copied" : "Copy report"}
+              {copied ? t("Copied") : t("Copy report")}
             </button>
           ) : undefined
         }
         note={
           status
-            ? `${status.videos} visible player${status.videos === 1 ? "" : "s"} · ${status.hiddenVideos ?? 0} hidden video${status.hiddenVideos === 1 ? "" : "s"}`
-            : "Open Settings from the popup on your video tab to see its players here."
+            ? format("{visible} visible players · {hidden} hidden videos", { visible: status.videos, hidden: status.hiddenVideos ?? 0 })
+            : t("Open Settings from the popup on your video tab to see its players here.")
         }
       >
         {status?.renderers.map((r, i) => <RendererFacts key={i} d={r} />)}
         {status && (
-          <Disclosure summary="Raw status">
+          <Disclosure summary={t("Raw status")}>
             <pre>{JSON.stringify(status, null, 2)}</pre>
           </Disclosure>
         )}
       </Group>
-      <Group title="How numbers are measured">
+      <Group title={t("How numbers are measured")}>
         <p className="muted" style={{ lineHeight: 1.6, maxWidth: "72ch" }}>
-          Source frame rate comes from decoded media timestamps. Enhanced frame
-          rate counts frames submitted for enhancement, not display refresh. GPU
-          time is sampled every tenth frame when the graphics driver reports it.
-          Frames that arrive while the GPU is still busy are skipped rather than
-          queued, so playback never falls behind. Audio stays with the website's
-          player.
-        </p>
+          {t("Source frame rate comes from decoded media timestamps. Enhanced frame rate counts frames submitted for enhancement, not display refresh. GPU time is sampled every tenth frame when the graphics driver reports it. Frames that arrive while the GPU is still busy are skipped rather than queued, so playback never falls behind. Audio stays with the website's player.")}</p>
       </Group>
     </>
   );
@@ -1125,17 +1098,17 @@ function RendererFacts({ d }: { d: Diagnostics }) {
   const budget = d.sourceFps > 0 ? 1000 / d.sourceFps : 0;
   return (
     <dl className="facts">
-      <Fact label="State" value={d.state} />
-      <Fact label="Engine" value={ALGORITHM_LABELS[d.algorithm as Algorithm] ?? d.algorithm} />
-      <Fact label="Backend" value={d.backend || "—"} />
-      <Fact label="Size" value={d.resolution || "—"} />
-      <Fact label="Source" value={`${d.sourceFps.toFixed(2)} fps`} />
-      <Fact label="Enhanced" value={`${d.outputFps.toFixed(1)} fps`} />
-      <Fact label="GPU" value={d.gpuMs === null ? "—" : budget ? `${d.gpuMs.toFixed(2)} of ${budget.toFixed(1)} ms` : `${d.gpuMs.toFixed(2)} ms`} />
-      <Fact label="Skipped" value={`${d.dropped} of ${d.decoded + d.dropped}`} />
-      <Fact label="Content" value={d.hint === "animation" ? "Animation-like" : d.hint === "live" ? "Camera-like" : "—"} />
-      {d.adaptive && <Fact label="Load" value={d.adaptive} />}
-      {d.state !== "active" && <Fact label="Message" value={d.message} />}
+      <Fact label={t("State")} value={t(d.state)} />
+      <Fact label={t("Engine")} value={t(ALGORITHM_LABELS[d.algorithm as Algorithm] ?? d.algorithm)} />
+      <Fact label={t("Backend")} value={d.backend || "—"} />
+      <Fact label={t("Size")} value={d.resolution || "—"} />
+      <Fact label={t("Source")} value={`${d.sourceFps.toFixed(2)} fps`} />
+      <Fact label={t("Enhanced")} value={`${d.outputFps.toFixed(1)} fps`} />
+      <Fact label="GPU" value={d.gpuMs === null ? "—" : budget ? format("{time} of {budget} ms", { time: d.gpuMs.toFixed(2), budget: budget.toFixed(1) }) : `${d.gpuMs.toFixed(2)} ms`} />
+      <Fact label={t("Skipped")} value={format("{count} of {total}", { count: d.dropped, total: d.decoded + d.dropped })} />
+      <Fact label={t("Content")} value={d.hint === "animation" ? t("Animation-like") : d.hint === "live" ? t("Camera-like") : "—"} />
+      {d.adaptive && <Fact label={t("Load")} value={translateMessage(d.adaptive)} />}
+      {d.state !== "active" && <Fact label={t("Message")} value={translateMessage(d.message)} />}
     </dl>
   );
 }
@@ -1149,31 +1122,29 @@ function Welcome({ store, done }: { store: Store; done: () => void }) {
   return (
     <>
       <Preview settings={store.config!.defaults} />
-      <Group title="Three steps">
+      <Group title={t("Three steps")}>
         <div className="rows">
           <div className="row wide">
             <ol className="steps">
               <li>
                 <div>
-                  <strong>Pin WebScaly and open a video</strong>
-                  <p>Use the puzzle icon in Chrome's toolbar to pin WebScaly, then open any page with a video.</p>
+                  <strong>{t("Pin WebScaly and open a video")}</strong>
+                  <p>{t("Use the puzzle icon in Chrome's toolbar to pin WebScaly, then open any page with a video.")}</p>
                 </div>
               </li>
               <li>
                 <div>
-                  <strong>Choose “Allow on this website”</strong>
-                  <p>Chrome asks once. WebScaly only ever runs on websites you allow, and you can remove them here at any time.</p>
+                  <strong>{t("Choose “Allow on this website”")}</strong>
+                  <p>{t("Chrome asks once. WebScaly only ever runs on websites you allow, and you can remove them here at any time.")}</p>
                 </div>
               </li>
               <li>
                 <div>
-                  <strong>Watch</strong>
+                  <strong>{t("Watch")}</strong>
                   <p>
-                    The toolbar badge shows <b>ON</b> while a video is enhanced. Pick an engine in the popup
-                    {keys["toggle-enhancement"] ? (
+                    {t("The toolbar badge shows")}{" "}<b>ON</b> {" "}{t("while a video is enhanced. Pick an engine in the popup")}{keys["toggle-enhancement"] ? (
                       <>
-                        , or press <Shortcut keys={keys["toggle-enhancement"]} /> to switch it off and on
-                      </>
+                        {t(", or press")}{" "}<Shortcut keys={keys["toggle-enhancement"]} /> {" "}{t("to switch it off and on")}</>
                     ) : null}
                     .
                   </p>
@@ -1185,8 +1156,7 @@ function Welcome({ store, done }: { store: Store; done: () => void }) {
       </Group>
       <div>
         <button className="btn primary" onClick={done}>
-          Got it
-        </button>
+          {t("Got it")}</button>
       </div>
     </>
   );

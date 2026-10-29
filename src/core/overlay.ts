@@ -1,3 +1,4 @@
+import { bindLocale, localize } from "../shared/i18n/dom";
 import type { Settings } from "../shared/settings-core";
 import { ALGORITHM_LABELS, QUALITY_LABELS } from "../shared/settings-core";
 import type { Diagnostics } from "../shared/player-status";
@@ -87,6 +88,7 @@ export class PlayerOverlay {
   private hud = document.createElement("output");
   private divider = document.createElement("div");
   private toastNode = document.createElement("div");
+  private unbindLocale?: () => void;
   private frames = new Map<Role, HTMLIFrameElement>();
   private ready = new Set<HTMLIFrameElement>();
   private sizes = new Map<Role, [number, number]>();
@@ -126,6 +128,7 @@ export class PlayerOverlay {
     this.toastNode.setAttribute("role", "status");
     shadow.append(style, this.canvas, this.divider, this.hud, this.toastNode);
     video.insertAdjacentElement("afterend", this.host);
+    this.unbindLocale = bindLocale(shadow);
     const opts = { signal: this.abort.signal },
       passive = { ...opts, passive: true, capture: true };
     window.addEventListener("message", this.receive, opts);
@@ -416,9 +419,11 @@ export class PlayerOverlay {
       <dl>${row("Size", escape(d.resolution || "—"))}${row("Source", `${d.sourceFps.toFixed(2)} fps`)}${row("Enhanced", `${d.outputFps.toFixed(1)} fps`)}${row("GPU", d.gpuMs === null ? "—" : `${d.gpuMs.toFixed(2)} / ${budget ? budget.toFixed(1) : "—"} ms`)}${row("Skipped", String(d.dropped))}</dl>
       <div class="budget" title="GPU time against this video's frame budget"><i style="width:${share.toFixed(1)}%"></i></div>
       ${d.adaptive ? `<div class="note">${escape(d.adaptive)}</div>` : ""}`;
+    localize(this.hud);
   }
   toast(html: string) {
     this.toastNode.innerHTML = html;
+    localize(this.toastNode);
     this.toastNode.classList.add("show");
     clearTimeout(this.toastTimer);
     this.toastTimer = setTimeout(
@@ -463,6 +468,7 @@ export class PlayerOverlay {
     });
   }
   destroy() {
+    this.unbindLocale?.();
     clearInterval(this.tick);
     clearTimeout(this.sleepTimer);
     clearTimeout(this.toastTimer);
