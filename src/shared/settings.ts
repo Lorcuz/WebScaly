@@ -75,14 +75,25 @@ export function normalizeConfiguration(input: unknown): Configuration {
     preferences: normalizePreferences(value.preferences),
   };
 }
-/** Adds or updates sites and presets from an import without removing anything already approved. */
+/** Whether an imported file carries its own Default profile (a partial file must not reset it). */
+export function carriesDefaults(raw: unknown): boolean {
+  const defaults = (raw as { defaults?: unknown } | null | undefined)?.defaults;
+  return !!defaults && typeof defaults === "object";
+}
+/**
+ * Adds or updates sites and presets from an import without removing anything already approved.
+ * The file's Default profile is applied only when it has one, and a file can narrow but never
+ * widen an approved site: Chrome has not granted the wider scope, so the site would stop working.
+ */
 export function mergeConfiguration(
   current: Configuration,
   incoming: Configuration,
+  takeDefaults = true,
 ): Configuration {
-  const sites = current.sites.map(
-    (s) => incoming.sites.find((i) => i.origin === s.origin) ?? s,
-  );
+  const sites = current.sites.map((s) => {
+    const file = incoming.sites.find((i) => i.origin === s.origin);
+    return file ? { ...file, subdomains: s.subdomains && file.subdomains } : s;
+  });
   for (const site of incoming.sites)
     if (!sites.some((s) => s.origin === site.origin)) sites.push(site);
   const presets = current.presets.map(
@@ -92,7 +103,7 @@ export function mergeConfiguration(
     if (!presets.some((p) => p.name === preset.name)) presets.push(preset);
   return normalizeConfiguration({
     ...current,
-    defaults: incoming.defaults,
+    defaults: takeDefaults ? incoming.defaults : current.defaults,
     sites,
     presets,
   });

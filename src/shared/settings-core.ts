@@ -229,12 +229,19 @@ export function normalizePreferences(input: unknown): Preferences {
   };
 }
 export function siteOrigin(input: string): string {
-  const url = new URL(input);
+  let url: URL;
+  try {
+    url = new URL(input);
+  } catch {
+    throw new Error("Enter a website address such as https://www.example.com.");
+  }
   if (
     !["https:", "http:"].includes(url.protocol) ||
     url.username ||
     url.password ||
-    url.hostname.includes("*")
+    // Chrome percent-encodes "*" in a host to "%2A", so a wildcard has to be
+    // caught as an escape too. A real host name never contains either.
+    /[*%]/.test(url.hostname)
   )
     throw new Error("Use a specific HTTP or HTTPS website.");
   return `${url.protocol}//${url.hostname}`;
@@ -267,4 +274,17 @@ export function hostLabel(origin: string): string {
   } catch {
     return origin;
   }
+}
+/**
+ * The host for display. https://host and http://host are separate profiles; when
+ * both exist the label says which one, so two rows are never called the same.
+ */
+export function siteLabel(
+  origin: string,
+  sites: readonly { origin: string }[],
+): string {
+  const host = hostLabel(origin);
+  return sites.some((s) => s.origin !== origin && hostLabel(s.origin) === host)
+    ? `${host} (${origin.startsWith("http://") ? "HTTP" : "HTTPS"})`
+    : host;
 }
