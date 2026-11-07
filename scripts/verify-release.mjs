@@ -20,7 +20,9 @@ const context=await chromium.launchPersistentContext(await mkdtemp(resolve("test
 const errors=[],badRequests=[],checks=[];
 context.on("page",page=>{
  page.on("pageerror",error=>errors.push(error.message));
- page.on("requestfailed",request=>badRequests.push(new URL(request.url()).pathname));
+ // A request the browser cancels itself (net::ERR_ABORTED) is not a missing resource: the settings preview creates in-player frames, and
+// unmounting them while a frame request is still in flight cancels it. Missing files fail as 404/ERR_FILE_NOT_FOUND and still count.
+ page.on("requestfailed",request=>{if(request.failure()?.errorText!=="net::ERR_ABORTED")badRequests.push(new URL(request.url()).pathname);});
  page.on("response",response=>{if(response.status()>=400)badRequests.push(new URL(response.url()).pathname);});
  page.on("request",request=>{if(/^https?:/.test(request.url()))errors.push("Unexpected external network request");});
 });
@@ -31,6 +33,8 @@ assert.deepEqual((granted.origins??[]).filter(origin=>/^https?:/.test(origin)),[
 checks.push("No website permission granted on installation");
 const options=await context.newPage();await options.goto(`chrome-extension://${id}/options.html`);
 await expect(options.getByRole("heading",{name:"Enhancement",exact:true})).toBeVisible();
+// The live preview creates in-player frames; switching sections unmounts it, which aborts any frame request still in flight.
+await options.waitForLoadState("networkidle");
 for(const name of ["Controls","Compare","HUD"])await expect(options.getByRole("switch",{name,exact:true})).not.toBeChecked();
 checks.push("Hidden player-tool defaults preserved");
 for(const section of ["Websites","Presets","Behavior","Diagnostics","Getting started","About"]){
@@ -39,12 +43,12 @@ for(const section of ["Websites","Presets","Behavior","Diagnostics","Getting sta
 }
 checks.push("All seven settings sections load from the ZIP");
 const flag=options.getByRole("img",{name:"🇮🇹",exact:true});
-assert(await flag.evaluate(img=>img.complete&&img.naturalWidth>0));
+await expect.poll(()=>flag.evaluate(img=>img.complete&&img.naturalWidth>0)).toBe(true);
 await expect(options.getByRole("img",{name:"PayPal donation QR code",exact:true})).toBeHidden();
 await options.getByRole("button",{name:"Support WebScaly",exact:true}).press("Enter");
 const qr=options.getByRole("img",{name:"PayPal donation QR code",exact:true});
 await expect(qr).toBeVisible();
-assert(await qr.locator("img").evaluate(img=>img.complete&&img.naturalWidth===815));
+await expect.poll(()=>qr.locator("img").evaluate(img=>img.complete&&img.naturalWidth===815)).toBe(true);
 checks.push("About flag and hidden/revealed QR assets work");
 await options.screenshot({path:"test-results/packaged-about.png",animations:"disabled"});
 const popup=await context.newPage();await popup.goto(`chrome-extension://${id}/popup.html`);

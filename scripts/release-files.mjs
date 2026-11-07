@@ -4,7 +4,7 @@ import { unzipSync } from "fflate";
 
 const decoder = new TextDecoder();
 export const version = JSON.parse(await readFile("package.json", "utf8")).version;
-export const sourceName = `webscaly-source-${version}.zip`;
+export const sourceName = `webscaly-${version}-source.zip`;
 export const extensionName = `webscaly-${version}.zip`;
 export const zipOptions = { level: 9, mtime: new Date("1980-01-01T00:00:00Z") };
 
@@ -48,7 +48,7 @@ export function audit(files, depth = 0) {
 export const storeAssetNames = [
   "assets.json","icon-128.png","small-promo-440x280.png","marquee-promo-1400x560.png",
   "01-player-1280x800.png","02-settings-1280x800.png","03-popup-1280x800.png",
-  "04-site-profiles-1280x800.png","05-about-1280x800.png","popup-ui.png",
+  "04-site-profiles-1280x800.png","05-engines-1280x800.png","popup-ui.png",
 ];
 export async function collectSource() {
   const source = {};
@@ -77,7 +77,7 @@ export function runtimeAllowed(name) {
     /^icons\/(?:16|32|48|128)\.png$/.test(name) ||
     /^(?:images\/italy\.svg|images\/support-paypal\.png)$/.test(name) ||
     /^licenses\/[\w.-]+\.(?:txt|md)$/.test(name) ||
-    /^compliance\/(?:fsrcnnx\/[\w./-]+|webscaly-source-[\d.]+\.zip)$/.test(name);
+    /^compliance\/(?:fsrcnnx\/[\w./-]+|webscaly-[\d.]+-source\.zip)$/.test(name);
 }
 export function validateRuntime(runtime) {
   audit(runtime);
