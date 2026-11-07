@@ -1,4 +1,8 @@
-# Upgrade to 0.4.0
+# Upgrade to 0.4.1
+
+0.4.1 is a reliability update with no new permissions and no settings changes. Reload the unpacked `dist` extension (or let the store update) and refresh video tabs. Existing profiles, approvals and presets are kept. If you disable and re-enable WebScaly, refresh open video tabs so the player attaches again.
+
+## Upgrade to 0.4.0
 
 Reload the unpacked `dist` extension in Chrome and refresh video tabs. Store installations update automatically. No new permissions are requested.
 
