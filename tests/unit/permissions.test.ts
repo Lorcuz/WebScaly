@@ -388,6 +388,31 @@ it("imports merge by default and only a replace revokes missing sites", async ()
   expect(local.webscalyConfig.sites.map((s: any) => s.origin)).toEqual(["https://new.test"]);
   expect(scopes.has("https://keep.test/*")).toBe(false);
 });
+it("a merge import keeps the current Default profile when the file carries none", async () => {
+  approved("https://keep.test");
+  local.webscalyConfig.defaults = { ...DEFAULTS, strength: 0.77 };
+  await send({
+    type: "webscaly:import",
+    config: { version: 2, sites: [{ origin: "https://new.test", subdomains: false, settings: DEFAULTS }] },
+  });
+  expect(local.webscalyConfig.defaults.strength).toBe(0.77);
+  await send({
+    type: "webscaly:import",
+    config: { version: 2, defaults: { ...DEFAULTS, strength: 0.5 }, sites: [] },
+  });
+  expect(local.webscalyConfig.defaults.strength).toBe(0.5);
+});
+it("a merge import cannot widen an approved website to a scope Chrome has not granted", async () => {
+  approved("https://keep.test");
+  await send({
+    type: "webscaly:import",
+    config: { ...EMPTY, sites: [{ origin: "https://keep.test", subdomains: true, settings: { ...DEFAULTS, strength: 0.9 } }] },
+  });
+  const site = local.webscalyConfig.sites.find((s: any) => s.origin === "https://keep.test");
+  expect(site.settings.strength).toBe(0.9);
+  expect(site.subdomains).toBe(false);
+  expect(scopes.has("https://keep.test/*")).toBe(true);
+});
 it("keyboard commands change only the profile rendering in the active tab", async () => {
   approved("https://example.com", "https://other.test");
   const chrome = (globalThis as any).chrome;

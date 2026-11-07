@@ -10,6 +10,7 @@ import {
   normalizeConfiguration,
   normalizeSettings,
   profileFor,
+  siteLabel,
   siteOrigin,
 } from "../../src/shared/settings";
 describe("least-privilege site matching", () => {
@@ -28,9 +29,19 @@ describe("least-privilege site matching", () => {
     "https://user:secret@example.com",
     "https://*",
     "https://*.example.com",
+    // Chrome's URL parser turns "*" in a host into "%2A" instead of rejecting it.
+    "https://%2A.example.com",
   ])("rejects invalid host scope %s", (url) =>
     expect(() => siteOrigin(url)).toThrow(),
   );
+  it("labels same-host profiles by scheme only when they would otherwise look identical", () => {
+    const sites = [{ origin: "http://a.test" }, { origin: "https://a.test" }, { origin: "https://b.test" }];
+    expect(siteLabel("http://a.test", sites)).toBe("a.test (HTTP)");
+    expect(siteLabel("https://a.test", sites)).toBe("a.test (HTTPS)");
+    expect(siteLabel("https://b.test", sites)).toBe("b.test");
+  });
+  it("explains an address that is not a URL at all", () =>
+    expect(() => siteOrigin("example.com")).toThrow(/such as https:\/\/www\.example\.com/));
   it("does not approve suffix lookalikes, other protocols or subdomains implicitly", () => {
     for (const url of [
       "https://notexample.com",
