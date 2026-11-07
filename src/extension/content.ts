@@ -22,6 +22,8 @@ else {
     roots = new Set<Document | ShadowRoot>(),
     shadowHosts = new Set<Element>();
   let revision = 0,
+    // Counts configuration changes seen in storage; see authorize().
+    configEpoch = 0,
     discoveryEpoch = 0,
     shadowCursor = 0,
     active = false,
@@ -29,6 +31,9 @@ else {
     site: SiteProfile | null = null,
     prefs: Preferences = PREFERENCES,
     authorizedAt = 0,
+    // Consecutive authorizations the worker never answered, and when to ask again.
+    unanswered = 0,
+    retryAt = 0,
     discharging = false,
     battery: (EventTarget & { charging: boolean }) | undefined,
     reported: BadgeState = "idle",
@@ -143,12 +148,27 @@ else {
     );
     return second ? [first, second] : [first];
   }
-  async function authorize(): Promise<boolean> {
-    const r = await tell({ type: "webscaly:authorized" });
-    const value = r?.ok ? r.value : null;
+  /**
+   * "denied" is the worker's answer that this frame has no approval; "unknown"
+   * means no answer at all (the worker errored or restarted), which says nothing
+   * about approval and is retried instead of switching the page off for good.
+   */
+  async function authorize(): Promise<"allowed" | "denied" | "unknown"> {
+    // The worker answers from the configuration it read when the request
+    // arrived. A change that reached this page through storage while the
+    // request was in flight is newer than that answer, so ask again instead of
+    // letting the stale settings (for example "not paused") overwrite it.
+    let r: { ok?: boolean; value?: any } | undefined;
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const seen = configEpoch;
+      r = await tell({ type: "webscaly:authorized" });
+      if (seen === configEpoch) break;
+    }
+    if (!r?.ok) return "unknown";
+    const value = r.value;
     if (!value) {
       site = null;
-      return false;
+      return "denied";
     }
     site = {
       origin: value.origin,
@@ -157,8 +177,17 @@ else {
     };
     prefs = normalizePreferences(value.preferences);
     authorizedAt = Date.now();
+    unanswered = 0;
     void watchBattery();
-    return true;
+    return "allowed";
+  }
+  /** Fails closed after repeated silence: no processing without a recent approval, but keep asking. */
+  function noAnswer() {
+    retryAt = Date.now() + Math.min(1500 * ++unanswered, 6000);
+    if (unanswered >= 3) {
+      clear();
+      report();
+    }
   }
   const batteryActive = () => prefs.batterySaver && discharging;
   async function watchBattery() {
@@ -212,6 +241,8 @@ else {
   function deactivate() {
     active = false;
     site = null;
+    unanswered = 0;
+    retryAt = 0;
     discoveryEpoch++;
     clear();
     observer.disconnect();
@@ -235,13 +266,18 @@ else {
       return;
     }
     if (!site || Date.now() - authorizedAt > AUTH_TTL) {
-      const version = ++revision,
-        allowed = await authorize();
-      if (version !== revision || !active || dead) return;
-      if (!allowed) {
-        deactivate();
-        return;
+      if (Date.now() >= retryAt) {
+        const version = ++revision,
+          answer = await authorize();
+        if (version !== revision || !active || dead) return;
+        if (answer === "denied") {
+          deactivate();
+          return;
+        }
+        if (answer === "unknown") noAnswer();
       }
+      // A short silence keeps the last approval; a long one, or no approval yet, waits.
+      if (!site || unanswered >= 3) return;
     }
     if (!wanted()) {
       clear();
@@ -330,14 +366,15 @@ else {
   }
   async function refresh() {
     const version = ++revision,
-      allowed = await authorize();
+      answer = await authorize();
     if (version !== revision || dead) return;
-    if (!allowed) {
+    if (answer === "denied") {
       deactivate();
       return;
     }
     activate();
-    apply();
+    if (answer === "allowed") apply();
+    else noAnswer();
   }
   const primary = () =>
     [...renderers.values()].find((r) => r.diagnostics.state === "active") ??
@@ -412,7 +449,9 @@ else {
     changes: Record<string, chrome.storage.StorageChange>,
     area: string,
   ) => {
-    if (area !== "local" || !changes.webscalyConfig || !active || !site) return;
+    if (area !== "local" || !changes.webscalyConfig) return;
+    configEpoch++;
+    if (!active || !site) return;
     const value = changes.webscalyConfig.newValue as
       | { sites?: { origin?: unknown; subdomains?: unknown; settings?: unknown }[]; preferences?: unknown }
       | undefined;

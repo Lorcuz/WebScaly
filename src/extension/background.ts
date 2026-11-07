@@ -1,6 +1,7 @@
 import {
   ALGORITHMS,
   ALGORITHM_LABELS,
+  carriesDefaults,
   hostPattern,
   mergeConfiguration,
   normalizeConfiguration,
@@ -599,7 +600,7 @@ chrome.runtime.onMessage.addListener((message: unknown, sender, reply) => {
         (c) =>
           replace
             ? { ...incoming, preferences: c.preferences }
-            : mergeConfiguration(c, incoming),
+            : mergeConfiguration(c, incoming, carriesDefaults(m.config)),
         replace,
       );
       if (replace) {
