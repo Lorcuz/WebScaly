@@ -172,6 +172,39 @@ test("controls frames never post to a document that is not the extension page", 
   expect(problems.filter((t) => /postMessage|target origin|origin/i.test(t))).toEqual([]);
   await page.close();
 });
+test("a control frame the page moves is sent no state until it announces itself again", async () => {
+  await configure({ ...DEFAULTS, controls: true, comparison: false });
+  const page = await context.newPage();
+  const problems: string[] = [];
+  page.on("console", (m) => {
+    if (m.type() === "error" || m.type() === "warning") problems.push(m.text());
+  });
+  page.on("pageerror", (e) => problems.push(e.message));
+  await page.goto(url);
+  await page.evaluate(() => window.fixture.create(30, 640, false));
+  await expect(page.locator('iframe[title="WebScaly video controls"]')).toBeVisible();
+  // A frame the page moves reloads into about:blank, in the page's own origin. A
+  // settings change that lands before the overlay's next layout pass used to be
+  // posted into that blank document (about one run in eight). The window is a few
+  // milliseconds wide, so the move-then-change sequence is repeated.
+  const comparison = page.locator('iframe[title="WebScaly comparison"]');
+  for (let i = 0; i < 20; i++) {
+    await configure({ ...DEFAULTS, controls: true, comparison: true });
+    await expect(comparison).toBeVisible();
+    await page.evaluate(() => {
+      const frame = document.querySelector('iframe[title="WebScaly video controls"]')!;
+      const holder = document.createElement("div");
+      document.body.append(holder);
+      holder.append(frame);
+    });
+    await configure({ ...DEFAULTS, controls: true, comparison: false, hud: true });
+    await expect(comparison).toHaveCount(0);
+  }
+  await page.waitForTimeout(1200);
+  await expect(page.locator("webscaly-player output")).toBeVisible();
+  expect(problems.filter((t) => /postMessage|target origin|origin/i.test(t))).toEqual([]);
+  await page.close();
+});
 test("isolated controls and slider preserve playback and capture-phase native handlers", async () => {
   await configure({ ...DEFAULTS, controls: true, comparison: true });
   const page = await fixture();
@@ -874,6 +907,93 @@ test("sharp sources are skipped, and global pause clears and restores processing
   await expect(page.locator("webscaly-player")).toHaveAttribute("data-state", "active");
   await page.close();
 });
+test("a command sent while the worker restarts is not undone by a stale authorization", async () => {
+  await configure({ ...DEFAULTS, controls: true });
+  const page = await fixture();
+  await expect(page.locator("webscaly-player")).toHaveAttribute("data-state", "active");
+  const tabId = await worker.evaluate(
+    async (u) => (await chrome.tabs.query({})).find((t) => t.url === u)!.id!,
+    page.url(),
+  );
+  // Stop the worker: its restart re-authorizes the page while the command writes the new setting.
+  const settings = await options();
+  const cdp = await context.newCDPSession(page);
+  await cdp.send("ServiceWorker.enable");
+  await cdp.send("ServiceWorker.stopAllWorkers");
+  const reply = await settings.evaluate(
+    async (tab) =>
+      chrome.runtime.sendMessage({ type: "webscaly:command", command: "toggle-pause", tabId: tab }),
+    tabId,
+  );
+  expect(reply.ok).toBe(true);
+  await expect(page.locator("webscaly-player")).toHaveCount(0);
+  worker = context.serviceWorkers()[context.serviceWorkers().length - 1] ?? worker;
+  await expect
+    .poll(() => worker.evaluate((id) => chrome.action.getBadgeText({ tabId: id }), tabId))
+    .toBe("II");
+  await settings.close();
+  await page.close();
+});
+test("importing a partial profile file keeps the Default profile and an approved site's scope", async () => {
+  const wide = "http://plain.webscaly.test"; // an IP address cannot carry a subdomain scope
+  await worker.evaluate(
+    async (c) => chrome.storage.local.set({ webscalyConfig: c }),
+    {
+      ...EMPTY,
+      defaults: { ...DEFAULTS, strength: 0.77 },
+      sites: [{ origin: wide, subdomains: false, settings: DEFAULTS }],
+    },
+  );
+  const page = await context.newPage();
+  await page.goto(`chrome-extension://${id}/options.html?section=Websites`);
+  const chooser = page.waitForEvent("filechooser");
+  await page.getByRole("button", { name: "Import and merge" }).click();
+  (await chooser).setFiles({
+    name: "profiles.json",
+    mimeType: "application/json",
+    // No "defaults" key, and a scope wider than what Chrome granted.
+    buffer: Buffer.from(
+      JSON.stringify({
+        version: 2,
+        sites: [{ origin: wide, subdomains: true, settings: { ...DEFAULTS, strength: 0.9 } }],
+      }),
+    ),
+  });
+  const stored = () =>
+    worker.evaluate(async () => (await chrome.storage.local.get("webscalyConfig")) as any);
+  await expect.poll(async () => (await stored()).webscalyConfig.sites[0].settings.strength).toBe(0.9);
+  const { webscalyConfig: config } = await stored();
+  expect(config.defaults.strength).toBe(0.77);
+  expect(config.sites[0].subdomains).toBe(false);
+  await page.close();
+});
+test("a transient authorization failure does not leave the page inactive", async () => {
+  await configure();
+  await expect
+    .poll(() => worker.evaluate(async () => (await chrome.scripting.getRegisteredContentScripts()).length))
+    .toBe(1);
+  // The worker fails to answer, as it would while it errors or restarts, then recovers.
+  await worker.evaluate(() => {
+    (globalThis as any).realContains = chrome.permissions.contains;
+    chrome.permissions.contains = (() => Promise.reject(new Error("transient"))) as any;
+  });
+  try {
+    const page = await fixture();
+    await page.waitForTimeout(2500);
+    await expect(page.locator("webscaly-player")).toHaveCount(0);
+    await worker.evaluate(() => {
+      chrome.permissions.contains = (globalThis as any).realContains;
+    });
+    await expect(page.locator("webscaly-player")).toHaveAttribute("data-state", "active", {
+      timeout: 15000,
+    });
+    await page.close();
+  } finally {
+    await worker.evaluate(() => {
+      chrome.permissions.contains = (globalThis as any).realContains ?? chrome.permissions.contains;
+    });
+  }
+});
 test("the toolbar saves an enhanced snapshot without touching playback", async () => {
   await configure({ ...DEFAULTS, controls: true });
   const page = await fixture();
@@ -930,6 +1050,130 @@ test("plain http:// websites get the overlay and the WebGL fallback", async () =
   } finally {
     server.close();
   }
+});
+
+test("the overlay lines up with the video when no ancestor is positioned", async () => {
+  await configure();
+  const page = await context.newPage();
+  await page.goto(url);
+  // No positioned ancestor, a page margin and a collapsing wrapper margin: the
+  // host is placed against the document, not against <body>.
+  await page.addStyleTag({
+    content:
+      "body{margin:24px;min-height:3000px}.player{position:static!important;margin:30px 0 0 50px}",
+  });
+  await page.evaluate(() => window.fixture.create(30, 640));
+  await expect(page.locator("webscaly-player")).toHaveAttribute("data-state", "active");
+  const offset = () =>
+    page.evaluate(() => {
+      const v = document.querySelector("video")!.getBoundingClientRect(),
+        h = document.querySelector("webscaly-player")!.getBoundingClientRect();
+      return Math.max(
+        ...(["x", "y", "width", "height"] as const).map((k) => Math.abs(v[k] - h[k])),
+      );
+    });
+  await expect.poll(offset).toBeLessThan(1);
+  await page.evaluate(() => scrollTo(0, 120));
+  await expect.poll(offset).toBeLessThan(1);
+  // A transformed ancestor is the containing block and anchors the host instead.
+  await page.addStyleTag({
+    content: ".player{transform:translate(40px,20px) scale(.8);transform-origin:0 0}",
+  });
+  await expect.poll(offset).toBeLessThan(1);
+  await page.close();
+});
+
+test("the toolbar keeps its buttons reachable on a small player", async () => {
+  await configure({ ...DEFAULTS, controls: true, comparison: true });
+  const page = await context.newPage();
+  await page.setViewportSize({ width: 340, height: 700 });
+  await page.goto(url);
+  await page.evaluate(() => window.fixture.create(30, 640));
+  await expect(page.locator("webscaly-player")).toHaveAttribute("data-state", "active");
+  const frames = () => page.frames().filter((f) => f.url().includes("ui-frame.html"));
+  await expect.poll(() => frames().length).toBe(2);
+  const fits = async () =>
+    Promise.all(
+      frames().map((f) =>
+        f.evaluate(() => {
+          const room = innerWidth + 0.5,
+            shown = [...document.querySelectorAll("button, select, input")].filter(
+              (e) => e.getBoundingClientRect().width > 0,
+            );
+          return shown.length > 0 && shown.every((e) => e.getBoundingClientRect().right <= room);
+        }),
+      ),
+    );
+  await expect.poll(fits).toEqual([true, true]);
+  // The buttons that matter most stay, and the toolbar stays inside the player.
+  await expect(page.frameLocator('iframe[title="WebScaly video controls"]').getByRole("button", { name: "Save snapshot" })).toBeVisible();
+  const video = (await page.locator("video").boundingBox())!,
+    bar = (await page.locator('iframe[title="WebScaly video controls"]').boundingBox())!;
+  expect(bar.x).toBeGreaterThanOrEqual(video.x);
+  expect(bar.x + bar.width).toBeLessThanOrEqual(video.x + video.width + 0.5);
+  // Growing the window brings the full toolbar back.
+  await page.setViewportSize({ width: 1100, height: 700 });
+  await expect(page.frameLocator('iframe[title="WebScaly video controls"]').getByLabel("Video quality")).toBeVisible();
+  await page.close();
+});
+
+test("http and https profiles of one host are told apart in the website list", async () => {
+  await worker.evaluate(async (c) => chrome.storage.local.set({ webscalyConfig: c }), {
+    ...EMPTY,
+    sites: [
+      { origin: "http://127.0.0.1", subdomains: false, settings: DEFAULTS },
+      { origin: "https://127.0.0.1", subdomains: false, settings: DEFAULTS },
+    ],
+  });
+  const page = await context.newPage();
+  await page.goto(`chrome-extension://${id}/options.html?section=Websites`);
+  await expect(page.getByRole("button", { name: "Remove 127.0.0.1 (HTTP)", exact: true })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Remove 127.0.0.1 (HTTPS)", exact: true })).toBeVisible();
+  await page.close();
+});
+
+test("the add-website form rejects bad addresses with a readable message", async () => {
+  const page = await context.newPage();
+  await page.goto(`chrome-extension://${id}/options.html?section=Websites`);
+  const address = page.getByLabel("Website address"),
+    add = page.getByRole("button", { name: "Add website" });
+  // Chrome encodes "*" in a host as "%2A", which used to slip through and wait for a prompt.
+  await address.fill("http://*.example.com");
+  await add.click();
+  await expect(page.getByText("Use a specific HTTP or HTTPS website.").first()).toBeVisible();
+  await address.fill("https://");
+  await add.click();
+  await expect(page.getByText(/Enter a website address such as/).first()).toBeVisible();
+  expect(
+    await worker.evaluate(
+      async () =>
+        ((await chrome.storage.local.get("webscalyConfig")) as any).webscalyConfig.sites.length,
+    ),
+  ).toBe(0);
+  await page.close();
+});
+
+test("native caption tracks stay visible over the enhanced picture", async () => {
+  await configure();
+  const page = await fixture();
+  await page.locator("video").evaluate((v: HTMLVideoElement) => {
+    const track = v.addTextTrack("captions", "English", "en");
+    track.mode = "showing";
+    track.addCue(new VTTCue(0, 3600, "<i>Native</i> caption"));
+  });
+  await expect(page.locator("webscaly-player")).toHaveAttribute("data-state", "active");
+  const caption = page.locator("webscaly-player .captions");
+  await expect(caption).toBeVisible();
+  await expect(caption).toHaveText("Native caption");
+  // It sits inside the picture, near the bottom.
+  const box = await caption.boundingBox(),
+    video = await page.locator("video").boundingBox();
+  expect(box!.y).toBeGreaterThan(video!.y + video!.height / 2);
+  expect(box!.y + box!.height).toBeLessThanOrEqual(video!.y + video!.height);
+  // Without the enhanced picture the browser's own captions are visible, so none are drawn here.
+  await configure({ ...DEFAULTS, enabled: false, controls: true });
+  await expect(page.locator("webscaly-player .captions")).toBeHidden();
+  await page.close();
 });
 
 test("seeking and buffering keep the same renderer", async () => {
