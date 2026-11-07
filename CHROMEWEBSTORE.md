@@ -1,6 +1,6 @@
 # Chrome Web Store Listing — WebScaly
 
-Last updated: 2026-10-20. Project version: 0.4.0 (prepared; the store currently serves 0.3.1). Status: published on the Chrome Web Store.
+Last updated: 2026-11-07. Project version: 0.4.1 (released on GitHub; submit it to the store as a separate update). Status: published on the Chrome Web Store.
 
 **Live listing:** [WebScaly on the Chrome Web Store](https://chromewebstore.google.com/detail/webscaly/hdcnniaagmhkocoeahemlpgjecgpchfa). This is the recommended installation method. Source and development releases are available on [GitHub](https://github.com/Lorcuz/WebScaly).
 
@@ -80,7 +80,7 @@ Use files from the Chrome Web Store handoff folder's `assets/` directory:
 | Screenshot 2 | 02-settings-1280x800.png | 1280×800, 24-bit PNG, no alpha |
 | Screenshot 3 | 03-popup-1280x800.png | 1280×800, 24-bit PNG, no alpha |
 | Screenshot 4 | 04-site-profiles-1280x800.png | 1280×800, 24-bit PNG, no alpha |
-| Screenshot 5 | 05-about-1280x800.png | 1280×800, 24-bit PNG, no alpha |
+| Screenshot 5 | 05-engines-1280x800.png | 1280×800, 24-bit PNG, no alpha |
 | Small promo tile | small-promo-440x280.png | 440×280, 24-bit PNG, no alpha |
 | Marquee promo tile | marquee-promo-1400x560.png | 1400×560, 24-bit PNG, no alpha |
 
@@ -150,7 +150,8 @@ Use Chrome 121+ with a supported graphics context. No login is required. The sup
 
 | Version | Release prepared | Changes | Distribution |
 | --- | --- | --- | --- |
-| 0.4.0 | 2026-10-20 | New image pipeline (quality scalers, adaptive sharpening, deband, colour), adaptive performance, skip-sharp, battery saver, pause, snapshots, hold-original, content suggestions, keyboard shortcuts, toolbar badge, built-in presets, redesigned popup/settings/player controls in the original palette, many reliability and performance fixes. No new permissions. | Prepared; upload after release checks |
+| 0.4.1 | 2026-11-07 | Reliability release: overlay alignment, native captions over the enhanced picture, small-player controls, website-address validation, authorization and service-worker recovery, safer profile imports, cross-frame messaging and packaging fixes. No new permissions. | [Current GitHub release](https://github.com/Lorcuz/WebScaly/releases/tag/v0.4.1) |
+| 0.4.0 | 2026-10-20 | New image pipeline (quality scalers, adaptive sharpening, deband, colour), adaptive performance, skip-sharp, battery saver, pause, snapshots, hold-original, content suggestions, keyboard shortcuts, toolbar badge, built-in presets, redesigned popup/settings/player controls in the original palette, many reliability and performance fixes. No new permissions. | [GitHub release](https://github.com/Lorcuz/WebScaly/releases/tag/v0.4.0) |
 | 0.3.1 | 2026-10-13 | GitHub repository link and icon in About; refreshed UI screenshots and corresponding source. | [Current GitHub release](https://github.com/Lorcuz/WebScaly/releases/tag/v0.3.1) |
 | 0.3.0 | 2026-10-13 | Enhancement-only release, opt-in site access, refined interface, About/support, current artwork and corresponding source. | [Earlier GitHub release](https://github.com/Lorcuz/WebScaly/releases/tag/v0.3.0); superseded by 0.3.1 |
 

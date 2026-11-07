@@ -24,7 +24,7 @@ For the design and its limits, see [rendering, permissions and player integratio
 
 https://github.com/user-attachments/assets/3110377b-ab5e-4bab-959b-4a9ba016e71f
 
-A one-minute tour of WebScaly 0.4.0: allowing a website, choosing an engine, comparing in the player, each engine on footage that suits it, tuning the picture, and the smart and private defaults. [Download the MP4 (720p, 9 MB)](docs/media/webscaly-presentation-720p.mp4) · English captions ([SRT](docs/media/webscaly-presentation.en.srt) · [VTT](docs/media/webscaly-presentation.en.vtt)) · [All demonstrations](docs/media/README.md) · [Credits](docs/media/ATTRIBUTIONS.md)
+A one-minute tour (recorded on 0.4.0; 0.4.1 keeps the same interface): allowing a website, choosing an engine, comparing in the player, each engine on footage that suits it, tuning the picture, and the smart and private defaults. [Download the MP4 (720p, 9 MB)](docs/media/webscaly-presentation-720p.mp4) · English captions ([SRT](docs/media/webscaly-presentation.en.srt) · [VTT](docs/media/webscaly-presentation.en.vtt)) · [All demonstrations](docs/media/README.md) · [Credits](docs/media/ATTRIBUTIONS.md)
 
 ## Before and after
 
@@ -82,7 +82,7 @@ npm run build
 2. Choose **Load unpacked** and select the generated `dist` folder.
 3. Follow the website approval and enhancement steps above.
 
-To update an unpacked installation, rebuild and reload WebScaly on the extensions page, then refresh your video tabs. You can also extract the extension ZIP from [GitHub Releases](https://github.com/Lorcuz/WebScaly/releases/latest) and load it as an unpacked extension.
+To update an unpacked installation, rebuild and reload WebScaly on the extensions page, then refresh your video tabs. You can also download `webscaly-0.4.1.zip` from [GitHub Releases](https://github.com/Lorcuz/WebScaly/releases/latest), extract it and load the folder as an unpacked extension. The matching `webscaly-0.4.1-source.zip` holds the corresponding source.
 
 ![WebScaly enhancement settings](docs/store/assets/02-settings-1280x800.png)
 

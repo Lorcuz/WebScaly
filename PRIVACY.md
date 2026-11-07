@@ -1,6 +1,6 @@
 # WebScaly Privacy Policy
 
-Last updated: 20 October 2026. Applies to WebScaly 0.4.0.
+Last updated: 7 November 2026. Applies to WebScaly 0.4.1.
 
 WebScaly enhances video on your device, on websites you approve. It does not send your videos or browsing activity to the developer, run analytics, sell data or use cloud processing. You do not need an account.
 

@@ -1,5 +1,35 @@
 # Changelog
 
+## 0.4.1 — 7 November 2026
+
+A reliability update. No new permissions; settings, approvals and presets carry over.
+
+### Picture and player
+- The enhanced picture now lines up with the video on pages that have body margins, scrolling or no positioned container.
+- Native subtitle tracks stay visible over the enhanced picture: captions are drawn inside the overlay above the player controls and follow the track's on/off state.
+- The in-player toolbar and comparison slider adapt to small players, so every button stays inside the video.
+- Player control frames that a page moves or reloads no longer receive messages while blank, which removes a rare console error.
+
+### Websites and access
+- Website addresses are validated when you add them: wildcard hosts are refused with a clear message, a bare address gets `https://`, and a malformed address no longer leaves Save hanging.
+- Websites that differ only by `http` and `https` are labelled so their Remove buttons can be told apart.
+- A command sent while the background worker is restarting is no longer undone by a stale authorization check.
+- If the background worker cannot answer for a moment, an approved page recovers by itself instead of staying inactive until a later event.
+
+### Settings
+- Importing a profile file that contains only websites (**Import and merge**) keeps your current Default profile.
+- An import can narrow, but never widen, the access Chrome has granted to an approved website.
+
+### Release quality
+- The release verifier no longer fails intermittently on correct packages, and the packaging script uses the current store screenshot names.
+- The corresponding-source archive is named `webscaly-<version>-source.zip`.
+- Browser and unit tests cover each fix (66 unit and 50 browser tests).
+
+### Known limitations
+- After disabling and re-enabling the extension, refresh open video tabs so the player attaches again.
+- The in-player toolbar and HUD are drawn above page content, so a page's own modal dialog may appear beneath them.
+- Neural engines need WebGPU; protected, cross-origin or DRM media cannot be enhanced.
+
 ## 0.4.0 — 20 October 2026
 
 ### Picture
