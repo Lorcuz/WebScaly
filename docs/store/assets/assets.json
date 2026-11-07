@@ -1,7 +1,7 @@
 {
-  "version": "0.4.0",
-  "footage": "Original procedural video, created locally for WebScaly",
-  "screenshots": "Actual installed extension with test-only loopback approval; popup overview contains its unaltered UI capture",
+  "version": "0.4.1",
+  "footage": "Comparison images use real captures of the extension on credited footage (docs/store/frames); other pictures use a locally generated demo video",
+  "screenshots": "Actual installed extension with test-only loopback approval; popup and settings are unaltered captures inside the framed layouts",
   "files": [
     {
       "file": "icon-128.png",
@@ -53,7 +53,7 @@
       "channels": 3
     },
     {
-      "file": "05-about-1280x800.png",
+      "file": "05-engines-1280x800.png",
       "width": 1280,
       "height": 800,
       "alpha": false,
