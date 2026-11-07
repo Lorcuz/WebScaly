@@ -1,4 +1,5 @@
 import {
+  carriesDefaults,
   mergeConfiguration,
   normalizeConfiguration,
   normalizePreferences,
@@ -46,7 +47,7 @@ export async function request(
     next =
       params.mode === "replace"
         ? { ...incoming, preferences: config.preferences }
-        : mergeConfiguration(config, incoming);
+        : mergeConfiguration(config, incoming, carriesDefaults(params.config));
   }
   if (type === "remove")
     next = {
@@ -79,7 +80,13 @@ export async function approveSite(
     throw new Error(
       "Website access requires the installed extension. This is an interface preview.",
     );
-  const site: SiteProfile = { origin: siteOrigin(url), subdomains, settings };
+  // People type "example.com"; only an explicit scheme is kept as typed.
+  const address = url.trim();
+  const site: SiteProfile = {
+    origin: siteOrigin(/^[a-z][a-z\d+.-]*:\/\//i.test(address) ? address : `https://${address}`),
+    subdomains,
+    settings,
+  };
   return request("approve", site as unknown as Record<string, unknown>);
 }
 export interface Tab {

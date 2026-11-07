@@ -17,6 +17,7 @@ import {
   PICTURE_KEYS,
   QUALITY_LABELS,
   hostLabel,
+  siteLabel,
   hostPattern,
   normalizeConfiguration,
   pictureOf,
@@ -191,7 +192,7 @@ export function Settings() {
                 <option value="">Default settings</option>
                 {config.sites.map((s) => (
                   <option key={s.origin} value={s.origin}>
-                    {hostLabel(s.origin)}
+                    {siteLabel(s.origin, config.sites)}
                   </option>
                 ))}
               </select>
@@ -299,7 +300,7 @@ function Enhancement({ store, target }: { store: Store; target: Target }) {
   const config = store.config!;
   const settings = settingsFor(config, target);
   const set = (patch: Partial<SettingsModel>, delay = 0) => store.patch(target, patch, delay);
-  const scope = target ? hostLabel(target) : "new websites";
+  const scope = target ? siteLabel(target, config.sites) : "new websites";
   return (
     <>
       <Preview settings={settings} />
@@ -591,15 +592,16 @@ function Websites({ store, edit }: { store: Store; edit: (origin: string) => voi
   const replace = useRef(false);
   const granted = (o: (typeof config.sites)[number]) => !!store.grants?.has(hostPattern(o));
   const remove = async (origin: string) => {
-    const host = hostLabel(origin);
+    const host = hostLabel(origin),
+      label = siteLabel(origin, config.sites);
     const covered = config.sites.filter(
       (s) => s.origin !== origin && s.subdomains && host.endsWith(`.${hostLabel(s.origin)}`),
     );
     const ok = await confirm({
-      title: `Remove ${host}?`,
+      title: `Remove ${label}?`,
       body: (
         <p>
-          Enhancement stops on {host} immediately and Chrome's access for it is
+          Enhancement stops on {label} immediately and Chrome's access for it is
           revoked.
           {covered.length > 0 &&
             ` Broader approvals that include it (${covered.map((s) => `*.${hostLabel(s.origin)}`).join(", ")}) are removed too.`}
@@ -608,7 +610,7 @@ function Websites({ store, edit }: { store: Store; edit: (origin: string) => voi
       confirm: "Remove website",
       danger: true,
     });
-    if (ok) await store.run(() => request("remove", { origin }), `${host} removed.`);
+    if (ok) await store.run(() => request("remove", { origin }), `${label} removed.`);
   };
   const exportConfig = () => {
     const url = URL.createObjectURL(
@@ -623,10 +625,11 @@ function Websites({ store, edit }: { store: Store; edit: (origin: string) => voi
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   };
   const importConfig = async (input: File) => {
-    let imported: Configuration;
+    let imported: Configuration, raw: unknown;
     try {
       if (input.size > 256000) throw new Error("This file is larger than 256 KB.");
-      imported = normalizeConfiguration(JSON.parse(await input.text()));
+      raw = JSON.parse(await input.text());
+      imported = normalizeConfiguration(raw);
     } catch (e) {
       store.reportError(`Could not read that file. ${(e as Error).message}`);
       return;
@@ -647,7 +650,7 @@ function Websites({ store, edit }: { store: Store; edit: (origin: string) => voi
             {dropped.length > 0 && (
               <ul>
                 {dropped.map((s) => (
-                  <li key={s.origin}>{hostLabel(s.origin)}</li>
+                  <li key={s.origin}>{siteLabel(s.origin, config.sites)}</li>
                 ))}
               </ul>
             )}
@@ -659,7 +662,8 @@ function Websites({ store, edit }: { store: Store; edit: (origin: string) => voi
       if (!ok) return;
     }
     await store.run(
-      () => request("import", { config: imported, mode }),
+      // The file itself goes to the worker, which needs to know whether it had a Default profile.
+      () => request("import", { config: raw, mode }),
       `Imported ${imported.sites.length} website profile${imported.sites.length === 1 ? "" : "s"}. Approve each website before it can be enhanced.`,
     );
   };
@@ -711,7 +715,7 @@ function Websites({ store, edit }: { store: Store; edit: (origin: string) => voi
             </p>
           ) : (
             config.sites.map((site) => {
-              const host = hostLabel(site.origin);
+              const host = siteLabel(site.origin, config.sites);
               const ok = granted(site);
               return (
                 <div className="row site-row" key={site.origin}>
@@ -811,7 +815,7 @@ function Presets({ store, target }: { store: Store; target: Target }) {
   const settings = settingsFor(config, target);
   const [name, setName] = useState("");
   const confirm = useConfirm();
-  const scope = target ? hostLabel(target) : "default settings";
+  const scope = target ? siteLabel(target, config.sites) : "default settings";
   const same = (picture: Partial<SettingsModel>) =>
     PICTURE_KEYS.every((k) => picture[k] === undefined || picture[k] === settings[k]);
   const save = (presets: Configuration["presets"]) =>

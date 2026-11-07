@@ -117,8 +117,22 @@ input:focus-visible {
   display: flex;
   gap: 10px;
   align-items: center;
-  width: 290px;
+  width: min(290px, calc(var(--available, 316px) - 26px));
   color: var(--dim);
+}
+main[data-narrow="1"] .comparison span {
+  display: none;
+}
+main[data-compact="1"] .power span,
+main[data-compact="2"] .power span,
+main[data-compact="3"] .power span,
+main[data-compact="1"] .sep,
+main[data-compact="2"] .sep,
+main[data-compact="3"] .sep,
+main[data-compact="2"] #quality,
+main[data-compact="3"] #quality,
+main[data-compact="3"] #engine {
+  display: none;
 }
 .comparison .after {
   color: var(--accent);

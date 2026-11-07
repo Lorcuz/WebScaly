@@ -95,6 +95,20 @@ if (
     const r = root.getBoundingClientRect();
     send("size", { width: r.width, height: r.height });
   }).observe(root);
+  // A small player cannot hold the whole toolbar: drop the label, then the
+  // quality and engine menus (still available in the popup) until it fits.
+  let lastAvailable = 0;
+  const fitTo = (available: number) => {
+    if (role === "compare") {
+      root.style.setProperty("--available", `${available}px`);
+      root.dataset.narrow = available < 300 ? "1" : "";
+      return;
+    }
+    for (const level of [0, 1, 2, 3]) {
+      root.dataset.compact = String(level);
+      if (root.getBoundingClientRect().width <= available) break;
+    }
+  };
   window.addEventListener("message", (e) => {
     if (
       e.source !== parent ||
@@ -106,6 +120,11 @@ if (
       return;
     const s = e.data.settings;
     if (!s || typeof s.enabled !== "boolean") return;
+    const available = Number(e.data.available);
+    if (available > 0 && available !== lastAvailable) {
+      lastAvailable = available;
+      fitTo(available);
+    }
     const split = document.querySelector<HTMLInputElement>("#split");
     if (split && document.activeElement !== split) {
       split.value = String(Math.round(s.split * 100));
