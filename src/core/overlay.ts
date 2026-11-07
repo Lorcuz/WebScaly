@@ -73,6 +73,9 @@ canvas{width:100%;height:100%;pointer-events:none!important;display:none;backgro
 .divider span{position:absolute;top:96px;padding:3px 7px;border-radius:5px;background:var(--panel);font-size:10.5px;white-space:nowrap}
 .divider .before{right:8px;color:var(--dim)}.divider .after{left:8px;color:var(--accent)}
 :host([data-layout=preview]) .divider span{top:10px}
+.captions{position:absolute;left:0;right:0;bottom:24px;text-align:center;pointer-events:none!important;padding:0 5%}
+.captions span{display:inline-block;max-width:100%;padding:.08em .35em;background:#000c;color:#fff;
+  font:400 1em/1.3 Arial,"Helvetica Neue",Helvetica,sans-serif;white-space:pre-line;text-shadow:none}
 .toast{position:absolute;left:50%;top:14px;transform:translate(-50%,-6px);padding:6px 11px;border-radius:7px;
   background:var(--panel);border:1px solid var(--line);font-weight:500;white-space:nowrap;opacity:0;
   transition:opacity .18s ease,transform .18s ease;pointer-events:none}
@@ -87,6 +90,7 @@ export class PlayerOverlay {
   private hud = document.createElement("output");
   private divider = document.createElement("div");
   private toastNode = document.createElement("div");
+  private captions = document.createElement("div");
   private frames = new Map<Role, HTMLIFrameElement>();
   private ready = new Set<HTMLIFrameElement>();
   private sizes = new Map<Role, [number, number]>();
@@ -102,6 +106,7 @@ export class PlayerOverlay {
   private toastTimer?: ReturnType<typeof setTimeout>;
   private rect?: DOMRect;
   private canvasShown = false;
+  private announcedWidth = 0;
   private restoreVideoStyle: string | null = null;
   private resize: ResizeObserver;
   constructor(
@@ -124,10 +129,36 @@ export class PlayerOverlay {
       '<span class="before">Original</span><span class="after">Enhanced</span>';
     this.toastNode.className = "toast";
     this.toastNode.setAttribute("role", "status");
-    shadow.append(style, this.canvas, this.divider, this.hud, this.toastNode);
+    // The browser draws native <track> captions inside the video, under the
+    // enhanced picture, so they are drawn again here while that picture shows.
+    this.captions.className = "captions";
+    this.captions.setAttribute("aria-hidden", "true");
+    this.captions.hidden = true;
+    this.captions.append(document.createElement("span"));
+    shadow.append(
+      style,
+      this.canvas,
+      this.divider,
+      this.captions,
+      this.hud,
+      this.toastNode,
+    );
     video.insertAdjacentElement("afterend", this.host);
     const opts = { signal: this.abort.signal },
       passive = { ...opts, passive: true, capture: true };
+    const tracks = video.textTracks,
+      watched = new WeakSet<TextTrack>(),
+      watch = () => {
+        for (const t of Array.from(tracks ?? []))
+          if (!watched.has(t)) {
+            watched.add(t);
+            t.addEventListener("cuechange", () => this.syncCaptions(), opts);
+          }
+        this.syncCaptions();
+      };
+    for (const event of ["addtrack", "removetrack", "change"])
+      tracks?.addEventListener(event, watch, opts);
+    watch();
     window.addEventListener("message", this.receive, opts);
     document.addEventListener("scroll", () => this.requestLayout(), passive);
     window.addEventListener("resize", () => this.requestLayout(), opts);
@@ -251,6 +282,16 @@ export class PlayerOverlay {
   private sendState() {
     for (const [role, f] of this.frames) {
       if (!this.ready.has(f) || !f.isConnected) continue;
+      // A frame the page moved has already reloaded into about:blank, which is in
+      // the page's own origin; the next layout pass would notice the move, but a
+      // settings change can arrive first. contentDocument is null for the
+      // extension page on a normal website, and is that page's own document where
+      // the host page is itself an extension page (settings preview), so only a
+      // blank document is skipped.
+      if (f.contentDocument?.URL === "about:blank") {
+        this.ready.delete(f);
+        continue;
+      }
       try {
         f.contentWindow?.postMessage(
           {
@@ -260,6 +301,8 @@ export class PlayerOverlay {
             settings: this.settings,
             state: this.host.dataset.state ?? "",
             fullscreen: !!document.fullscreenElement,
+            // Room for the controls; a small player gets a more compact toolbar.
+            available: Math.max(0, Math.floor((this.rect?.width ?? 0) - 16)),
           },
           new URL(f.src).origin,
         );
@@ -306,6 +349,10 @@ export class PlayerOverlay {
       style = getComputedStyle(video),
       r = video.getBoundingClientRect();
     this.rect = r;
+    if (Math.round(r.width) !== this.announcedWidth) {
+      this.announcedWidth = Math.round(r.width);
+      this.sendState();
+    }
     // Keep the video's stacking level. A positive overlay level escapes an auto
     // media container and covers later JW/Vixcloud controls and captions.
     this.host.style.zIndex = style.zIndex;
@@ -318,12 +365,31 @@ export class PlayerOverlay {
     const fullscreen = document.fullscreenElement,
       nativeFullscreen = fullscreen === video;
     this.host.style.display = visible && !nativeFullscreen ? "block" : "none";
+    // offsetParent reports <body> when nothing else anchors the host, but an
+    // unpositioned body is not a containing block: the host is then placed
+    // against the initial containing block (the document's top left), not the
+    // body's margin box.
     const parent = this.host.offsetParent as HTMLElement | null,
-      p = parent?.getBoundingClientRect();
-    const sx = p && parent?.offsetWidth ? p.width / parent.offsetWidth : 1,
-      sy = p && parent?.offsetHeight ? p.height / parent.offsetHeight : 1;
-    this.host.style.left = `${(r.left - (p?.left ?? 0)) / sx + (parent?.scrollLeft ?? 0) - (parent?.clientLeft ?? 0)}px`;
-    this.host.style.top = `${(r.top - (p?.top ?? 0)) / sy + (parent?.scrollTop ?? 0) - (parent?.clientTop ?? 0)}px`;
+      anchor =
+        parent === document.body && getComputedStyle(parent).position === "static"
+          ? null
+          : parent,
+      p = anchor?.getBoundingClientRect();
+    // offsetWidth is rounded; a ratio within 1% of 1 is rounding, not a transform.
+    const ratio = (box: number, offset: number) =>
+      offset && Math.abs(box / offset - 1) > 0.01 ? box / offset : 1;
+    const sx = p && anchor ? ratio(p.width, anchor.offsetWidth) : 1,
+      sy = p && anchor ? ratio(p.height, anchor.offsetHeight) : 1;
+    this.host.style.left = `${
+      anchor
+        ? (r.left - p!.left) / sx + anchor.scrollLeft - anchor.clientLeft
+        : r.left + scrollX
+    }px`;
+    this.host.style.top = `${
+      anchor
+        ? (r.top - p!.top) / sy + anchor.scrollTop - anchor.clientTop
+        : r.top + scrollY
+    }px`;
     this.host.style.width = `${r.width / sx}px`;
     this.host.style.height = `${r.height / sy}px`;
     this.canvas.style.objectFit = style.objectFit;
@@ -335,6 +401,9 @@ export class PlayerOverlay {
       ? `inset(0 0 ${nativeControlsInset}px 0)`
       : "";
     this.divider.style.bottom = `${nativeControlsInset}px`;
+    // Native captions sit above the control band and scale with the picture.
+    this.captions.style.bottom = `${nativeControlsInset ? nativeControlsInset + 8 : 24}px`;
+    this.captions.style.fontSize = `${Math.round(Math.min(40, Math.max(14, r.height * 0.048)))}px`;
     const root =
       fullscreen?.contains(video) && !nativeFullscreen ? fullscreen : document.body;
     // Both controls live in the top band, clear of captions and native controls:
@@ -431,6 +500,27 @@ export class PlayerOverlay {
     this.canvasShown = show;
     this.canvas.style.display = show ? "block" : "none";
     this.divider.hidden = !show || !this.settings.comparison;
+    this.syncCaptions();
+  }
+  /** Draws the cues of every showing caption or subtitle track over the enhanced picture. */
+  private syncCaptions() {
+    const lines: string[] = [];
+    if (this.canvasShown)
+      for (const track of Array.from(this.video.textTracks ?? []))
+        if (
+          track.mode === "showing" &&
+          (track.kind === "captions" || track.kind === "subtitles")
+        )
+          for (const cue of Array.from(track.activeCues ?? [])) {
+            const c = cue as VTTCue,
+              text =
+                c.getCueAsHTML?.().textContent ??
+                String(c.text ?? "").replace(/<[^>]*>/g, "");
+            if (text.trim()) lines.push(text.trim());
+          }
+    const text = lines.join("\n");
+    this.captions.hidden = !text;
+    this.captions.firstElementChild!.textContent = text;
   }
   resetCanvas() {
     const c = document.createElement("canvas");
