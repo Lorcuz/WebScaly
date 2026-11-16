@@ -13,7 +13,7 @@ import {
   type Settings,
   type SiteProfile,
 } from "../shared/settings";
-import { permissionCovers, type ApprovalIntent } from "../shared/permissions";
+import { permissionCovers, type ApprovalIntent, revokes } from "../shared/permissions";
 import {
   readConfiguration,
   writeConfiguration,
@@ -21,7 +21,33 @@ import {
 } from "../shared/storage";
 import type { PlayerStatus } from "../shared/player-status";
 const PENDING = "webscalyApprovalIntents",
-  FRAMES = "webscalyFrames";
+  FRAMES = "webscalyFrames",
+  BADGES = "webscalyBadges";
+/**
+ * A record in session storage (kept across worker restarts, cleared with the browser session) that is
+ * changed only through its own queue. Frames authorize and report concurrently; without the queue two
+ * read-modify-write cycles could each drop the other's entry. Writes happen only when a change says so.
+ */
+function sessionRecord<T extends object>(key: string) {
+  let value: T | undefined,
+    queue: Promise<unknown> = Promise.resolve();
+  const run = <R>(fn: (v: T) => R | Promise<R>): Promise<R> => {
+    const result = queue.then(async () =>
+      fn((value ??= ((await chrome.storage.session.get(key))[key] as T | undefined) ?? ({} as T))),
+    );
+    queue = result.catch(() => {});
+    return result;
+  };
+  return {
+    /** A copy of the current value. */
+    read: () => run((v) => structuredClone(v)),
+    /** Applies `fn` atomically; it returns whether it changed the value, and only then is it stored. */
+    change: (fn: (v: T) => boolean) =>
+      run(async (v) => {
+        if (fn(v)) await chrome.storage.session.set({ [key]: v });
+      }),
+  };
+}
 let queue = Promise.resolve();
 function serialize<T>(task: () => Promise<T>): Promise<T> {
   const result = queue.then(task);
@@ -34,22 +60,37 @@ function serialize<T>(task: () => Promise<T>): Promise<T> {
 const approving = new Map<string, Promise<Configuration>>();
 const activeIntents = new Set<string>();
 const cancelled = new Set<string>();
-// Fingerprint of approved scopes and grants from this worker's last reconcile.
-// Settings-only edits leave it unchanged; content scripts apply those from storage.
-let reconciled = "";
-async function broadcast(message: object) {
+// Fingerprint of approved scopes and grants from the last reconcile. Settings-only edits leave it
+// unchanged; content scripts apply those from storage. It is kept in session storage so a worker that
+// wakes up again does not re-register scripts and make every approved frame re-authorize; session
+// storage is cleared on browser restart, extension reload and update, which then reconcile fully.
+const RECONCILED = "webscalyReconciled";
+let reconciled: string | undefined;
+async function forgetReconciled() {
+  reconciled = "";
+  await chrome.storage.session.set({ [RECONCILED]: "" });
+}
+/**
+ * Stops renderers that lose access. With `scopes` (the revoked or removed host patterns) only frames whose own
+ * origin is covered stop, plus every frame of a tab whose top-level page is covered; unrelated websites and tabs
+ * keep enhancing. Without scopes every frame stops (used when the revoked scope is unknown).
+ */
+async function invalidate(scopes?: string[]) {
+  if (scopes && !scopes.length) return false;
   const tabs = await chrome.tabs.query({});
   await Promise.all(
     tabs
       .filter((t) => t.id !== undefined)
       .map(async (t) => {
+        // A page Chrome no longer lets us read (its access was just revoked) is treated as covered.
+        const all = !scopes || !t.url || scopes.some((p) => revokes(p, t.url!));
         try {
-          await chrome.tabs.sendMessage(t.id!, message);
+          await chrome.tabs.sendMessage(t.id!, { type: "webscaly:invalidate", scopes, all });
         } catch {}
       }),
   );
+  return true;
 }
-const invalidate = () => broadcast({ type: "webscaly:invalidate" });
 async function intents(): Promise<Record<string, ApprovalIntent>> {
   return (
     ((await chrome.storage.session.get(PENDING))[PENDING] as Record<
@@ -76,8 +117,11 @@ async function reconcile(config: Configuration) {
   const fingerprint = JSON.stringify(
     config.sites.map((s, i) => [hostPattern(s), grants[i]]),
   );
+  reconciled ??=
+    ((await chrome.storage.session.get(RECONCILED))[RECONCILED] as string | undefined) ?? "";
   if (fingerprint === reconciled) return;
   reconciled = fingerprint;
+  await chrome.storage.session.set({ [RECONCILED]: fingerprint });
   try {
     const desired: chrome.scripting.RegisteredContentScript[] = [];
     for (const [index, site] of config.sites.entries())
@@ -131,15 +175,16 @@ async function reconcile(config: Configuration) {
         }),
     );
   } catch (e) {
-    reconciled = "";
+    await forgetReconciled();
     throw e;
   }
 }
 async function update(
   mutator: (c: Configuration) => Configuration,
-  stop = false,
+  stop?: string[] | true,
 ) {
-  if (stop) await invalidate();
+  // Frames that were stopped but are still approved come back with the refresh of a full reconcile.
+  if (stop && (await invalidate(stop === true ? undefined : stop))) await forgetReconciled();
   const next = normalizeConfiguration(mutator(await readConfiguration()));
   await writeConfiguration(next);
   await reconcile(next);
@@ -201,11 +246,15 @@ async function recover() {
   }
 }
 type Registry = Record<number, Record<number, string>>;
-async function registry(): Promise<Registry> {
-  return (
-    ((await chrome.storage.session.get(FRAMES))[FRAMES] as Registry) ?? {}
-  );
-}
+/** Origin of every authorized frame, per tab: commands and the popup address embedded players by frame id. */
+const frameRegistry = sessionRecord<Registry>(FRAMES);
+/**
+ * When each frame last authorized (an ordinal in this worker's memory; nothing is stored). tabStatus prunes a
+ * frame that did not answer only if it has not authorized since tabStatus asked: a frame that navigates while
+ * the popup or a shortcut asks re-authorizes with an unchanged entry, which must not then be deleted.
+ */
+const frameSeen = new Map<string, number>();
+let frameTick = 0;
 async function authorized(
   sender: chrome.runtime.MessageSender,
 ): Promise<(SiteProfile & { preferences: Configuration["preferences"] }) | null> {
@@ -228,21 +277,25 @@ async function authorized(
     parent = profileFor(tab.url ?? (sender.frameId === 0 ? frameUrl : ""), c);
   if (!own || !parent || !(await granted(parent)) || !(await granted(own)))
     return null;
-  const frames = await registry(),
-    known = frames[sender.tab.id] ?? {},
+  const tabId = sender.tab.id,
     frameId = sender.frameId ?? 0,
     origin = siteOrigin(frameUrl);
-  // Only write when the frame is new or navigated; authorization runs often.
-  if (known[frameId] !== origin) {
-    known[frameId] = origin;
-    frames[sender.tab.id] = known;
-    await chrome.storage.session.set({ [FRAMES]: frames });
-  }
+  frameSeen.set(`${tabId}:${frameId}`, ++frameTick);
+  // Only write when the frame is new or navigated; authorization runs often. The registry only addresses
+  // commands and the popup, so a failing session store must not deny an authorized frame.
+  await frameRegistry
+    .change((frames) => {
+      const known = (frames[tabId] ??= {});
+      if (known[frameId] === origin) return false;
+      known[frameId] = origin;
+      return true;
+    })
+    .catch(() => {});
   return { ...own, preferences: c.preferences };
 }
 async function tabStatus(tabId: number): Promise<PlayerStatus> {
-  const frames = await registry(),
-    known = frames[tabId] ?? {};
+  const asked = frameTick,
+    known = (await frameRegistry.read())[tabId] ?? {};
   const result: PlayerStatus = {
       videos: 0,
       hiddenVideos: 0,
@@ -280,11 +333,20 @@ async function tabStatus(tabId: number): Promise<PlayerStatus> {
       },
     ),
   );
-  if (stale.length) {
-    for (const id of stale) delete known[id];
-    frames[tabId] = known;
-    await chrome.storage.session.set({ [FRAMES]: frames });
-  }
+  if (stale.length)
+    await frameRegistry.change((frames) => {
+      let changed = false;
+      for (const id of stale)
+        if (
+          frames[tabId] &&
+          id in frames[tabId] &&
+          (frameSeen.get(`${tabId}:${id}`) ?? 0) <= asked
+        ) {
+          delete frames[tabId][id];
+          changed = true;
+        }
+      return changed;
+    });
   result.frames.sort((a, b) => a.frameId - b.frameId);
   for (const origin of origins) {
     const site = profileFor(origin, config);
@@ -300,9 +362,10 @@ const BADGE: Record<Exclude<BadgeState, "idle">, [string, string]> = {
   unavailable: ["!", "#ff9aa4"],
   paused: ["II", "#ddc48d"],
 };
-const frameStates = new Map<number, Map<number, BadgeState>>();
+/** Per-frame badge states, kept in session storage so a restarted worker still knows every frame's state. */
+const badgeStates = sessionRecord<Record<number, Record<number, BadgeState>>>(BADGES);
 async function paintBadge(tabId: number) {
-  const values = [...(frameStates.get(tabId)?.values() ?? [])];
+  const values = Object.values((await badgeStates.read())[tabId] ?? {});
   const state: BadgeState = values.includes("active")
     ? "active"
     : values.includes("unavailable")
@@ -327,12 +390,34 @@ function reportState(sender: chrome.runtime.MessageSender, state: unknown) {
   const tabId = sender.tab?.id;
   if (tabId === undefined || typeof state !== "string" || !(state in BADGE || state === "idle"))
     return;
-  const frames = frameStates.get(tabId) ?? new Map<number, BadgeState>();
-  if (state === "idle") frames.delete(sender.frameId ?? 0);
-  else frames.set(sender.frameId ?? 0, state as BadgeState);
-  frameStates.set(tabId, frames);
-  void paintBadge(tabId);
+  const frameId = sender.frameId ?? 0;
+  void badgeStates
+    .change((tabs) => {
+      const frames = (tabs[tabId] ??= {});
+      if (state === "idle") {
+        if (!(frameId in frames)) return false;
+        delete frames[frameId];
+        if (!Object.keys(frames).length) delete tabs[tabId];
+        return true;
+      }
+      if (frames[frameId] === state) return false;
+      frames[frameId] = state as BadgeState;
+      return true;
+    })
+    // The in-memory state changed even if storing it failed; the badge follows it either way.
+    .then(
+      () => paintBadge(tabId),
+      () => paintBadge(tabId),
+    )
+    .catch(() => {});
 }
+/** Forgets a tab's frame states; `true` when there were any. */
+const forgetBadges = (tabId: number) =>
+  badgeStates.change((tabs) => {
+    if (!(tabId in tabs)) return false;
+    delete tabs[tabId];
+    return true;
+  });
 
 /* Keyboard shortcuts act on the profiles that are actually rendering in the tab. */
 const COMMANDS = new Set([
@@ -547,6 +632,10 @@ chrome.runtime.onMessage.addListener((message: unknown, sender, reply) => {
         (await chrome.permissions.getAll()).origins?.filter(
           (p) => permissionCovers(p, origin) && !required.includes(p),
         ) ?? [];
+      const current = await readConfiguration(),
+        removed = current.sites
+          .filter((s) => permissionCovers(hostPattern(s), origin))
+          .map(hostPattern);
       const next = await update(
         (c) => ({
           ...c,
@@ -554,7 +643,7 @@ chrome.runtime.onMessage.addListener((message: unknown, sender, reply) => {
             (s) => !permissionCovers(hostPattern(s), origin),
           ),
         }),
-        true,
+        [...new Set([...removed, ...grants])],
       );
       if (grants.length) await chrome.permissions.remove({ origins: grants });
       return next;
@@ -595,20 +684,35 @@ chrome.runtime.onMessage.addListener((message: unknown, sender, reply) => {
     if (m.type === "webscaly:import") {
       const incoming = normalizeConfiguration(m.config),
         replace = m.mode === "replace";
-      // Device preferences never travel with an imported profile file.
-      const next = await update(
-        (c) =>
-          replace
-            ? { ...incoming, preferences: c.preferences }
-            : mergeConfiguration(c, incoming, carriesDefaults(m.config)),
-        replace,
-      );
+      const build = (c: Configuration): Configuration =>
+        replace
+            ? {
+                ...incoming,
+                sites: incoming.sites.map((s) => {
+                  const current = c.sites.find((x) => x.origin === s.origin);
+                  return current
+                    ? { ...s, subdomains: current.subdomains && s.subdomains }
+                    : s;
+                }),
+                preferences: c.preferences,
+              }
+            : mergeConfiguration(c, incoming, carriesDefaults(m.config));
+      // A replace stops only websites that it drops or narrows; kept websites keep enhancing.
+      let scopes: string[] | undefined;
       if (replace) {
-        const keep = new Set(next.sites.map(hostPattern)),
-          required = chrome.runtime.getManifest?.().host_permissions ?? [];
+        const current = await readConfiguration(),
+          kept = new Set(normalizeConfiguration(build(current)).sites.map(hostPattern));
+        scopes = current.sites.map(hostPattern).filter((p) => !kept.has(p));
+      }
+      // Device preferences never travel with an imported profile file.
+      const next = await update(build, scopes);
+      if (replace) {
+        const required = chrome.runtime.getManifest?.().host_permissions ?? [];
         const removed =
           (await chrome.permissions.getAll()).origins?.filter(
-            (p) => !keep.has(p) && !required.includes(p),
+            (p) =>
+              !required.includes(p) &&
+              !next.sites.some((s) => permissionCovers(p, s.origin)),
           ) ?? [];
         if (removed.length)
           await chrome.permissions.remove({ origins: removed });
@@ -650,45 +754,56 @@ async function boot() {
   await reconcile(await readConfiguration());
 }
 chrome.runtime.onInstalled.addListener((details) => {
-  void serialize(boot);
+  void serialize(boot).catch(() => {});
   if (details?.reason === "install")
     void chrome.tabs
       .create({ url: chrome.runtime.getURL("options.html?section=Welcome") })
       .catch(() => {});
 });
 chrome.runtime.onStartup.addListener(() => {
-  void serialize(boot);
+  void serialize(boot).catch(() => {});
 });
 chrome.permissions.onAdded.addListener(() => {
-  void serialize(boot);
+  void serialize(boot).catch(() => {});
 });
-chrome.permissions.onRemoved.addListener(() => {
+chrome.permissions.onRemoved.addListener((removed) => {
   void serialize(async () => {
-    await invalidate();
-    reconciled = "";
+    // Only frames covered by the revoked patterns stop (all frames if Chrome did not say which).
+    await invalidate(removed?.origins?.length ? removed.origins : undefined);
+    await forgetReconciled();
     await boot();
-  });
+  }).catch(() => {});
 });
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area === "local" && changes[STORAGE_KEY])
-    void serialize(async () => reconcile(await readConfiguration()));
+    void serialize(async () => reconcile(await readConfiguration())).catch(() => {});
 });
 chrome.commands?.onCommand.addListener((command, tab) => {
   void serialize(() => runCommand(command, tab?.id)).catch(() => {});
 });
 chrome.tabs.onUpdated?.addListener((tabId, info) => {
-  if (info.status === "loading" && frameStates.has(tabId)) {
-    frameStates.delete(tabId);
-    void paintBadge(tabId);
-  }
+  if (info.status !== "loading") return;
+  // A navigation (including a same-document one) starts the tab's badge over; frames that are still
+  // rendering report again, and a new document's frames report when they start.
+  void forgetBadges(tabId)
+    .catch(() => {})
+    .then(async () => {
+      await paintBadge(tabId);
+      try {
+        await chrome.tabs.sendMessage(tabId, { type: "webscaly:resync" });
+      } catch {}
+    })
+    .catch(() => {});
 });
 chrome.tabs.onRemoved.addListener((id) => {
-  frameStates.delete(id);
-  void serialize(async () => {
-    const r = await registry();
-    if (!(id in r)) return;
-    delete r[id];
-    await chrome.storage.session.set({ [FRAMES]: r });
-  });
+  void forgetBadges(id).catch(() => {});
+  for (const key of frameSeen.keys()) if (key.startsWith(`${id}:`)) frameSeen.delete(key);
+  void frameRegistry
+    .change((frames) => {
+      if (!(id in frames)) return false;
+      delete frames[id];
+      return true;
+    })
+    .catch(() => {});
 });
-void serialize(boot);
+void serialize(boot).catch(() => {});

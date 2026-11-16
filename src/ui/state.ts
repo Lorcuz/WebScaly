@@ -55,6 +55,8 @@ export function useStore(poll: number): Store {
   const [notice, setNotice] = useState("");
   const [lastError, setLastError] = useState("");
   const [busyCount, setBusy] = useState(0);
+  // Edits queued or being written (sliders and switches); the footer says "Saving…" until they settle.
+  const [writing, setWriting] = useState(0);
   const configRef = useRef(config);
   configRef.current = config;
   // While edits are in flight, storage echoes of older states are ignored.
@@ -183,7 +185,10 @@ export function useStore(poll: number): Store {
       const key = target ?? "";
       const entry = queued.current.get(key);
       if (entry) clearTimeout(entry.timer);
-      else pending.current++;
+      else {
+        pending.current++;
+        setWriting((n) => n + 1);
+      }
       const merged = { ...entry?.patch, ...change };
       const commit = () => {
         queued.current.delete(key);
@@ -196,7 +201,10 @@ export function useStore(poll: number): Store {
               });
           })
           .catch((e) => reportError((e as Error).message))
-          .finally(settle);
+          .finally(() => {
+            setWriting((n) => n - 1);
+            settle();
+          });
       };
       queued.current.set(key, {
         patch: merged,
@@ -250,7 +258,7 @@ export function useStore(poll: number): Store {
     error,
     notice,
     lastError,
-    busy: busyCount > 0,
+    busy: busyCount > 0 || writing > 0,
     setNotice,
     clearError,
     reportError,

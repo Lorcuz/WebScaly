@@ -7,7 +7,7 @@ export class GpuTimer {
     busy: boolean;
   }[] = [];
   constructor(
-    private device: GPUDevice,
+    device: GPUDevice,
     private report: (ms: number) => void,
   ) {
     if (!device.features.has("timestamp-query")) return;
@@ -47,6 +47,10 @@ export class GpuTimer {
       .end();
     encoder.resolveQuerySet(slot.queries, 0, 2, slot.resolve, 0);
     encoder.copyBufferToBuffer(slot.resolve, 0, slot.read, 0, 16);
+  }
+  /** Returns a slot whose commands were never submitted. */
+  cancel(slot: ReturnType<GpuTimer["start"]>) {
+    if (slot) slot.busy = false;
   }
   read(slot: ReturnType<GpuTimer["start"]>) {
     if (!slot) return;

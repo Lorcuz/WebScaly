@@ -27,7 +27,13 @@ export interface Diagnostics {
   /** Content-type estimate used for engine suggestions; never switches engines itself. */
   hint?: "animation" | "live" | "";
   controlsAvailable?: boolean;
+  /**
+   * Why the state is "unavailable": a protected (EME) video, frames the page does not allow WebScaly to read
+   * (cross-origin media), no usable graphics API, or another error.
+   */
+  reason?: UnavailableReason;
 }
+export type UnavailableReason = "protected" | "cross-origin" | "graphics" | "error";
 export interface PlayerStatus {
   videos: number;
   hiddenVideos?: number;

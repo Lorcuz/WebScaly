@@ -6,6 +6,7 @@ import {
   type SiteProfile,
 } from "../shared/settings-core";
 import { download, VideoRenderer } from "../core/renderer";
+import { invalidates } from "../shared/permissions";
 declare global {
   var __webscalyContent:
     | { activate: () => void; destroy: () => void }
@@ -15,12 +16,21 @@ type BadgeState = "active" | "unavailable" | "paused" | "idle";
 // Settings changes arrive through storage events; the worker is only asked to
 // re-authorize after a refresh broadcast, page restore, or this long interval.
 const AUTH_TTL = 30_000;
+/** Late shadow-root checks per heartbeat: at least this many hosts, more while under the time budget. */
+const HOSTS_PER_TICK = 250,
+  HOST_BUDGET_MS = 3;
+/** Below this CSS area (480×270) a muted looping or linked video is treated as a preview, not a player. */
+const PREVIEW_AREA = 480 * 270;
 if (globalThis.__webscalyContent) globalThis.__webscalyContent.activate();
 else {
   const renderers = new Map<HTMLVideoElement, VideoRenderer>(),
     videos = new Set<HTMLVideoElement>(),
     roots = new Set<Document | ShadowRoot>(),
-    shadowHosts = new Set<Element>();
+    // Custom elements that may attach an open shadow root after they were seen (late upgrades). There is no
+    // ceiling: the heartbeat checks them round-robin within a time budget, and forgets a host once its root
+    // is known or it leaves the document.
+    shadowHosts = new Set<Element>(),
+    hostQueue: Element[] = [];
   let revision = 0,
     // Counts configuration changes seen in storage; see authorize().
     configEpoch = 0,
@@ -57,11 +67,27 @@ else {
     }
   }
   const observer = new MutationObserver((records) => {
-    for (const record of records)
+    let relevant = false;
+    for (const record of records) {
       for (const node of record.addedNodes)
         if (node instanceof Element) discover(node);
-    schedule();
+      // discover() schedules its own scan when it finds a video or shadow root. Removals matter only when
+      // they take a tracked video or one of our overlays with them.
+      if (!relevant)
+        for (const node of record.removedNodes)
+          if (node instanceof Element && removesTracked(node)) {
+            relevant = true;
+            break;
+          }
+    }
+    if (relevant) schedule();
   });
+  function removesTracked(node: Element) {
+    for (const v of videos) if (node === v || node.contains(v)) return true;
+    for (const r of renderers.values())
+      if (node === r.view.host || node.contains(r.view.host)) return true;
+    return false;
+  }
   function discover(root: Document | ShadowRoot | Element) {
     if (root instanceof Document || root instanceof ShadowRoot) {
       if (!roots.has(root)) {
@@ -74,14 +100,17 @@ else {
       if (
         e.localName.includes("-") &&
         e.localName !== "webscaly-player" &&
-        shadowHosts.size < 2000
-      )
+        !shadowHosts.has(e)
+      ) {
         shadowHosts.add(e);
+        hostQueue.push(e);
+      }
     };
     if (root instanceof Element) remember(root);
     const walk = document.createTreeWalker(root, NodeFilter.SHOW_ELEMENT);
     const epoch = discoveryEpoch;
-    let count = 0;
+    let count = 0,
+      found = root instanceof HTMLVideoElement || root instanceof ShadowRoot;
     function batch() {
       if (!active || dead || epoch !== discoveryEpoch) return;
       let node: Node | null;
@@ -89,15 +118,20 @@ else {
         const e = node as Element;
         if (e.localName === "webscaly-player") continue;
         remember(e);
-        if (e instanceof HTMLVideoElement) videos.add(e);
-        if (e.shadowRoot && e.localName !== "webscaly-player")
+        if (e instanceof HTMLVideoElement) {
+          videos.add(e);
+          found = true;
+        }
+        if (e.shadowRoot && e.localName !== "webscaly-player") {
           discover(e.shadowRoot);
+          found = true;
+        }
         if (++count % 500 === 0) {
           setTimeout(batch, 0);
           return;
         }
       }
-      schedule();
+      if (found) schedule();
     }
     batch();
     if (
@@ -124,12 +158,26 @@ else {
     );
   }
   const area = (v: HTMLVideoElement) => v.clientWidth * v.clientHeight;
+  /**
+   * A hover preview or thumbnail clip: small, silent, and either part of a link (a card or thumbnail grid)
+   * or a decorative loop without controls. Several signals together, so a small real player (sound,
+   * controls, or not looping outside a link) and large muted autoplay players still qualify.
+   */
+  function preview(v: HTMLVideoElement) {
+    return (
+      area(v) < PREVIEW_AREA &&
+      (v.muted || v.volume === 0) &&
+      (!!v.closest("a[href]") || (v.loop && !v.controls))
+    );
+  }
   function usable() {
     return [...videos]
       .filter(
         (v) =>
           visible(v) &&
-          v.videoWidth > 0 &&
+          // A video already being enhanced keeps its renderer if it later looks like a preview (no churn).
+          (renderers.has(v) || !preview(v)) &&
+          (v.videoWidth > 0 || renderers.has(v)) &&
           // A seek or buffering stall briefly drops readyState; a video that is
           // already being enhanced keeps its renderer through it.
           (v.readyState >= 2 || renderers.has(v)),
@@ -249,6 +297,7 @@ else {
     roots.clear();
     videos.clear();
     shadowHosts.clear();
+    hostQueue.length = 0;
     shadowCursor = 0;
     clearTimeout(timer);
     timer = undefined;
@@ -265,7 +314,7 @@ else {
       destroy();
       return;
     }
-    if (!site || Date.now() - authorizedAt > AUTH_TTL) {
+    if (!site || (Date.now() - authorizedAt > AUTH_TTL && videos.size > 0)) {
       if (Date.now() >= retryAt) {
         const version = ++revision,
           answer = await authorize();
@@ -297,7 +346,7 @@ else {
     }
     const selected = new Set(selection());
     for (const [v, r] of renderers)
-      if (!selected.has(v)) {
+      if (!selected.has(v) || !r.view.host.isConnected) {
         r.dispose();
         renderers.delete(v);
       }
@@ -350,19 +399,38 @@ else {
           destroy();
           return;
         }
-        // Custom players can attach their open shadow root after their host was observed.
-        const candidates = [...shadowHosts];
-        if (shadowCursor >= candidates.length) shadowCursor = 0;
-        for (const host of candidates.slice(shadowCursor, shadowCursor + 200)) {
-          if (!host.isConnected) shadowHosts.delete(host);
-          else if (host.shadowRoot && !roots.has(host.shadowRoot))
-            discover(host.shadowRoot);
-        }
-        shadowCursor += 200;
-        schedule();
+        if (document.hidden) return;
+        checkShadowHosts();
+        // Scroll can bring a tracked video into view; with none tracked there is nothing to scan.
+        if (videos.size || renderers.size) schedule();
       }, 1800);
     }
     schedule();
+  }
+  /**
+   * Custom players can attach their open shadow root after their host was observed. Each heartbeat checks
+   * remembered hosts round-robin: at least HOSTS_PER_TICK, and more while under the time budget, so a page
+   * with thousands of custom elements is covered in a few ticks without a long task. A host is forgotten
+   * once its root is known or it is gone.
+   */
+  function checkShadowHosts() {
+    const deadline = performance.now() + HOST_BUDGET_MS,
+      total = hostQueue.length;
+    for (let checked = 0; checked < total && hostQueue.length; checked++) {
+      if (checked >= HOSTS_PER_TICK && performance.now() > deadline) break;
+      if (shadowCursor >= hostQueue.length) shadowCursor = 0;
+      const host = hostQueue[shadowCursor],
+        root = host.shadowRoot;
+      if (host.isConnected && !root) {
+        shadowCursor++;
+        continue;
+      }
+      if (host.isConnected && root && !roots.has(root)) discover(root);
+      // Done with this host: swap-remove it (order does not matter for a round-robin).
+      hostQueue[shadowCursor] = hostQueue[hostQueue.length - 1];
+      hostQueue.pop();
+      shadowHosts.delete(host);
+    }
   }
   async function refresh() {
     const version = ++revision,
@@ -373,6 +441,7 @@ else {
       return;
     }
     activate();
+    reported = "idle";
     if (answer === "allowed") apply();
     else noAnswer();
   }
@@ -386,7 +455,14 @@ else {
   ) => {
     if (sender.id !== chrome.runtime.id) return;
     if (m.type === "webscaly:invalidate") {
-      deactivate();
+      // Only a revoked scope that covers this frame (or its page) stops it; other websites keep enhancing.
+      if (invalidates(m as { scopes?: unknown; all?: unknown }, location.origin)) deactivate();
+      reply({ ok: true });
+    }
+    if (m.type === "webscaly:resync") {
+      // The worker started this tab's badge over (navigation): report the current state again.
+      reported = "idle";
+      report(true);
       reply({ ok: true });
     }
     if (m.type === "webscaly:refresh") {
@@ -414,24 +490,34 @@ else {
       reply({ ok: true });
     }
     if (m.type === "webscaly:status") {
-      const embeds = Array.from(document.querySelectorAll("iframe"))
-        .filter((f) => {
-          const r = f.getBoundingClientRect();
-          return (
-            !f.src.startsWith("chrome-extension:") &&
-            r.width >= 240 &&
-            r.height >= 120
-          );
-        })
-        .slice(0, 5)
-        .map((f) => {
-          try {
-            return new URL(f.src, location.href).origin;
-          } catch {
-            return "";
-          }
-        })
-        .filter((o) => o.startsWith("http"));
+      // Video embeds (YouTube, Vimeo, Dailymotion, JW and similar) allow fullscreen; ads, maps and
+      // comment widgets usually do not, and must not be presented as players that need access.
+      const embeds = [
+        ...new Set(
+          Array.from(document.querySelectorAll("iframe"))
+            .filter((f) => {
+              const r = f.getBoundingClientRect();
+              return (
+                !f.src.startsWith("chrome-extension:") &&
+                (f.allowFullscreen || /\bfullscreen\b/.test(f.allow)) &&
+                r.width >= 240 &&
+                r.height >= 120 &&
+                r.bottom > 0 &&
+                r.right > 0 &&
+                r.top < innerHeight &&
+                r.left < innerWidth
+              );
+            })
+            .map((f) => {
+              try {
+                return new URL(f.src, location.href).origin;
+              } catch {
+                return "";
+              }
+            })
+            .filter((o) => o.startsWith("http")),
+        ),
+      ].slice(0, 5);
       reply({
         origin: globalThis.origin,
         videos: usable().length,
@@ -496,6 +582,9 @@ else {
       capture: true,
       signal: abort.signal,
     });
+  document.addEventListener("visibilitychange", schedule, {
+    signal: abort.signal,
+  });
   window.addEventListener(
     "pagehide",
     (e) => {

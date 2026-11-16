@@ -32,7 +32,7 @@ export function Switch({
     <label className={`switch ${className}`} htmlFor={id}>
       <span className="copy">
         <span className={help ? "help-label" : undefined}>{label}</span>
-        {description && <small>{description}</small>}
+        {description && <small id={`${id}-description`}>{description}</small>}
       </span>
       <input
         id={id}
@@ -41,6 +41,7 @@ export function Switch({
         checked={checked}
         disabled={disabled}
         data-help={help}
+        aria-describedby={description ? `${id}-description` : undefined}
         aria-label={typeof label === "string" ? label : undefined}
         onChange={(e) => onChange(e.target.checked)}
       />

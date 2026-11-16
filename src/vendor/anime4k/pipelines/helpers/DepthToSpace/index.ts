@@ -126,9 +126,11 @@ export class DepthToSpace implements Anime4KPipeline {
     const depthToSpacePass = encoder.beginComputePass();
     depthToSpacePass.setPipeline(this.pipeline);
     depthToSpacePass.setBindGroup(0, this.bindGroup);
+    // WebScaly: matches @workgroup_size(8, 8) in depthToSpace.wgsl, one invocation per output pixel
+    // (it divided by 4 and launched four times the needed invocations). Output is unchanged.
     depthToSpacePass.dispatchWorkgroups(
-      Math.ceil(this.outputTexture.width / 4),
-      Math.ceil(this.outputTexture.height / 4),
+      Math.ceil(this.outputTexture.width / 8),
+      Math.ceil(this.outputTexture.height / 8),
     );
     depthToSpacePass.end();
   }

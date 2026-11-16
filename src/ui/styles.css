@@ -7,7 +7,8 @@
   --surface-2: #1c2b36;
   --surface-3: #243541;
   --line: #2b3b47;
-  --line-strong: #3b4f5c;
+  /* 3.5:1 on --bg and 3.1:1 on --surface: control boundaries meet WCAG 1.4.11. */
+  --line-strong: #5c6f7c;
   --text: #e5edf4;
   --text-2: #c2d0d9;
   --muted: #9aafbd;
@@ -300,8 +301,15 @@ svg {
 .switch.compact {
   min-height: 0;
 }
+.switch.compact {
+  gap: 8px;
+}
 .switch.compact .copy {
-  flex: 0;
+  flex: none;
+  color: var(--text-2);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 /* ---------- Segmented control (native radio group) ---------- */
@@ -576,6 +584,20 @@ svg {
 .stage.blocked .btn {
   margin-top: 4px;
 }
+/* Copy-protected playback: informative, not an error. */
+.stage.neutral .label {
+  color: var(--text-2);
+}
+.stage .engine {
+  color: var(--text-2);
+  font-weight: 600;
+}
+.stage .hint-text {
+  cursor: help;
+  text-decoration: underline dotted #9aafbd80;
+  text-underline-offset: 3px;
+  border-radius: 3px;
+}
 
 /* ---------- Disclosure ---------- */
 .disclosure > summary {
@@ -769,6 +791,12 @@ svg {
 .light[data-state="blocked"] .dot {
   background: var(--alert);
 }
+.light[data-state="protected"] {
+  color: var(--text-2);
+}
+.light[data-state="protected"] .dot {
+  background: var(--muted);
+}
 .light[data-state="paused"] .dot {
   background: var(--warn);
 }
@@ -848,21 +876,34 @@ svg {
   color: var(--accent);
   font-size: 12px;
 }
+/* Toggles show a state (filled when on); actions are momentary (outlined). */
 .tools {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 4px;
+  gap: 6px;
+}
+.tools .toggles,
+.tools .actions-row {
+  display: grid;
+  gap: 6px;
+}
+.tools .toggles {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+.tools .actions-row {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 .tool {
-  display: grid;
-  justify-items: center;
-  gap: 3px;
-  padding: 7px 2px 6px;
-  border: 1px solid transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 6px 8px;
+  border: 1px solid var(--line-strong);
   border-radius: 8px;
   background: transparent;
-  color: var(--muted);
-  font-size: 11.5px;
+  color: var(--text-2);
+  font-size: 12px;
   font-weight: 500;
   cursor: pointer;
   transition:
@@ -874,9 +915,34 @@ svg {
   color: var(--text);
   background: var(--surface);
 }
+.tool.toggle {
+  border-color: var(--line);
+  background: var(--surface);
+}
+.tool.toggle::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  margin-left: 2px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  opacity: 0.7;
+}
 .tool[aria-pressed="true"] {
   color: var(--accent);
+  border-color: var(--accent-line);
   background: var(--accent-soft);
+}
+.tool[aria-pressed="true"]::after {
+  background: currentColor;
+  opacity: 1;
+}
+.tool.action {
+  border-style: solid;
+  border-color: var(--line-strong);
+}
+.tool.action:active:not(:disabled) {
+  background: var(--surface-3);
 }
 .tool:disabled {
   opacity: 0.4;
@@ -1066,6 +1132,11 @@ kbd {
 .group > header h2 {
   font-size: 15px;
   font-weight: 600;
+}
+.group-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
 }
 .group > header p {
   color: var(--muted);

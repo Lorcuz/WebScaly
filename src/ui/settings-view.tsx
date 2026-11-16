@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import {
   IconActivity,
-  IconAdjustmentsHorizontal,
   IconBookmarks,
   IconInfoCircle,
   IconKeyboard,
@@ -23,7 +22,6 @@ import {
   pictureOf,
   type Algorithm,
   type Configuration,
-  type Quality,
   type Settings as SettingsModel,
   type SkipAbove,
 } from "../shared/settings";
@@ -90,7 +88,7 @@ const SECTIONS: { id: string; icon: Icon; title: string; description: string }[]
     id: "Welcome",
     icon: IconPlayerPlay,
     title: "Getting started",
-    description: "Three steps to a sharper picture.",
+    description: "Four steps to a sharper picture.",
   },
 ];
 // Section names from 0.3 links keep working.
@@ -233,7 +231,9 @@ export function Settings() {
           )}
         </div>
         <footer className="settings-footer">
-          <span aria-live="polite">{store.busy ? "Saving…" : "All changes saved"}</span>
+          <span aria-live="polite">
+            {store.busy ? "Saving…" : store.error ? "Last change not saved; see the message above" : "All changes saved"}
+          </span>
         </footer>
       </main>
     </div>
@@ -261,10 +261,10 @@ function Group({
   return (
     <section className="group">
       <header>
-        <h2>
-          {title}
+        <div className="group-heading">
+          <h2>{title}</h2>
           {aside}
-        </h2>
+        </div>
         {note && <p>{note}</p>}
       </header>
       {children}
@@ -325,7 +325,7 @@ function Enhancement({ store, target }: { store: Store; target: Target }) {
               onChange={(enabled) => set({ enabled })}
             />
           </div>
-          <Row wide>
+          <Row wide title="Algorithm">
             <Segmented
               label="Algorithm"
               tall
@@ -335,7 +335,7 @@ function Enhancement({ store, target }: { store: Store; target: Target }) {
               onChange={(algorithm) => set({ algorithm })}
             />
           </Row>
-          <Row wide>
+          <Row wide title="Quality">
             <Segmented
               label="Quality"
               tall
@@ -383,7 +383,7 @@ function Enhancement({ store, target }: { store: Store; target: Target }) {
         aside={
           <button
             className="link subtle"
-            style={{ marginLeft: 12, fontSize: 13 }}
+            style={{ fontSize: 13 }}
             disabled={!settings.vibrance && !settings.contrast && !settings.brightness}
             onClick={() => set({ vibrance: 0, contrast: 0, brightness: 0 })}
           >
@@ -530,6 +530,11 @@ function Preview({ settings }: { settings: SettingsModel }) {
     let live = true;
     void video
       .play()
+      // A preview that starts off screen is paused before playback begins (AbortError); it still gets
+      // its renderer, which starts on the first decoded frame once the preview is scrolled into view.
+      .catch((e: unknown) => {
+        if (!(e instanceof DOMException && e.name === "AbortError")) throw e;
+      })
       .then(async () => {
         if (!live) return;
         const r = new VideoRenderer(
@@ -552,7 +557,23 @@ function Preview({ settings }: { settings: SettingsModel }) {
         await r.start();
       })
       .catch(() => live && setState("failed"));
+    // Nothing is drawn or enhanced while the preview is scrolled away or the tab is in the background.
+    let onScreen = true;
+    const sync = () => {
+      const run = onScreen && !document.hidden;
+      source.run(run);
+      if (run) void video.play().catch(() => {});
+      else video.pause();
+    };
+    const seen = new IntersectionObserver(([entry]) => {
+      onScreen = !!entry?.isIntersecting;
+      sync();
+    });
+    seen.observe(host);
+    document.addEventListener("visibilitychange", sync);
     return () => {
+      seen.disconnect();
+      document.removeEventListener("visibilitychange", sync);
       live = false;
       renderer.current?.dispose();
       renderer.current = undefined;
@@ -960,7 +981,7 @@ function Behavior({ store }: { store: Store }) {
         title="Keyboard shortcuts"
         note="Shortcuts act on the video in the current tab. Chrome lets you change them."
         aside={
-          <button className="link" style={{ marginLeft: 12, fontSize: 13 }} onClick={openShortcutSettings}>
+          <button className="link" style={{ fontSize: 13 }} onClick={openShortcutSettings}>
             Change shortcuts
           </button>
         }
@@ -1086,7 +1107,7 @@ function DiagnosticsPage({ store }: { store: Store }) {
         title="Current video tab"
         aside={
           status ? (
-            <button className="link" style={{ marginLeft: 12, fontSize: 13 }} onClick={() => void copy()}>
+            <button className="link" style={{ fontSize: 13 }} onClick={() => void copy()}>
               {copied ? "Copied" : "Copy report"}
             </button>
           ) : undefined
@@ -1153,7 +1174,7 @@ function Welcome({ store, done }: { store: Store; done: () => void }) {
   return (
     <>
       <Preview settings={store.config!.defaults} />
-      <Group title="Three steps">
+      <Group title="Four steps">
         <div className="rows">
           <div className="row wide">
             <ol className="steps">
@@ -1167,6 +1188,15 @@ function Welcome({ store, done }: { store: Store; done: () => void }) {
                 <div>
                   <strong>Choose “Allow on this website”</strong>
                   <p>Chrome asks once. WebScaly only ever runs on websites you allow, and you can remove them here at any time.</p>
+                </div>
+              </li>
+              <li>
+                <div>
+                  <strong>What WebScaly reads, and where it stays</strong>
+                  <p>
+                    On websites you allow, WebScaly reads the page address and the video frames it enhances, only on this
+                    device. Nothing is uploaded or shared. A snapshot is saved only when you choose Snapshot.
+                  </p>
                 </div>
               </li>
               <li>

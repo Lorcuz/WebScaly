@@ -39,8 +39,7 @@
   grid-template-rows: auto 1fr auto;
   gap: 10px;
   padding: 16px;
-  opacity: 0.55;
-  transition: opacity 300ms var(--ease);
+  transition: color 300ms var(--ease);
 }
 .viewer-steps li + li {
   border-left: 1px solid var(--line);
@@ -75,10 +74,22 @@
   gap: 8px;
   flex-wrap: wrap;
 }
-/* The current step is lit; earlier steps stay readable. */
-.viewer[data-step="1"] li[data-step="1"],
-.viewer[data-step="2"] li:is([data-step="1"], [data-step="2"]),
-.viewer[data-step="3"] li {
+/* Steps not reached yet are dimmed through their heading and number only, so their text keeps AA contrast
+   (dimming the whole step with opacity fell to about 3.1:1). The current step is lit. */
+.viewer-steps li strong {
+  color: var(--text-2);
+}
+.viewer-steps li .n {
+  opacity: 0.6;
+}
+.viewer[data-step="1"] li[data-step="1"] strong,
+.viewer[data-step="2"] li:is([data-step="1"], [data-step="2"]) strong,
+.viewer[data-step="3"] li strong {
+  color: var(--text);
+}
+.viewer[data-step="1"] li[data-step="1"] .n,
+.viewer[data-step="2"] li:is([data-step="1"], [data-step="2"]) .n,
+.viewer[data-step="3"] li .n {
   opacity: 1;
 }
 .viewer[data-step="1"] li[data-step="1"] .n,
@@ -91,6 +102,9 @@
 #status {
   min-height: 22px;
   color: var(--text-2);
+}
+#status[data-tone="error"] {
+  color: var(--alert);
 }
 .capture-preview {
   position: relative;

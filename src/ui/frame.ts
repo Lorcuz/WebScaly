@@ -137,6 +137,7 @@ if (
     ])
       document.getElementById(id)?.setAttribute("aria-pressed", String(s[key]));
     root.dataset.state = typeof e.data.state === "string" ? e.data.state : "";
+    root.dataset.reason = typeof e.data.reason === "string" ? e.data.reason : "";
     for (const [id, key] of [
       ["engine", "algorithm"],
       ["quality", "quality"],
