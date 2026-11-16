@@ -51,20 +51,26 @@ export const ENGINE_OPTIONS = [
 export const QUALITY_OPTIONS = (["fast", "balanced", "quality"] as Quality[]).map(
   (value) => ({ value, label: QUALITY_LABELS[value] }),
 );
-export type Light = "active" | "idle" | "blocked" | "paused";
+export type Light = "active" | "idle" | "blocked" | "protected" | "paused";
 export const LIGHT_LABEL: Record<Light, string> = {
   active: "Enhancing",
   idle: "Standby",
   blocked: "Blocked",
+  protected: "Protected",
   paused: "Paused",
 };
 export function lightOf(status: PlayerStatus | null | undefined, paused: boolean): Light {
-  const states = status?.renderers.map((r) => r.state) ?? [];
+  const renderers = status?.renderers ?? [];
   if (paused) return "paused";
-  if (states.includes("active")) return "active";
-  if (states.includes("unavailable")) return "blocked";
+  if (renderers.some((r) => r.state === "active")) return "active";
+  // Copy-protected playback is a limit of the page, not a failure: it gets a neutral state.
+  if (renderers.some((r) => r.state === "unavailable" && r.reason !== "protected")) return "blocked";
+  if (renderers.some((r) => r.state === "unavailable")) return "protected";
   return "idle";
 }
+/** U3: what "skipped" means; renderer drops only, never decoder drops. */
+export const SKIPPED_HELP =
+  "Frames not enhanced because the GPU was still busy with the previous one. Playback is unaffected: those frames show the original video.";
 const ms = (v: number) => (v < 10 ? v.toFixed(1) : Math.round(v).toString());
 const matches = (settings: Settings, picture: Partial<Settings>) =>
   PICTURE_KEYS.every((k) => picture[k] === undefined || picture[k] === settings[k]);
@@ -135,7 +141,7 @@ export function Popup() {
       <Header light={light}>
         <button
           className="iconbtn"
-          aria-label={paused ? "Resume WebScaly" : "Pause WebScaly everywhere"}
+          aria-label="Pause WebScaly everywhere"
           aria-pressed={paused}
           data-help={paused ? "Resume enhancement on every approved website." : "Pause enhancement on every website without changing settings."}
           disabled={!isExtension}
@@ -161,7 +167,7 @@ export function Popup() {
           {allowed && !paused && !confirming ? (
             <Switch
               className="compact"
-              label={<span className="visually-hidden">Enhancement</span>}
+              label="Enhance"
               checked={settings.enabled}
               disabled={!editable}
               onChange={(enabled) => set({ enabled })}
@@ -232,7 +238,6 @@ export function Popup() {
             <button
               className="link subtle"
               style={{ marginLeft: "auto" }}
-              aria-label="Remove website access"
               onClick={() => setConfirming(true)}
             >
               Remove access
@@ -279,7 +284,7 @@ export function Popup() {
           </li>
           <li>
             <IconCpu size={16} stroke={1.8} aria-hidden="true" />
-            Video is enhanced on this device. Nothing is uploaded.
+            Uses this website's address and video frames only to enhance its video, on this device. Nothing is uploaded.
           </li>
           <li>
             <IconPlayerPlay size={16} stroke={1.8} aria-hidden="true" />
@@ -392,20 +397,43 @@ export function Popup() {
       </Disclosure>
 
       <section className="tools" aria-label="Player tools">
+        <div className="toggles" role="group" aria-label="Show on the video">
         <button
-          className="tool"
+          className="tool toggle"
           aria-pressed={settings.comparison}
           disabled={!editable}
           data-help="Original and enhanced side by side, with a draggable split."
           onClick={() => set({ comparison: !settings.comparison })}
         >
-          <IconLayoutColumns size={18} stroke={1.7} aria-hidden="true" />
+          <IconLayoutColumns size={16} stroke={1.8} aria-hidden="true" />
           Compare
         </button>
         <button
-          className="tool"
+          className="tool toggle"
+          aria-pressed={settings.controls}
+          disabled={!editable}
+          data-help="Compact controls on the video. They hide while you watch."
+          onClick={() => set({ controls: !settings.controls })}
+        >
+          <IconAdjustmentsHorizontal size={16} stroke={1.8} aria-hidden="true" />
+          Controls
+        </button>
+        <button
+          className="tool toggle"
+          aria-pressed={settings.hud}
+          disabled={!editable}
+          data-help="Live speed and resolution numbers on the video."
+          onClick={() => set({ hud: !settings.hud })}
+        >
+          <IconActivity size={16} stroke={1.8} aria-hidden="true" />
+          HUD
+        </button>
+        </div>
+        <div className="actions-row" role="group" aria-label="Actions">
+        <button
+          className="tool action"
           disabled={renderer?.state !== "active"}
-          data-help="Hold to see the original video."
+          data-help="Shows the original video while you hold the button (mouse, touch, Space or Enter)."
           onPointerDown={() => void tabAction(tab.id, "original", true)}
           onPointerUp={() => void tabAction(tab.id, "original", false)}
           onPointerLeave={(e) => {
@@ -417,38 +445,19 @@ export function Popup() {
           }}
           onKeyUp={() => void tabAction(tab.id, "original", false)}
         >
-          <IconEye size={18} stroke={1.7} aria-hidden="true" />
-          Original
+          <IconEye size={16} stroke={1.8} aria-hidden="true" />
+          Hold for original
         </button>
         <button
-          className="tool"
-          aria-pressed={settings.controls}
-          disabled={!editable}
-          data-help="Compact controls on the video. They hide while you watch."
-          onClick={() => set({ controls: !settings.controls })}
-        >
-          <IconAdjustmentsHorizontal size={18} stroke={1.7} aria-hidden="true" />
-          Controls
-        </button>
-        <button
-          className="tool"
-          aria-pressed={settings.hud}
-          disabled={!editable}
-          data-help="Live speed and resolution numbers on the video."
-          onClick={() => set({ hud: !settings.hud })}
-        >
-          <IconActivity size={18} stroke={1.7} aria-hidden="true" />
-          HUD
-        </button>
-        <button
-          className="tool"
+          className="tool action"
           disabled={renderer?.state !== "active"}
           data-help="Save the current enhanced frame as an image."
           onClick={() => void command("snapshot")}
         >
-          <IconCamera size={18} stroke={1.7} aria-hidden="true" />
+          <IconCamera size={16} stroke={1.8} aria-hidden="true" />
           Snapshot
         </button>
+        </div>
       </section>
 
       </>)}
@@ -507,10 +516,9 @@ function Stage({
     return (
       <section className="stage" aria-label="Live enhancement">
         <div className="stat">
-          <span className="label">Enhancing · {renderer.backend}</span>
-          <span className="label">
-            {engine}
-            {renderer.quality ? ` · ${QUALITY_LABELS[renderer.quality as Quality] ?? ""}` : ""}
+          <span className="label engine">
+            {renderer.backend} · {engine}
+            {renderer.quality ? ` ${QUALITY_LABELS[renderer.quality as Quality] ?? ""}` : ""}
           </span>
         </div>
         <div className="stat">
@@ -527,7 +535,9 @@ function Stage({
                 ? `GPU ${ms(renderer.gpuMs)} ms of ${ms(budget)} ms frame`
                 : `GPU ${ms(renderer.gpuMs)} ms`}
           </span>
-          <span className="label">{renderer.dropped} skipped</span>
+          <span className="label hint-text" tabIndex={0} data-help={SKIPPED_HELP}>
+            {renderer.dropped} skipped
+          </span>
         </div>
         <div
           className="budget"
@@ -543,18 +553,33 @@ function Stage({
       </section>
     );
   }
-  if (renderer?.state === "unavailable")
+  if (renderer?.state === "unavailable") {
+    // Each reason gets its own explanation; the compatibility player only helps with cross-origin frames.
+    const [title, text] =
+      renderer.reason === "protected"
+        ? ["Protected video", "This player uses copy protection, so its frames cannot be read. The video plays normally."]
+        : renderer.reason === "graphics"
+          ? ["Graphics unavailable", firstSentence(renderer.message)]
+          : renderer.reason === "cross-origin"
+            ? ["Direct access blocked", firstSentence(renderer.message)]
+            : ["Enhancement stopped", `${firstSentence(renderer.message)} Turn enhancement off and on to try again.`];
     return (
-      <section className="stage blocked" aria-label="Enhancement status">
-        <span className="label">Direct access blocked</span>
-        <p>{firstSentence(renderer.message)}</p>
-        <div>
-          <button className="btn small" onClick={openViewer}>
-            Open compatibility player
-          </button>
-        </div>
+      <section
+        className={`stage ${renderer.reason === "protected" ? "neutral" : "blocked"}`}
+        aria-label="Enhancement status"
+      >
+        <span className="label">{title}</span>
+        <p>{text}</p>
+        {renderer.reason === "cross-origin" && (
+          <div>
+            <button className="btn small" onClick={openViewer}>
+              Open compatibility player
+            </button>
+          </div>
+        )}
       </section>
     );
+  }
   const [title, text] =
     renderer?.state === "skipped"
       ? ["Already sharp", renderer.message]

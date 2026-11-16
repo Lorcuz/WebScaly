@@ -6,6 +6,8 @@ permissions:
   contents: read
 jobs:
   source:
+    # Checks that can run on a standard hosted runner. Browser and GPU tests need a physical
+    # graphics device and are run locally (docs/TESTING.md); a green run does not cover them.
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
@@ -13,7 +15,23 @@ jobs:
         with:
           node-version: '24'
           cache: npm
-      - run: npm ci
-      - run: npm test
-      - run: npm run build
-      - run: npm run package
+      - name: Install locked dependencies
+        run: npm ci
+      - name: Unit tests
+        run: npm test
+      - name: Lint (type checks)
+        run: npm run lint
+      - name: Build
+        run: npm run build
+      - name: Package and audit the release files
+        run: npm run package
+      - name: Dependency audit
+        run: npm audit
+      - name: Record what this run did not cover
+        if: always()
+        run: |
+          {
+            echo "### Not covered by this workflow"
+            echo "Browser tests (npm run test:browser), the GPU matrix (npm run test:gpu),"
+            echo "verify:release and verify:source need a local machine with a graphics device."
+          } >> "$GITHUB_STEP_SUMMARY"

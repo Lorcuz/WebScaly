@@ -9,14 +9,14 @@ Every engine is followed by a high-quality scaler (bicubic or Lanczos) and adapt
 FINE-TUNE THE PICTURE
 Adjust sharpening, denoise, deband, vibrance, contrast and brightness. Keep different settings for different websites, or apply a built-in preset: Anime, Live action, Low-res rescue or Battery friendly. A live before/after preview in Settings shows the effect on generated test footage.
 
-SMOOTH ON ANY DEVICE
-Adaptive performance steps down quality when your graphics card falls behind instead of stuttering. Leave already-sharp videos untouched, save battery while unplugged, or pause everything with one click.
+SMOOTH PLAYBACK
+Adaptive performance steps down quality when your graphics card falls behind instead of stuttering. Resizing the player or going fullscreen keeps the enhanced picture. Graphics memory is released shortly after enhancement stops or a tab stays in the background. Leave already-sharp videos untouched, save battery while unplugged, or pause everything with one click.
 
 A QUIET, COMPACT INTERFACE
 The popup shows the engine, resolution and speed at a glance. Optional in-player controls, comparison slider, snapshot and performance HUD stay hidden until you turn them on, and the controls hide while you watch. Keyboard shortcuts switch enhancement, comparison and engine, and the toolbar badge shows when a video is being enhanced.
 
 YOU CONTROL WEBSITE ACCESS
-WebScaly has no website access by default. Click Allow on this website, then Allow in Chrome. If a page uses an embedded player, approve that player's website too. Remove access whenever you want.
+WebScaly has no website access by default. Before you allow a website, the popup tells you what WebScaly uses there: the website address and its video frames, on your device only. Click Allow on this website, then Allow in Chrome. If a page uses an embedded player, approve that player's website too. Remove access whenever you want.
 
 YOUR VIDEOS STAY ON YOUR DEVICE
 No accounts, tracking, analytics, cloud processing or automatic uploads. Website addresses, video frames and settings are used locally to provide enhancement. Snapshots are saved only when you ask, to your own downloads. The developer does not receive your browsing activity or videos.
@@ -25,11 +25,11 @@ WHEN DIRECT ACCESS IS RESTRICTED
 The optional compatibility player lets you explicitly share your source tab and select the video area for local enhancement. Audio remains in the original tab. Nothing is recorded or uploaded.
 
 COMPATIBILITY
-Requires Chrome 121 or newer. Performance and available engines depend on your browser, GPU and video player. A lighter spatial fallback is available when supported. Protected video and browser security restrictions can prevent enhancement. Support is not guaranteed for every website or device.
+Requires Chrome 121 or newer. Performance and available engines depend on your browser, GPU and video player. A lighter spatial fallback is available when supported. Protected video and browser security restrictions can prevent enhancement; protected video is left untouched. WebScaly is developed and tested on Windows with an NVIDIA graphics card; other systems and graphics cards may work but have not been tested. Support is not guaranteed for every website or device.
 
 SUPPORT
 Questions or feedback: notlorcuz@gmail.com
-Bug reports: https://github.com/Lorcuz/webscaly/issues
-Privacy: https://github.com/Lorcuz/webscaly/blob/main/PRIVACY.md
+Bug reports: https://github.com/Lorcuz/WebScaly/issues
+Privacy: https://github.com/Lorcuz/WebScaly/blob/main/PRIVACY.md
 
-WebScaly is free and open source. Optional support is available in Settings → About.
+WebScaly is free, and its source code is published on GitHub. Optional support is available in Settings → About.

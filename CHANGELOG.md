@@ -1,5 +1,56 @@
 # Changelog
 
+## 0.5.0 — 16 November 2026
+
+A quality and reliability update. No new permissions; settings, approvals and presets carry over.
+
+### Picture and playback
+- Resizing the player or entering fullscreen no longer interrupts enhancement: only the display-size surfaces are resized, and Anime4K adds or drops only its 2× stage.
+- An adaptive quality step no longer shows a black picture while the pipeline rebuilds; steps that only change settings are applied in place.
+- A video whose resolution changes while enhancement is starting is no longer enhanced from the wrong part of the frame.
+- Adjusting sharpening or colour no longer undoes an adaptive step the graphics card needed.
+- Lowering "Skip videos above" applies immediately during playback.
+- A playlist or next-episode change on the same player keeps the renderer instead of rebuilding everything.
+- While the video element itself is fullscreen with its native controls, WebScaly stops processing frames nobody can see.
+- Source FPS stays correct when the graphics card drops frames.
+
+### Graphics and recovery
+- If the WebGL fallback loses its graphics context, the native video shows while WebScaly reconnects; if the context does not come back, the popup says so in plain words instead of showing an error code.
+- Retired WebGL contexts are released, so repeated restarts no longer hit Chrome's context limit.
+- When WebGPU is lost, WebScaly falls back to exactly one WebGL renderer.
+- Out-of-memory and validation errors while an engine starts are now detected, so WebScaly can fall back to Spatial Detail instead of failing.
+- A permanent failure such as cross-origin video is no longer retried on every play, seek or settings change; the toolbar can still retry it.
+
+### Lighter on your computer
+- Spatial Detail does less work when the video already matches the display size (GPU time per frame 0.30–0.33 ms → 0.13 ms on the test machine).
+- Anime4K is 4–11% faster, and FSRCNNX starts faster and uses less graphics memory.
+- Graphics memory is released 15 s after the last video on a page stops, instead of when the tab closes.
+- A tab left in the background for 60 s releases its pipeline and rebuilds it when you return; the original video shows for that short moment.
+- Pages without video and hidden tabs no longer run periodic checks, the Settings preview pauses when off-screen, and the HUD updates 4 times a second instead of on every frame.
+
+### Websites and access
+- Removing one website stops enhancement only on that website, not in every tab.
+- A replace import that keeps the same websites, or a Remove for a website that was already gone, no longer leaves enhancement off until each page is reloaded.
+- A replace import that changes a kept website's subdomain scope no longer revokes the access that website was using.
+- Ad-sized embedded frames are no longer offered as "players that need access".
+- Hover previews and thumbnail clips no longer get their own enhancement; real players still do.
+- Players that appear late inside very large pages are still found.
+- The toolbar badge keeps its state when Chrome restarts the background worker, and embedded players that register at the same moment are no longer dropped from the list that keyboard shortcuts act on.
+
+### Popup
+- Before you allow a website, the popup says exactly what WebScaly reads (the website's address and video frames), that it works on your device and that nothing is uploaded.
+- Each problem has its own explanation; only cross-origin video offers the compatibility player. Copy-protected video shows a neutral "Protected" status instead of a red error.
+- Toggles and one-off actions are visually distinct, the "Enhance" switch is labelled, and the "skipped" count explains itself on hover or keyboard focus.
+
+### Release quality
+- 84 unit tests and 83 browser tests in the public source, plus a type-checking lint step and a GPU image-quality matrix (16 configurations with image checks).
+
+### Known limitations
+- Benchmarks were run on one Windows 11 machine with one NVIDIA GPU. AMD and Intel GPUs have not been tested.
+- No screen-reader session has been recorded, so screen-reader compatibility is not claimed.
+- After disabling and re-enabling the extension, refresh open video tabs so the player attaches again.
+- Neural engines need WebGPU; protected, cross-origin or DRM media cannot be enhanced.
+
 ## 0.4.1 — 7 November 2026
 
 A reliability update. No new permissions; settings, approvals and presets carry over.

@@ -3,8 +3,33 @@ export interface DeviceContext {
   adapter: GPUAdapter;
 }
 let pending: Promise<DeviceContext> | undefined;
+// Renderers hold the shared device while they use it. When the last one lets go, the device (and the
+// GPU memory behind it) is released after a grace period, so a page whose video is gone does not keep it
+// for its whole lifetime, while quick engine switches or SPA navigations still reuse it.
+const RELEASE_AFTER_MS = 15_000;
+let holders = 0,
+  releaseTimer: ReturnType<typeof setTimeout> | undefined;
+/** Marks the shared device as in use; call the returned function exactly once when done. */
+export function holdDevice(): () => void {
+  holders++;
+  clearTimeout(releaseTimer);
+  let held = true;
+  return () => {
+    if (!held) return;
+    held = false;
+    if (--holders > 0) return;
+    clearTimeout(releaseTimer);
+    releaseTimer = setTimeout(() => {
+      if (holders > 0 || !pending) return;
+      const current = pending;
+      pending = undefined;
+      void current.then(({ device }) => device.destroy(), () => {});
+    }, RELEASE_AFTER_MS);
+  };
+}
 export function gpuDevice(): Promise<DeviceContext> {
-  pending ??= (async () => {
+  if (pending) return pending;
+  const request: Promise<DeviceContext> = (async () => {
     if (!navigator.gpu)
       throw new Error(
         "WebGPU is unavailable. Enable browser hardware acceleration and use Chrome 121 or newer.",
@@ -31,13 +56,15 @@ export function gpuDevice(): Promise<DeviceContext> {
         ),
       },
     });
+    // Only forget this device; a newer one may already be cached after a release.
     void device.lost.then(() => {
-      pending = undefined;
+      if (pending === request) pending = undefined;
     });
     return { device, adapter };
   })();
-  return pending.catch((e) => {
-    pending = undefined;
+  pending = request;
+  return request.catch((e) => {
+    if (pending === request) pending = undefined;
     throw e;
   });
 }

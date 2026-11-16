@@ -23,7 +23,8 @@ try {
   if (
     report.validationErrors.length ||
     errors.length ||
-    report.results.some((r) => !r.outputNonBlack || r.changedPixels === 0)
+    report.results.some((r) => !r.outputNonBlack || r.changedPixels === 0) ||
+    report.cases?.some((c) => !c.ok)
   )
     process.exitCode = 1;
 } finally {

@@ -139,11 +139,14 @@ export class Overlay implements Anime4KPipeline {
     throw new Error(`${this.constructor.name} has no param`);
   }
 
+  // WebScaly: one render-target view for the texture's lifetime instead of a new one every frame.
+  private outputView?: GPUTextureView;
+
   pass(encoder: GPUCommandEncoder): void {
     const bilinearPass = encoder.beginRenderPass({
       colorAttachments: [
         {
-          view: this.outputTexture.createView(),
+          view: (this.outputView ??= this.outputTexture.createView()),
           clearValue: {
             r: 0.0, g: 0.0, b: 0.0, a: 1.0,
           },

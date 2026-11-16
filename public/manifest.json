@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "WebScaly",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "minimum_chrome_version": "121",
   "description": "Local video enhancement with WebGPU and WebGL on websites you approve.",
   "permissions": [

@@ -23,7 +23,7 @@ WebScaly-authored code uses **MIT**. FSRCNNX remains **LGPL-3.0-or-later**, and 
 1. Clone or update the public repository with Git or GitHub Desktop. Keep its existing public history.
 2. Make the change, review the diff and run the relevant checks. For a clean source export, include hidden project files and exclude dependencies, private development history, browser profiles and raw reports.
 3. Commit and push the reviewed changes, or open a pull request. Keep the store, support and privacy links current.
-4. Confirm the GitHub Actions workflow succeeds. It runs unit tests, build and package validation with read-only repository permissions and pinned action revisions. It does not publish releases or submit store updates. Browser/GPU tests remain local checks; hosted CI is not physical GPU qualification.
+4. Confirm the GitHub Actions workflow succeeds. It runs unit tests, lint, build, package validation and a dependency audit with read-only repository permissions and pinned action revisions, and its run summary states what it did not cover. It does not publish releases or submit store updates. Browser/GPU tests remain local checks; hosted CI is not physical GPU qualification.
 
 Use the Git identity you want visible publicly. Never copy private development history into the public repository.
 

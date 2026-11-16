@@ -1,6 +1,7 @@
 import { gpuDevice, texture } from "../core/device";
 import { Enhancement } from "../core/enhancement";
 import { DEFAULTS, type Algorithm } from "../shared/settings";
+import { qualityCase, qualityCases, type CaseResult } from "./gpu-quality";
 
 async function readPixels(device: GPUDevice, tex: GPUTexture) {
   const pitch = Math.ceil((tex.width * 4) / 256) * 256;
@@ -112,6 +113,9 @@ export async function validateGpu() {
     }
   }
   source.destroy();
+  // Every engine, quality mode and scaling path on deterministic patterns (see gpu-quality.ts).
+  const cases: CaseResult[] = [];
+  for (const c of qualityCases()) cases.push(await qualityCase(device, c));
   await device.queue.onSubmittedWorkDone();
   return {
     browser: navigator.userAgent,
@@ -124,6 +128,7 @@ export async function validateGpu() {
     },
     features: [...device.features],
     results,
+    cases,
     validationErrors: failures,
   };
 }

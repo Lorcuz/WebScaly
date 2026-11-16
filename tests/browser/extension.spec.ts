@@ -49,7 +49,8 @@ test.beforeAll(async () => {
   const directory = resolve("test-results/extension");
   await mkdir(directory, { recursive: true });
   await mkdir(resolve("test-results/ui"), { recursive: true });
-  await cp("dist", directory, { recursive: true });
+  // WEBSCALY_EXTENSION_DIR runs the same checks against an unpacked release ZIP (default: the dist build).
+  await cp(process.env.WEBSCALY_EXTENSION_DIR ?? "dist", directory, { recursive: true });
   const m = JSON.parse(
     await readFile(resolve(directory, "manifest.json"), "utf8"),
   );
@@ -779,10 +780,18 @@ test("approved and embedded-access popup states fit, and full errors remain avai
   await configure();
   const source = await fixture();
   await source.evaluate(() => {
+    // A real player embed allows fullscreen (YouTube, Vimeo and similar embed codes all do).
     const frame = document.createElement("iframe");
     frame.src = "http://localhost:5173/tests/browser/fixture.html";
+    frame.allowFullscreen = true;
     frame.style.cssText = "width:900px;height:600px";
     document.body.append(frame);
+    // An ad-sized frame without fullscreen must not be presented as a player that needs access.
+    const ad = document.createElement("iframe");
+    ad.src = "http://plain.webscaly.test:5173/tests/browser/fixture.html";
+    // Pinned in view, so only the missing fullscreen permission excludes it.
+    ad.style.cssText = "position:fixed;top:0;right:0;width:300px;height:250px";
+    document.body.append(ad);
   });
   const tabId = await worker.evaluate(
     async (url) =>
@@ -794,6 +803,9 @@ test("approved and embedded-access popup states fit, and full errors remain avai
   await expect(
     page.getByRole("button", { name: "Allow localhost", exact: true }),
   ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "Allow plain.webscaly.test", exact: true }),
+  ).toHaveCount(0);
   const fits = async () => {
     const size = await page.locator("main.popup").evaluate((e) => ({
       width: e.getBoundingClientRect().width,
@@ -806,7 +818,7 @@ test("approved and embedded-access popup states fit, and full errors remain avai
   };
   await fits();
   await expect(
-    page.getByRole("switch", { name: "Enhancement", exact: true }),
+    page.getByRole("switch", { name: "Enhance", exact: true }),
   ).toBeChecked();
   await page
     .locator("main.popup")
@@ -829,10 +841,10 @@ test("approved and embedded-access popup states fit, and full errors remain avai
             ...args,
           ])) as typeof original;
   });
-  await page
-    .getByRole("button", { name: "Remove website access", exact: true })
-    .click();
+  // 0.5.1: the link is named by its visible text ("Remove access"); the confirmation replaces it.
   await page.getByRole("button", { name: "Remove access", exact: true }).click();
+  await expect(page.getByRole("group", { name: "Confirm removal" })).toBeVisible();
+  await page.getByRole("group", { name: "Confirm removal" }).getByRole("button", { name: "Remove access", exact: true }).click();
   await expect(page.getByRole("alert")).toContainText("Settings → Diagnostics");
   await fits();
   await page.goto(`chrome-extension://${id}/options.html?tab=${tabId}`);

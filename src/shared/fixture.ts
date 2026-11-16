@@ -119,14 +119,23 @@ export function fixtureStream(
   drawFixture(ctx, index, fps, fixture);
   const stream = canvas.captureStream(0),
     track = stream.getVideoTracks()[0] as CanvasCaptureMediaStreamTrack;
-  const interval = setInterval(() => {
-    drawFixture(ctx, index++, fps, fixture);
-    track.requestFrame();
-  }, 1000 / fps);
+  let interval: ReturnType<typeof setInterval> | undefined;
+  const run = (on: boolean) => {
+    clearInterval(interval);
+    interval = on
+      ? setInterval(() => {
+          drawFixture(ctx, index++, fps, fixture);
+          track.requestFrame();
+        }, 1000 / fps)
+      : undefined;
+  };
+  run(true);
   return {
     stream,
+    /** Stops or resumes drawing (for example while the preview is off screen). */
+    run,
     stop() {
-      clearInterval(interval);
+      run(false);
       stream.getTracks().forEach((t) => t.stop());
     },
   };

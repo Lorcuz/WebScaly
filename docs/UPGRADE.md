@@ -1,4 +1,10 @@
-# Upgrade to 0.4.1
+# Upgrade notes
+
+## Upgrade to 0.5.0
+
+No new permissions and no settings changes; profiles, approvals and presets are kept. Let the store update, or reload the unpacked `dist` extension, then refresh video tabs. Two behaviours are new: a tab left in the background for 60 s releases its graphics pipeline and shows the original video briefly when you return, and copy-protected video shows a neutral "Protected" status instead of an error.
+
+## Upgrade to 0.4.1
 
 0.4.1 is a reliability update with no new permissions and no settings changes. Reload the unpacked `dist` extension (or let the store update) and refresh video tabs. Existing profiles, approvals and presets are kept. If you disable and re-enable WebScaly, refresh open video tabs so the player attaches again.
 

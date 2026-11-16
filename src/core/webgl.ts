@@ -47,6 +47,9 @@ export class WebGLSpatial {
       );
     this.gl = gl;
     this.settings = settings;
+    // A context restored after a loss can still hold errors from before; start from a clean error state so
+    // the first frame does not report someone else's error.
+    for (let i = 0; i < 8 && gl.getError() !== gl.NO_ERROR; i++);
     const v2 =
       typeof WebGL2RenderingContext !== "undefined" &&
       gl instanceof WebGL2RenderingContext;
@@ -142,7 +145,13 @@ export class WebGLSpatial {
   update(settings: Settings) {
     this.settings = settings;
   }
-  render(video: HTMLVideoElement, mediaTime: number, compare: boolean) {
+  /** True once the browser has taken the context away (driver reset, too many contexts, GPU process crash). */
+  get lost() {
+    return this.gl.isContextLost();
+  }
+  /** Draws one frame; returns false without drawing when the context is lost (nothing to retry here). */
+  render(video: HTMLVideoElement, mediaTime: number, compare: boolean): boolean {
+    if (this.gl.isContextLost()) return false;
     const gl = this.gl,
       s = this.settings,
       frame = snapshot(video, mediaTime);
@@ -183,18 +192,33 @@ export class WebGLSpatial {
         gl.uniform1f(at(name), value);
       gl.drawArrays(gl.TRIANGLES, 0, 3);
       const error = gl.getError();
+      // The context can be lost between the check above and the draw; the lost event handles that.
+      if (error === gl.CONTEXT_LOST_WEBGL || gl.isContextLost()) return false;
       if (error !== gl.NO_ERROR)
         throw new Error(`WebGL frame upload/render failed (${error}).`);
+      return true;
     } finally {
       releaseSnapshot(frame);
     }
   }
-  destroy() {
+  /**
+   * Deletes every object this renderer created and, with `release`, gives the context back to the browser
+   * at once (WEBGL_lose_context) instead of waiting for garbage collection; Chrome keeps only 16 live
+   * contexts per page and loses the oldest. The canvas is never reused for WebGL afterwards: every
+   * initialization starts on a fresh canvas. Objects of an already lost context need no deletion.
+   */
+  destroy(release = true) {
     const gl = this.gl;
-    gl.deleteProgram(this.program);
-    gl.deleteTexture(this.input);
-    gl.deleteBuffer(this.vertices);
-    this.shaders.forEach((s) => gl.deleteShader(s));
+    if (!gl.isContextLost()) {
+      gl.useProgram(null);
+      gl.bindBuffer(gl.ARRAY_BUFFER, null);
+      gl.bindTexture(gl.TEXTURE_2D, null);
+      gl.deleteProgram(this.program);
+      gl.deleteTexture(this.input);
+      gl.deleteBuffer(this.vertices);
+      this.shaders.forEach((s) => gl.deleteShader(s));
+      if (release) gl.getExtension("WEBGL_lose_context")?.loseContext();
+    }
     this.shaders = [];
   }
 }

@@ -15,10 +15,10 @@ root.innerHTML = `<main class="viewer" data-step="1">
   <ol class="viewer-steps">
     <li data-step="1"><span class="n" aria-hidden="true">1</span><div><strong>Share the playing tab</strong><p>Chrome asks which tab. Only the picture is shared; sound stays in the original tab. Nothing is recorded or uploaded.</p></div><button id="share" class="btn primary">Choose video tab</button></li>
     <li data-step="2"><span class="n" aria-hidden="true">2</span><div><strong>Select the video area</strong><p>Drag a rectangle over the video to leave out page borders and player controls.</p></div><button id="crop" class="btn" disabled>Select video area</button></li>
-    <li data-step="3"><span class="n" aria-hidden="true">3</span><div><strong>Enhance</strong><p>Pick an engine and start. Keep the source tab playing; control playback there.</p></div><div class="step-controls"><label class="field"><span class="visually-hidden">Enhancement algorithm</span><select id="algorithm" class="select" aria-label="Enhancement algorithm"><option value="spatial">Spatial Detail</option><option value="anime4k">Anime4K</option><option value="fsrcnnx">FSRCNNX</option></select></label><button id="enhance" class="btn" disabled>Enhance selected area</button></div></li>
+    <li data-step="3"><span class="n" aria-hidden="true">3</span><div><strong>Enhance</strong><p>Pick an engine and start. Keep the source tab playing; control playback there.</p></div><div class="step-controls"><label class="field"><span class="visually-hidden">Enhancement algorithm</span><select id="algorithm" class="select" aria-label="Enhancement algorithm"><option value="spatial">Spatial Detail</option><option value="anime4k">Anime4K</option><option value="fsrcnnx">FSRCNNX</option></select></label><button id="enhance" class="btn" disabled>Enhance whole picture</button></div></li>
   </ol>
   <p id="status" role="status" aria-live="polite">Select a tab to begin.</p>
-  <div class="capture-preview"><video muted playsinline></video><div id="selection" hidden></div><button id="exit-fullscreen" class="btn">Exit fullscreen</button></div>
+  <div class="capture-preview"><video muted playsinline aria-label="Shared tab preview"></video><div id="selection" hidden></div><button id="exit-fullscreen" class="btn">Exit fullscreen</button></div>
   <div class="viewer-bar"><button id="fullscreen" class="btn" disabled>Fullscreen</button><button id="stop" class="btn quiet" disabled>Stop sharing</button><span class="muted">Tab sharing captures displayed pixels, not the original encoded resolution. Protected video may stay black.</span></div>
 </main>`;
 const video = root.querySelector<HTMLVideoElement>("video")!;
@@ -37,8 +37,16 @@ let stream: MediaStream | undefined,
   renderer: VideoRenderer | undefined,
   crop: Crop | undefined,
   selecting = false,
-  anchor: { x: number; y: number } | undefined;
+  anchor: { x: number; y: number } | undefined,
+  previousCrop: Crop | undefined;
 let settings: Settings = { ...DEFAULTS, enabled: true, scale: "2" };
+/** Status line; errors get their own style and role so they are not mistaken for progress. */
+function say(text: string, tone: "info" | "error" = "info") {
+  status.textContent = text;
+  status.dataset.tone = tone;
+}
+/** Enhance works on the whole shared picture until an area is selected; the label says which. */
+const enhanceLabel = () => (enhance.textContent = crop ? "Enhance selected area" : "Enhance whole picture");
 const sourceTab = Number(new URLSearchParams(location.search).get("source"));
 if (chrome?.runtime?.id && sourceTab > 0) {
   share.disabled = true;
@@ -86,8 +94,10 @@ function stop() {
   selecting = false;
   anchor = undefined;
   preview.classList.remove("selecting");
-  status.textContent = "Tab sharing stopped.";
+  say("Tab sharing stopped.");
   step(1);
+  // The control that had focus may now be disabled; keep keyboard users at the start of the flow.
+  if (document.activeElement instanceof HTMLButtonElement && document.activeElement.disabled) share.focus();
 }
 share.addEventListener("click", async () => {
   stop();
@@ -119,17 +129,18 @@ share.addEventListener("click", async () => {
       video.requestVideoFrameCallback(() => resolve()),
     );
     crop = undefined;
+    enhanceLabel();
     cropButton.disabled =
       enhance.disabled =
       stopButton.disabled =
       fullscreen.disabled =
         false;
-    status.textContent =
-      "Sharing locally. Select video area, then drag a rectangle over the video.";
+    say("Sharing locally. Select the video area, or enhance the whole picture.");
     step(2);
+    cropButton.focus();
   } catch (error) {
     stop();
-    status.textContent = `Tab sharing was not started. ${(error as Error).message}`;
+    say(`Tab sharing was not started. ${(error as Error).message}`, "error");
   }
 });
 cropButton.addEventListener("click", async () => {
@@ -137,10 +148,22 @@ cropButton.addEventListener("click", async () => {
   renderer?.dispose();
   renderer = undefined;
   selecting = true;
+  previousCrop = crop;
   selection.hidden = true;
   preview.classList.add("selecting");
-  status.textContent =
-    "Drag from one corner of the video to the opposite corner.";
+  say("Drag from one corner of the video to the opposite corner. Escape cancels.");
+});
+// Escape leaves area selection and keeps the previous area (or the whole picture).
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape" || !selecting) return;
+  selecting = false;
+  anchor = undefined;
+  // A drag in progress has already written a partial area.
+  crop = previousCrop;
+  selection.hidden = true;
+  enhanceLabel();
+  preview.classList.remove("selecting");
+  say(crop ? "Selection cancelled. The previous area is kept." : "Selection cancelled. The whole picture is used.");
 });
 fullscreen.addEventListener("click", () => {
   void preview.requestFullscreen().catch((error) => {
@@ -188,12 +211,20 @@ preview.addEventListener("pointerup", () => {
   selecting = false;
   preview.classList.remove("selecting");
   if (!crop || crop.width < 0.02 || crop.height < 0.02) {
-    crop = undefined;
+    crop = previousCrop;
     selection.hidden = true;
-    status.textContent = "Area is too small. Select a larger video area.";
+    enhanceLabel();
+    say(
+      previousCrop
+        ? "Area is too small, so the previous area is kept. Select a larger video area to change it."
+        : "Area is too small. Select a larger video area.",
+      "error",
+    );
   } else {
-    status.textContent = "Video area selected. Click Enhance selected area.";
+    enhanceLabel();
+    say("Video area selected. Choose Enhance selected area.");
     step(3);
+    enhance.focus();
   }
 });
 async function enable() {
@@ -207,10 +238,14 @@ async function enable() {
     (_s, patch) => {
       settings = { ...settings, ...patch };
     },
-    { crop },
+    {
+      crop,
+      // Keep the status line in step with the renderer (failures included), not just its first state.
+      onState: (d) => say(d.message, d.state === "unavailable" ? "error" : "info"),
+    },
   );
   await renderer.start();
-  status.textContent = renderer.diagnostics.message;
+  say(renderer.diagnostics.message, renderer.diagnostics.state === "unavailable" ? "error" : "info");
 }
 enhance.addEventListener("click", () => {
   void enable();
@@ -235,7 +270,7 @@ async function validateSource() {
     if (!r?.ok) {
       stop();
       share.disabled = true;
-      status.textContent = "Source website access was removed.";
+      say("Source website access was removed.", "error");
     }
   } catch {
     stop();

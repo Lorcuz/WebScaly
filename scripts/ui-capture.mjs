@@ -77,7 +77,7 @@ try {
     await popup.locator("main.popup").screenshot({ path: resolve(out, `popup-${name}.png`) });
   };
   await popup.goto(`chrome-extension://${id}/popup.html?tab=${tabId}`);
-  await expect(popup.getByText("Enhancing ·")).toBeVisible({ timeout: 10000 });
+  await expect(popup.locator(".stage .engine")).toBeVisible({ timeout: 10000 }); // 0.5.1: the card shows backend · engine
   await shoot("active");
   await popup.getByText("Fine-tune").click();
   await shoot("finetune");

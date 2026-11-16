@@ -69,7 +69,7 @@ canvas{width:100%;height:100%;pointer-events:none!important;display:none;backgro
 .hud .budget{height:4px;border-radius:2px;background:#ffffff1f;overflow:hidden}
 .hud .budget i{display:block;height:100%;background:var(--accent);border-radius:2px}
 .hud .note{color:#ddc48d;font-size:11px}
-.divider{position:absolute;top:0;width:1px;background:var(--accent);pointer-events:none}
+.divider{position:absolute;top:0;width:1px;background:var(--accent);pointer-events:none;box-shadow:0 0 0 1px #0009}
 .divider span{position:absolute;top:96px;padding:3px 7px;border-radius:5px;background:var(--panel);font-size:10.5px;white-space:nowrap}
 .divider .before{right:8px;color:var(--dim)}.divider .after{left:8px;color:var(--accent)}
 :host([data-layout=preview]) .divider span{top:10px}
@@ -300,6 +300,7 @@ export class PlayerOverlay {
             role,
             settings: this.settings,
             state: this.host.dataset.state ?? "",
+            reason: this.host.dataset.reason ?? "",
             fullscreen: !!document.fullscreenElement,
             // Room for the controls; a small player gets a more compact toolbar.
             available: Math.max(0, Math.floor((this.rect?.width ?? 0) - 16)),
@@ -463,8 +464,12 @@ export class PlayerOverlay {
     this.applyVisibility();
   }
   status(d: Diagnostics) {
-    const changed = this.host.dataset.state !== d.state;
+    const reason = d.state === "unavailable" ? (d.reason ?? "") : "";
+    const changed = this.host.dataset.state !== d.state || (this.host.dataset.reason ?? "") !== reason;
     this.host.dataset.state = d.state;
+    // Lets the toolbar show copy-protected playback neutrally (it is not a failure).
+    if (reason) this.host.dataset.reason = reason;
+    else delete this.host.dataset.reason;
     this.host.dataset.outputFps = String(d.outputFps);
     this.host.dataset.backend = d.backend ?? "";
     d.controlsAvailable = this.frames.size
@@ -482,8 +487,8 @@ export class PlayerOverlay {
       ALGORITHM_LABELS[d.algorithm as keyof typeof ALGORITHM_LABELS] ??
       d.algorithm;
     this.hud.innerHTML = `<div class="title"><span>${escape(engine)}</span><b>${escape(d.backend || "Preparing")}</b></div>
-      <dl>${row("Size", escape(d.resolution || "—"))}${row("Source", `${d.sourceFps.toFixed(2)} fps`)}${row("Enhanced", `${d.outputFps.toFixed(1)} fps`)}${row("GPU", d.gpuMs === null ? "—" : `${d.gpuMs.toFixed(2)} / ${budget ? budget.toFixed(1) : "—"} ms`)}${row("Skipped", String(d.dropped))}</dl>
-      <div class="budget" title="GPU time against this video's frame budget"><i style="width:${share.toFixed(1)}%"></i></div>
+      <dl>${row("Size", escape(d.resolution || "—"))}${row("Source", `${d.sourceFps.toFixed(2)} fps`)}${row("Enhanced", `${d.outputFps.toFixed(1)} fps`)}${row("GPU", d.gpuMs === null ? "—" : `${d.gpuMs.toFixed(2)} / ${budget ? budget.toFixed(1) : "—"} ms`)}${row("Skipped (GPU busy)", String(d.dropped))}</dl>
+      <div class="budget" role="meter" aria-label="GPU time against the frame budget" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${Math.round(share)}"><i style="width:${share.toFixed(1)}%"></i></div>
       ${d.adaptive ? `<div class="note">${escape(d.adaptive)}</div>` : ""}`;
   }
   toast(html: string) {
