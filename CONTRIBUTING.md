@@ -4,9 +4,11 @@ Start with a small issue describing the problem or proposed improvement. For a f
 
 ## Development
 
-Use Node.js 22.12+ or 24 LTS and npm. Run `npm ci`, `npm test` and `npm run build`. Install test Chromium with `npx playwright install chromium`, then run `npm run test:browser`. `npm run dev` starts the local development UI; extension behavior needs a built unpacked `dist` installation.
+Use Node.js 22.12+ or 24 LTS and npm. Run `npm ci`, `npm test`, `npm run lint` and `npm run build`. Install test Chromium with `npx playwright install chromium`, then run `npm run test:browser`. `npm run dev` starts the local development UI; extension behavior needs a built unpacked `dist` installation.
 
-Use generated or redistributable video for tests. Keep profiles, traces, device reports, secret keys and personal paths out of source control. Do not add remote executable code, analytics or unnecessary permissions. Include fallbacks and cleanup for new graphics features; simulated capabilities do not qualify physical hardware.
+The GitHub Actions workflow runs unit tests, lint, build, packaging and a dependency audit. It cannot run the browser or GPU tests, because hosted runners have no graphics device: run `npm run test:browser` (and `npm run test:gpu` for rendering changes) on your own machine and say so in the pull request. See [docs/TESTING.md](docs/TESTING.md).
+
+Use generated or redistributable video for tests. Keep profiles, traces, device reports, secret keys and personal paths out of source control. Do not add remote executable code, analytics, network requests or unnecessary permissions. Include fallbacks and cleanup for new graphics features; simulated capabilities do not qualify physical hardware.
 
 ## Licensing
 
@@ -14,4 +16,4 @@ Contributions to WebScaly-authored material are provided under the root MIT lice
 
 ## Pull requests
 
-Explain the concrete problem and the resulting behavior. Run checks appropriate to the change, list any known limits, and update user documentation when needed. A focused patch is easier to review than a collection of unrelated changes.
+Explain the concrete problem and the resulting behavior. Run checks appropriate to the change, list any known limits, and update user documentation and `CHANGELOG.md` when behavior changes. A focused patch is easier to review than a collection of unrelated changes.

@@ -1,12 +1,12 @@
 # WebScaly Privacy Policy
 
-Last updated: 7 November 2026. Applies to WebScaly 0.4.1.
+Last updated: 16 November 2026. Applies to WebScaly 0.4.1 and later versions, including 0.5.0. Data handling did not change after 0.4.1; this update adds the list of what the popup tells you before you allow a website.
 
 WebScaly enhances video on your device, on websites you approve. It does not send your videos or browsing activity to the developer, run analytics, sell data or use cloud processing. You do not need an account.
 
 ## Information handled on your device
 
-- **Website addresses and permissions.** WebScaly reads the current website after you open its popup, stores the website origins you approve and checks parent/embedded-player addresses to enforce your choices. It does not keep a log of your browsing history. Temporary tab and frame context may contain page addresses while the browser session is running.
+- **Website addresses and permissions.** WebScaly reads the current website after you open its popup or press a WebScaly keyboard shortcut, stores the website origins you approve and checks parent/embedded-player addresses to enforce your choices. It does not keep a log of your browsing history. Temporary tab and frame context may contain page addresses while the browser session is running.
 - **Video content.** Decoded video frames and video dimensions are used locally for enhancement and comparison. Every few seconds a small thumbnail of the frame is analysed on your device to suggest an engine (for example, Anime4K for animation); it is discarded immediately. Frames are not uploaded or recorded. Audio and playback remain with the website.
 - **Snapshots.** When you choose Snapshot, the current enhanced frame is saved as a PNG through Chrome's normal download, on your device only. WebScaly never takes snapshots on its own.
 - **Settings.** Enhancement preferences, approved sites and presets are saved in the extension's local browser storage. They are not synced to a WebScaly account or a remote server.
@@ -18,7 +18,7 @@ WebScaly does not read passwords, cookies, authentication tokens, payment detail
 
 ## Website access and the compatibility player
 
-Website access is off by default. It is requested when you choose Add/Allow. An embedded player requires approval for both its origin and the parent website. Removing a website stops its enhancement and revokes the matching grants; overlapping broader grants may also be removed.
+Website access is off by default. It is requested when you choose Add/Allow. Before you allow a website, the popup states that WebScaly uses that website's address and video frames only to enhance its video, on your device, and that nothing is uploaded. An embedded player requires approval for both its origin and the parent website. Removing a website stops its enhancement and revokes the matching grants; overlapping broader grants may also be removed.
 
 The optional compatibility player asks you to select a tab through Chrome's sharing dialog and select the video area. That display stream is processed locally and does not include audio. WebScaly does not record, upload or save it. Other visible tab content can be present in the shared image before you choose the video area. Stop sharing, close the compatibility player or remove source-site access to end processing. Browser security and protected-media restrictions remain in force.
 

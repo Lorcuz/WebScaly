@@ -5,7 +5,7 @@ audit-initial.json
 dist/
 dist-personal/
 release/
-Publishing/
+/Publishing/
 .research/
 .models/
 .build-backups/

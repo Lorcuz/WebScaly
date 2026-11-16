@@ -1,6 +1,6 @@
 # Chrome Web Store Listing — WebScaly
 
-Last updated: 2026-11-07. Project version: 0.4.1 (released on GitHub; submit it to the store as a separate update). Status: published on the Chrome Web Store.
+Last updated: 2026-11-16. Published version: 0.4.1. Next release: 0.5.0, prepared and not yet uploaded. Status: published on the Chrome Web Store.
 
 **Live listing:** [WebScaly on the Chrome Web Store](https://chromewebstore.google.com/detail/webscaly/hdcnniaagmhkocoeahemlpgjecgpchfa). This is the recommended installation method. Source and development releases are available on [GitHub](https://github.com/Lorcuz/WebScaly).
 
@@ -14,8 +14,8 @@ Last updated: 2026-11-07. Project version: 0.4.1 (released on GitHub; submit it 
 | Language | English |
 | Global promo video | The YouTube URL of the 0.4.0 presentation once it is published there; leave empty until then. |
 | Official URL | None. Use a verified site only if you actually own it. |
-| Homepage URL | https://github.com/Lorcuz/webscaly |
-| Support URL | https://github.com/Lorcuz/webscaly/blob/main/SUPPORT.md |
+| Homepage URL | https://github.com/Lorcuz/WebScaly |
+| Support URL | https://github.com/Lorcuz/WebScaly/blob/main/SUPPORT.md |
 | Mature content | No / off. WebScaly and the supplied original demo imagery contain no mature content. |
 | Item support | On / visible. Monitor the support email and GitHub issues. |
 | Distribution visibility | Public |
@@ -40,14 +40,14 @@ Every engine is followed by a high-quality scaler (bicubic or Lanczos) and adapt
 FINE-TUNE THE PICTURE
 Adjust sharpening, denoise, deband, vibrance, contrast and brightness. Keep different settings for different websites, or apply a built-in preset: Anime, Live action, Low-res rescue or Battery friendly. A live before/after preview in Settings shows the effect on generated test footage.
 
-SMOOTH ON ANY DEVICE
-Adaptive performance steps down quality when your graphics card falls behind instead of stuttering. Leave already-sharp videos untouched, save battery while unplugged, or pause everything with one click.
+SMOOTH PLAYBACK
+Adaptive performance steps down quality when your graphics card falls behind instead of stuttering. Resizing the player or going fullscreen keeps the enhanced picture. Graphics memory is released shortly after enhancement stops or a tab stays in the background. Leave already-sharp videos untouched, save battery while unplugged, or pause everything with one click.
 
 A QUIET, COMPACT INTERFACE
 The popup shows the engine, resolution and speed at a glance. Optional in-player controls, comparison slider, snapshot and performance HUD stay hidden until you turn them on, and the controls hide while you watch. Keyboard shortcuts switch enhancement, comparison and engine, and the toolbar badge shows when a video is being enhanced.
 
 YOU CONTROL WEBSITE ACCESS
-WebScaly has no website access by default. Click Allow on this website, then Allow in Chrome. If a page uses an embedded player, approve that player's website too. Remove access whenever you want.
+WebScaly has no website access by default. Before you allow a website, the popup tells you what WebScaly uses there: the website address and its video frames, on your device only. Click Allow on this website, then Allow in Chrome. If a page uses an embedded player, approve that player's website too. Remove access whenever you want.
 
 YOUR VIDEOS STAY ON YOUR DEVICE
 No accounts, tracking, analytics, cloud processing or automatic uploads. Website addresses, video frames and settings are used locally to provide enhancement. Snapshots are saved only when you ask, to your own downloads. The developer does not receive your browsing activity or videos.
@@ -56,14 +56,14 @@ WHEN DIRECT ACCESS IS RESTRICTED
 The optional compatibility player lets you explicitly share your source tab and select the video area for local enhancement. Audio remains in the original tab. Nothing is recorded or uploaded.
 
 COMPATIBILITY
-Requires Chrome 121 or newer. Performance and available engines depend on your browser, GPU and video player. A lighter spatial fallback is available when supported. Protected video and browser security restrictions can prevent enhancement. Support is not guaranteed for every website or device.
+Requires Chrome 121 or newer. Performance and available engines depend on your browser, GPU and video player. A lighter spatial fallback is available when supported. Protected video and browser security restrictions can prevent enhancement; protected video is left untouched. WebScaly is developed and tested on Windows with an NVIDIA graphics card; other systems and graphics cards may work but have not been tested. Support is not guaranteed for every website or device.
 
 SUPPORT
 Questions or feedback: notlorcuz@gmail.com
-Bug reports: https://github.com/Lorcuz/webscaly/issues
-Privacy: https://github.com/Lorcuz/webscaly/blob/main/PRIVACY.md
+Bug reports: https://github.com/Lorcuz/WebScaly/issues
+Privacy: https://github.com/Lorcuz/WebScaly/blob/main/PRIVACY.md
 
-WebScaly is free and open source. Optional support is available in Settings → About.
+WebScaly is free, and its source code is published on GitHub. Optional support is available in Settings → About.
 
 ## Single purpose — Privacy practices
 
@@ -104,6 +104,10 @@ Temporarily reads the active website address when the user opens WebScaly from t
 
 Users can choose any ordinary HTTP or HTTPS video website. These optional declarations allow a request for the specific origin, or explicitly selected subdomain scope, after Add/Allow. No host is granted at installation. Both the parent page and an embedded player must be approved; revoking either stops processing for that page. No cookies, private form data or video content are sent to the developer.
 
+**Web-accessible resource — `ui-frame.html` on http/https pages**
+
+The on-video controls (toolbar and comparison slider) are drawn by `ui-frame.html`, loaded as an isolated extension frame into the enhanced player so that page scripts cannot read or trigger them. The page contains only WebScaly's own controls and no user data. The content script that places it runs only on approved websites.
+
 **Keyboard shortcuts (`commands` manifest key, not a permission)**
 
 Declares optional shortcuts to switch enhancement, comparison and engine, save a snapshot or pause. Chrome shows and lets users change them at chrome://extensions/shortcuts. No extra permission or warning is involved.
@@ -115,6 +119,8 @@ Select **No, I am not using remote code**. JavaScript, styles, fonts, enhancemen
 ## Privacy practices — disclose local handling
 
 Google requires disclosure even when information is only processed or stored locally. For this build, disclose:
+
+The dashboard answers must match this table. Check them whenever this page or the extension changes.
 
 | Data-use checkbox | Select? | Actual handling |
 | --- | --- | --- |
@@ -132,7 +138,9 @@ These are disclosures of local handling, not claims of developer-side collection
 
 Check all three certifications: data is not sold to third parties; data is not used for purposes unrelated to the item's core functionality; data is not used to determine creditworthiness or for lending.
 
-**Privacy policy URL:** https://github.com/Lorcuz/webscaly/blob/main/PRIVACY.md
+**Limited Use statement:** the privacy policy (section "Limited use") and the README state that WebScaly's use of this information complies with the Chrome Web Store User Data Policy, including the Limited Use requirements. Keep that sentence on both pages.
+
+**Privacy policy URL:** https://github.com/Lorcuz/WebScaly/blob/main/PRIVACY.md
 
 This policy is public on GitHub. Keep the URL accessible without sign-in and review it when updating the store item. It describes on-device origins, frames, session context, preferences, diagnostic data, exports, optional tab sharing and voluntary support messages.
 
@@ -142,7 +150,7 @@ For a future extension update, use a version newer than the one published on the
 
 A repository documentation update does not require a new extension version or store package. Publish future code changes and their corresponding source on GitHub, and update store screenshots, listing text and privacy disclosures when the shipped behavior changes.
 
-Suggested reviewer notes: "WebScaly has no website access on installation. A Getting started page opens once after install. Open an ordinary video page, click the extension, choose Allow on this website and Allow; enhancement starts automatically. Embedded players need their own approval in addition to the parent page. Player Controls/Compare/HUD are off by default. The compatibility player requires an explicit Chrome tab-sharing choice. Local processing can be restricted by protected media or pixel-access rules. The bundled compliance archive contains LGPL corresponding source and rebuild instructions."
+Suggested reviewer notes: "WebScaly has no website access on installation. A Getting started page opens once after install. Open an ordinary video page, click the extension, choose Allow on this website and Allow; enhancement starts automatically. Embedded players need their own approval in addition to the parent page. Before approval the popup states that the website address and video frames are used on the device only. Player Controls/Compare/HUD are off by default. Copy-protected video is detected and left untouched (shown as Protected). The compatibility player requires an explicit Chrome tab-sharing choice. Local processing can be restricted by protected media or pixel-access rules. The bundled compliance archive contains LGPL corresponding source and rebuild instructions."
 
 Use Chrome 121+ with a supported graphics context. No login is required. The supplied local test results do not certify every website, physical GPU or Chrome version. See docs/COMPATIBILITY.md for passed, partial and unverified outcomes. Native browser denial/restart recovery and physical AMD/Intel qualification remain manual validation limits.
 
@@ -150,6 +158,7 @@ Use Chrome 121+ with a supported graphics context. No login is required. The sup
 
 | Version | Release prepared | Changes | Distribution |
 | --- | --- | --- | --- |
+| 0.5.0 | 2026-11-16 | Quality and reliability: in-place resize and fullscreen, WebGL recovery, lower GPU and memory use, background-tab release, per-website invalidation, clearer popup states and the disclosure next to Allow. No new permissions. See CHANGELOG.md. | Not uploaded |
 | 0.4.1 | 2026-11-07 | Reliability release: overlay alignment, native captions over the enhanced picture, small-player controls, website-address validation, authorization and service-worker recovery, safer profile imports, cross-frame messaging and packaging fixes. No new permissions. | [Current GitHub release](https://github.com/Lorcuz/WebScaly/releases/tag/v0.4.1) |
 | 0.4.0 | 2026-10-20 | New image pipeline (quality scalers, adaptive sharpening, deband, colour), adaptive performance, skip-sharp, battery saver, pause, snapshots, hold-original, content suggestions, keyboard shortcuts, toolbar badge, built-in presets, redesigned popup/settings/player controls in the original palette, many reliability and performance fixes. No new permissions. | [GitHub release](https://github.com/Lorcuz/WebScaly/releases/tag/v0.4.0) |
 | 0.3.1 | 2026-10-13 | GitHub repository link and icon in About; refreshed UI screenshots and corresponding source. | [Current GitHub release](https://github.com/Lorcuz/WebScaly/releases/tag/v0.3.1) |

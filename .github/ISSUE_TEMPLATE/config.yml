@@ -1,5 +1,5 @@
 blank_issues_enabled: false
 contact_links:
   - name: Private support or security report
-    url: https://github.com/Lorcuz/webscaly/blob/main/SUPPORT.md
+    url: https://github.com/Lorcuz/WebScaly/blob/main/SUPPORT.md
     about: Contact the maintainer by email for private questions or security reports.

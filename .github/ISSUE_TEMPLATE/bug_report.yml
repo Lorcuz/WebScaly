@@ -25,14 +25,19 @@ body:
       label: Chrome and WebScaly versions
     validations:
       required: true
+  - type: input
+    id: system
+    attributes:
+      label: Operating system and graphics card
+      description: For example "Windows 11, NVIDIA RTX 3060". This helps track which hardware has been tested.
   - type: dropdown
     id: algorithm
     attributes:
       label: Enhancement algorithm
       options:
         - Spatial Detail
-        - Anime4K CNN
-        - FSRCNNX x2
+        - Anime4K
+        - FSRCNNX
         - Not sure
   - type: textarea
     id: diagnostics

@@ -2,7 +2,7 @@
 
 ## Supported version
 
-Security fixes target the latest WebScaly release, currently 0.4.1. Update before reporting a problem where possible.
+Security fixes target the latest WebScaly release published on the Chrome Web Store and GitHub. Update before reporting a problem where possible.
 
 ## Report privately
 
