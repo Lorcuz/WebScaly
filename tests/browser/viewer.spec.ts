@@ -46,6 +46,45 @@ test("Chrome tab sharing feeds a cropped compatibility player and stops cleanly"
       "data-state",
       "active",
     );
+    // 0.5.1 review fix: Escape in the middle of a new drag keeps the area that was in use.
+    const canvasWidth = () =>
+      page.evaluate(() => document.querySelector("webscaly-player")!.shadowRoot!.querySelector("canvas")!.width);
+    const selectedWidth = await canvasWidth();
+    await page
+      .getByRole("button", { name: "Select video area", exact: true })
+      .click();
+    await page.mouse.move(r.x + r.width * 0.3, r.y + r.height * 0.3);
+    await page.mouse.down();
+    await page.mouse.move(r.x + r.width * 0.33, r.y + r.height * 0.34, { steps: 4 });
+    await page.keyboard.press("Escape");
+    await page.mouse.up();
+    await expect(page.locator("#status")).toContainText("previous area is kept");
+    expect(await page.locator("#selection").isHidden()).toBe(true);
+    await page
+      .getByRole("button", { name: "Enhance selected area", exact: true })
+      .click();
+    await expect(page.locator("webscaly-player")).toHaveAttribute(
+      "data-state",
+      "active",
+    );
+    expect(await canvasWidth()).toBe(selectedWidth);
+    // A too-small drag also keeps the area that was in use.
+    await page
+      .getByRole("button", { name: "Select video area", exact: true })
+      .click();
+    await page.mouse.move(r.x + r.width * 0.5, r.y + r.height * 0.5);
+    await page.mouse.down();
+    await page.mouse.move(r.x + r.width * 0.505, r.y + r.height * 0.505, { steps: 2 });
+    await page.mouse.up();
+    await expect(page.locator("#status")).toContainText("previous area is kept");
+    await page
+      .getByRole("button", { name: "Enhance selected area", exact: true })
+      .click();
+    await expect(page.locator("webscaly-player")).toHaveAttribute(
+      "data-state",
+      "active",
+    );
+    expect(await canvasWidth()).toBe(selectedWidth);
     await expect
       .poll(async () =>
         Number(

@@ -50,6 +50,9 @@ export const storeAssetNames = [
   "01-player-1280x800.png","02-settings-1280x800.png","03-popup-1280x800.png",
   "04-site-profiles-1280x800.png","05-engines-1280x800.png","popup-ui.png",
 ];
+// CODE_OF_CONDUCT.md is deliberately not in the root list below: it waits for the maintainer to approve its public
+// contact line. Add it to the roots again once approved.
+export const localOnly = ["tests/browser/drm.spec.ts"];
 export async function collectSource() {
   const source = {};
   for (const folder of ["src","public","tests/unit","tests/browser",".github"])
@@ -57,13 +60,16 @@ export async function collectSource() {
   const scripts = ["build-extension.mjs","package.mjs","release-files.mjs","verify-release.mjs","verify-source.mjs","prepare-publication.mjs",
     "playwright.mjs","serve.mjs","gpu-check.mjs","ui-capture.mjs","store-capture.mjs","site-check.mjs","make-fixtures.mjs"];
   const roots = ["README.md","LICENSE","THIRD_PARTY_NOTICES.md","PRIVACY.md","SUPPORT.md","SECURITY.md","CONTRIBUTING.md",
-    "CHANGELOG.md","CHROMEWEBSTORE.md","package.json","package-lock.json","tsconfig.json","vite.config.ts",
+    "CHANGELOG.md","CHROMEWEBSTORE.md","package.json","package-lock.json","tsconfig.json","tsconfig.lint.json","vite.config.ts",
     "playwright.config.ts","popup.html","options.html","ui-frame.html","lab.html","benchmark.html","viewer.html",".gitignore",".gitattributes"];
   const docs = ["ARCHITECTURE","COMPATIBILITY","DELIVERY","DESIGN","LOCAL_VIDEO_ENHANCEMENT","PERFORMANCE","PLAN","RESEARCH","REVIEW","TESTING","UPGRADE"].map(n=>`docs/${n}.md`);
   for (const name of [...roots,...scripts.map(n=>"scripts/"+n),...docs,
     ...["README","PRIVACY","PERMISSIONS","LISTING"].map(n=>`docs/store/${n}.md`),
     "docs/store/description.txt","docs/publishing/GITHUB.md",...storeAssetNames.map(n=>"docs/store/assets/"+n)])
     source[name] = new Uint8Array(await readFile(name));
+  // Local-only files: the EME-state test documents a paused internal investigation (its comments point to
+  // private notes), so it stays out of the public source until the maintainer decides otherwise.
+  for (const name of localOnly) delete source[name];
   audit(source);
   return source;
 }

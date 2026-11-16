@@ -7,7 +7,8 @@ import { version } from "./release-files.mjs";
 if (!process.env.PLAYWRIGHT_BROWSERS_PATH && existsSync(".playwright"))
   process.env.PLAYWRIGHT_BROWSERS_PATH = resolve(".playwright");
 const { chromium } = await import("@playwright/test");
-const folder = "docs/store/assets", stage = await mkdtemp(resolve("test-results/store-art-"));
+// STORE_ASSETS_DIR writes a candidate set elsewhere (default: the tracked listing assets).
+const folder = process.env.STORE_ASSETS_DIR ?? "docs/store/assets", stage = await mkdtemp(resolve("test-results/store-art-"));
 await mkdir(folder,{recursive:true});
 await cp("public/icons/128.png",`${folder}/icon-128.png`);
 await cp("public/logo-master.png",resolve(stage,"logo.png"));
@@ -48,7 +49,7 @@ res.writeHead(200,{"Content-Type":({".html":"text/html",".js":"text/javascript",
 res.end(bytes);}catch{res.writeHead(404);res.end("Not found");}});
 await new Promise(r=>server.listen(0,"127.0.0.1",r));
 const base=`http://127.0.0.1:${server.address().port}`;
-const extension=await mkdtemp(resolve("test-results/store-extension-")); await cp("dist",extension,{recursive:true});
+const extension=await mkdtemp(resolve("test-results/store-extension-")); await cp(process.env.WEBSCALY_EXTENSION_DIR ?? "dist",extension,{recursive:true});
 const manifest=JSON.parse(await readFile(resolve(extension,"manifest.json"),"utf8"));
 manifest.host_permissions=["http://127.0.0.1/*"];
 await writeFile(resolve(extension,"manifest.json"),JSON.stringify(manifest));
@@ -94,12 +95,17 @@ await options.goto(`chrome-extension://${id}/options.html?tab=${tabId}&profile=$
 await options.getByLabel("Editing profile").selectOption("http://127.0.0.1");
 // Let the live before/after preview start before capturing.
 await options.waitForTimeout(2500);await options.evaluate(()=>document.fonts.ready);
+// Browser zoom 85% (as a user could set) so the controls below the live preview are not cut off at the frame edge; the 100vh sidebar is stretched to the same window height.
+await options.evaluate(()=>{document.documentElement.style.zoom="0.85";const st=document.createElement("style");st.textContent=".sidebar{height:calc(100vh / 0.85)!important}.settings-shell{min-height:calc(100vh / 0.85)!important}";document.head.append(st);});await options.waitForTimeout(600);
 await toStage(options,"settings.png");
 await options.getByRole("button",{name:"Websites",exact:true}).click();await options.waitForTimeout(300);await toStage(options,"websites.png");
 const popup=await context.newPage();await hiDpi(popup,360,720);await popup.goto(`chrome-extension://${id}/popup.html?tab=${tabId}`);
-await popup.getByRole("button",{name:"Remove website access",exact:true}).waitFor();
+await popup.getByRole("button",{name:"Remove access",exact:true}).waitFor();
 // Keep the demo tab in front so the live readout reports real frames, then read the popup.
 await page.bringToFront();await page.waitForTimeout(2200);
+// The engine suggestion can appear a few seconds in and grow the popup; capture only once its size is stable.
+await popup.waitForFunction(()=>{const h=document.querySelector("main.popup").getBoundingClientRect().height,w=window;
+ if(w.__h!==h){w.__h=h;w.__since=performance.now();}return performance.now()-w.__since>4000;},null,{polling:250,timeout:30000});
 const popupBytes=await popup.locator("main.popup").screenshot({animations:"disabled"});
 await sharp(popupBytes).flatten({background:"#10181f"}).removeAlpha().png().toFile(`${folder}/popup-ui.png`);
 await cp(`${folder}/popup-ui.png`,resolve(stage,"popup.png"));
@@ -114,7 +120,7 @@ async function render(html,name){await graphics.setContent(html);await ready();a
 await render(shot({eyebrow:"Before and after",title:"See the difference in the player.",
  sub:"Drag the split to compare the original with the enhanced picture, live on your device.",
  body:`<div class="frame"><img src="${base}/hero-compare-1088x612.png" width="1088" height="612" alt="Original on the left, enhanced on the right, of the same frame"></div>`,
- foot:`${heroCredit}. 360p source enhanced to 1080p with Anime4K · Quality. Same frame, same crop on both sides.`}),"01-player-1280x800.png");
+ foot:`${heroCredit}. 360p source enhanced with Anime4K · Quality. Same frame on both sides.`}),"01-player-1280x800.png");
 
 // 2. Settings, framed.
 const framed=(file,w,h)=>`<div class="frame"><img src="${base}/${file}" width="${w}" height="${h}" alt=""></div>`;
