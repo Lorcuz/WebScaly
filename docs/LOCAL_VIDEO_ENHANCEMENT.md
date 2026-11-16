@@ -1,6 +1,6 @@
 # Local video enhancement in Chrome: frames, permissions and player controls
 
-WebScaly is a free, open-source Chrome extension that applies sharpening, light denoise and upscaling to accessible web video. Processing happens on the user's device, on websites the user explicitly approves.
+WebScaly is a free Chrome extension, with its source code available on GitHub, that applies sharpening, light denoise and upscaling to accessible web video. Processing happens on the user's device, on websites the user explicitly approves.
 
 I maintain the project. This article explains the design decisions behind its rendering, website permissions and player integration, including the limits of the current release.
 
