@@ -1,5 +1,5 @@
 {
-  "version": "0.4.1",
+  "version": "0.5.0",
   "footage": "Comparison images use real captures of the extension on credited footage (docs/store/frames); other pictures use a locally generated demo video",
   "screenshots": "Actual installed extension with test-only loopback approval; popup and settings are unaltered captures inside the framed layouts",
   "files": [
@@ -62,7 +62,7 @@
     {
       "file": "popup-ui.png",
       "width": 360,
-      "height": 465,
+      "height": 538,
       "alpha": false,
       "channels": 3
     }
